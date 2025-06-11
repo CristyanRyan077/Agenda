@@ -1,0 +1,11 @@
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\bin\Debug\Agenda.exe.config
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\bin\Debug\Agenda.exe
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\bin\Debug\Agenda.pdb
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.csproj.AssemblyReference.cache
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.Main.resources
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.frmLogin.resources
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.Properties.Resources.resources
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.csproj.GenerateResource.cache
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.csproj.CoreCompileInputs.cache
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.exe
+C:\Users\Foco na Arte\Desktop\Cristyan\C#\Agenda\Agenda\obj\Debug\Agenda.pdb
