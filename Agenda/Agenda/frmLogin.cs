@@ -15,6 +15,9 @@ namespace Agenda
         public frmLogin()
         {
             InitializeComponent();
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            this.UpdateStyles();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -22,16 +25,16 @@ namespace Agenda
             Login();
         }
 
-        private bool AutenticacaoLogin(string usuario, string senha)
+        private bool AutenticacaoLogin(string senha)
         {
-                return (string.Equals(usuario.Trim(), "admin", StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(senha.Trim(), "cristyan653", StringComparison.OrdinalIgnoreCase));
+             return (string.Equals(senha.Trim(), "cristyan653", StringComparison.OrdinalIgnoreCase));
         }
 
         private void Login()
         {
-            if (AutenticacaoLogin(txtUsuario.Text, txtSenha.Text))
+            if (AutenticacaoLogin(txtSenha.Text))
             {
+                this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             else
@@ -46,6 +49,10 @@ namespace Agenda
             {
                 Login();
             }
+        }
+        public string Usuario
+        {
+            get { return txtUsuario.Text; }
         }
     }
 }
