@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace Agenda
 {
@@ -15,30 +16,61 @@ namespace Agenda
         public Main()
         {
             InitializeComponent();
-            lbl_agenda.Click += (Sender, e) => pnlAgenda_Click(Sender, e);
-            pbAgenda.Click += (Sender, e) => pnlAgenda_Click(Sender, e);
-
-            lbl_agenda.MouseEnter += (Sender, e) => pnlAgenda_MouseEnter(Sender, e);
-            pbAgenda.MouseEnter += (Sender, e) => pnlAgenda_MouseEnter(Sender, e);
-
-            lbl_agenda.MouseLeave += (Sender, e) => pnlAgenda_MouseLeave(Sender, e);
-            pbAgenda.MouseLeave += (Sender, e) => pnlAgenda_MouseLeave(Sender, e);
+            using (frmLogin frmLogin = new frmLogin())
+            {
+                if (frmLogin.ShowDialog() == DialogResult.OK)
+                {
+                    lblHello.Text = ($"Seja bem vindo {frmLogin.Usuario}");
+                }
+            }
         }
-        private void pnlAgenda_Click(object sender, EventArgs e)
+        private void tsbClientes_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("teste");
-        }
+            frmClientes novoCliente = new frmClientes();
+            novoCliente.ShowDialog();
 
-        private void pnlAgenda_MouseEnter(object sender, EventArgs e)
-        {
-            pnlAgenda.BorderStyle = BorderStyle.Fixed3D;
-            pnlAgenda.BackColor = Color.FromArgb(340, 240, 240);
         }
 
-        private void pnlAgenda_MouseLeave(object sender, EventArgs e)
+        private void agendamentoBindingNavigatorSaveItem_Click(object sender, EventArgs e)
         {
-            pnlAgenda.BorderStyle = BorderStyle.None;
-            pnlAgenda.BackColor = SystemColors.Control;
+            this.Validate();
+            this.agendamentoBindingSource.EndEdit();
+
+        }
+
+        private void Main_Load(object sender, EventArgs e)
+        {
+            // TODO: esta linha de código carrega dados na tabela 'agendaDataSet.ConsultaAgendamento'. Você pode movê-la ou removê-la conforme necessário.
+            this.consultaAgendamentoTableAdapter.Fill(this.agendaDataSet.ConsultaAgendamento);
+
+
+        }
+
+        private void tsbAgenda_Click(object sender, EventArgs e)
+        {
+            this.agendamentoTableAdapter.Fill(this.agendaDataSet.Agendamento);
+            frmAgenda frmAgenda = new frmAgenda();
+            frmAgenda.ShowDialog();
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnPesquisar_Click(object sender, EventArgs e)
+        {
+            DateTime dataInicio = dtp1.Value.Date;
+            DateTime dataFim = dtp2.Value.Date.AddDays(1).AddSeconds(-1);
+
+            try
+            {
+                this.consultaAgendamentoTableAdapter.FillAgenda(this.agendaDataSet.ConsultaAgendamento, dataInicio, dataFim);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao pesquisar: {ex.Message}");
+            }
         }
     }
 }

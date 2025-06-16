@@ -17,7 +17,7 @@ namespace Agenda
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             using (var login = new frmLogin())
-            {
+            { /*
                 if (login.ShowDialog() == DialogResult.OK)
                 {
                     Application.Run(new Main());
