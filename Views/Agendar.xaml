@@ -1,0 +1,108 @@
+﻿    <Window x:Class="AgendaNovo.Agendar"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:hc="https://handyorg.github.io/handycontrol"
+            xmlns:vm="clr-namespace:AgendaNovo;assembly=AgendaNovo"
+            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+            xmlns:local="clr-namespace:AgendaNovo"
+            mc:Ignorable="d"
+            d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
+            WindowState="Maximized"
+            ResizeMode="NoResize"
+            Title="Agendar" Height="900" Width="1440">
+    
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Imagens/images.png"/>
+        </Grid.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="275.993"/>
+            <RowDefinition Height="142.007"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="-590,15,0,202">
+            <hc:TextBox x:Name="txtID" hc:InfoElement.Placeholder="ID" Text="{Binding NovoAgendamento.Id, Mode=TwoWay }"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
+                 Background="#88D1D3D8" Foreground="Black"
+                 BorderBrush="Transparent" Language="pt-br" Width="109"
+                 SelectionTextBrush="Black" Height="53"/>
+        </StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,80,0,91" Grid.RowSpan="2">
+            <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente" Text="{Binding NovoAgendamento.Cliente, Mode=TwoWay}"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
+                 Background="#88D1D3D8" Foreground="Black"
+                 BorderBrush="Transparent" Language="pt-br" Width="706"
+                 hc:InfoElement.Necessary="True" SelectionTextBrush="Black" Height="53"/>
+            <Border Name="bordaCliente" Height="2" 
+                Background="White"
+                Opacity="0.5" />
+
+            <materialDesign:PackIcon Name="iconAcc" Kind="Account"
+                                 Width="98" Height="55"
+                                 Opacity="0.5" Margin="630,-55,0,0"
+                                 BorderBrush="White" Foreground="White" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,156,0,0" Grid.RowSpan="2">
+            <hc:ComboBox x:Name="cboPacote" hc:InfoElement.Placeholder="Pacote" Text="{Binding NovoAgendamento.Pacote, Mode=TwoWay}"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 Background="#88D1D3D8" Foreground="Black" BorderBrush="Transparent" SelectionTextBrush="Black" Height="55"
+                 >
+
+                <hc:AutoCompleteTextBoxItem Content="Acompanhamento Infantil"/>
+                <hc:AutoCompleteTextBoxItem Content="Smash the cake"/>
+            </hc:ComboBox>
+            <Border x:Name="bordaPacote"
+                Background="White" Height="2" Opacity="0.5"/>
+            <hc:ComboBox x:Name="horario" hc:InfoElement.Placeholder="Horário"
+                         Margin="-420,10,0,0" Text="{Binding NovoAgendamento.Horario, Mode=TwoWay}"
+                         Width="285" Height="37" FontSize="20">
+                <hc:AutoCompleteTextBoxItem Content="8:00"/>
+                <hc:AutoCompleteTextBoxItem Content="9:00"/>
+                <hc:AutoCompleteTextBoxItem Content="10:00"/>
+            </hc:ComboBox>
+            <Button
+                x:Name="btnAgendar" Command="{Binding AgendarCommand}" Width="240" Content="Agendar" Margin="-460,99,0,0" hc:BorderElement.CornerRadius="10" Background="#FF00FF1B" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Click="btnAgendar_Click" Height="58"
+                />
+
+            <materialDesign:PackIcon x:Name="iconPacote" Kind="BoxAdd"
+                                 Width="49" Height="61" Opacity="0.5" Margin="660,-263,0,0"
+                                 BorderBrush="White" Foreground="White" Grid.Column="1" />
+            <Button
+                x:Name="btnExcluir" Command="{Binding ExcluirCommand}" Width="240" Margin="150,-60,0,0" Content="Excluir" hc:BorderElement.CornerRadius="10" Background="Red" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Click="btnAgendar_Click" Height="58"
+                />
+
+        </StackPanel>
+
+
+        <StackPanel Grid.Column="1" Grid.RowSpan="2">
+            <Calendar Name="calendario" Language="pt-br" Height="319" Width="430" Focusable="False" SelectedDate="{Binding NovoAgendamento.Data, Mode=TwoWay}">
+                <Calendar.LayoutTransform>
+                    <ScaleTransform ScaleX="1.30" ScaleY="1.30"/>
+                </Calendar.LayoutTransform>
+
+            </Calendar>
+
+        </StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+            <DataGrid Height="449" Width="1396" Margin="-10,20,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente}" />
+                    <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                    <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                    <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </StackPanel>
+
+    </Grid>
+</Window>

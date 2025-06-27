@@ -1,0 +1,292 @@
+﻿<Window x:Class="AgendaNovo.MainWindow"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="Manual"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:vm="clr-namespace:AgendaNovo"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        mc:Ignorable="d"
+        Width="1440" Height="900"
+        d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
+        Title="MainWindow">
+
+<DockPanel>
+    <ToolBarTray DockPanel.Dock="Top">
+        <ToolBar Height="73" Margin="0,0,-1525,0" Background="White">
+            <Button x:Name="btnAgenda" Padding="4" Click="btnAgenda_Click"
+                        Height="60" BorderBrush="Black" BorderThickness="1" FontSize="14">
+                <StackPanel>
+                    <Image Source="C:\Users\Foco na Arte\Desktop\Cristyan\Imagens\agenda.png" Height="32" Width="30"/>
+                    <TextBlock FontWeight="Bold" Foreground="Blue">Agendar</TextBlock>
+                </StackPanel>
+            </Button>
+            <Button x:Name="btnClientes" Padding="4" Click="btnClientes_Click"
+                        Height="60" Margin="10,0,0,0" BorderBrush="Black" FontSize="14">
+                <StackPanel>
+                    <Image Source="C:\Users\Foco na Arte\Desktop\Cristyan\Imagens\1077114.png" Height="32" Width="30"/>
+                    <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
+                </StackPanel>
+            </Button>
+        </ToolBar>
+    </ToolBarTray>
+
+    <TabControl Margin="0,4,0,0">
+        <TabItem Header="Semanal">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.Background>
+                            <ImageBrush ImageSource="/Imagens/download.jpeg"/>
+                        </Grid.Background>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+
+
+                            <!-- SEGUNDA -->
+                            <Grid Grid.Row="1" Grid.Column="0">
+                                <StackPanel>
+                                    <TextBlock Text="Segunda" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardSegunda" Background="#8873B9F9"  Width="470" Height="400">
+
+                                        <ItemsControl ItemsSource="{Binding AgendamentosSegunda}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}" />
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+                            <!-- TERÇA -->
+                            <Grid Grid.Row="1" Grid.Column="1">
+                                <StackPanel>
+                                    <TextBlock Text="Terça" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardTerca" Background="#8873B9F9"  Width="470" Height="400">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosTerca}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                                <Run Text="{Binding Cliente}"/>
+                                                <Run Text=" - "/>
+                                                <Run Text="{Binding Pacote}"/>
+                                                <Run Text=" ("/>
+                                                <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                                <Run Text=" - "/>
+                                                <Run Text="{Binding Horario}"/>
+                                                <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+                            <!-- QUARTA -->
+                            <Grid Grid.Row="1" Grid.Column="2">
+                                <StackPanel>
+                                    <TextBlock Text="Quarta" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardQuarta" Background="#8873B9F9"  Width="470" Height="400">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosQuarta}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- QUINTA -->
+                            <Grid Grid.Row="2" Grid.Column="0">
+                                <StackPanel>
+                                    <TextBlock Text="Quinta" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardQuinta" Background="#8873B9F9" Width="470" Height="400">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosQuinta}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- SEXTA -->
+                            <Grid Grid.Row="2" Grid.Column="1">
+                                <StackPanel>
+                                    <TextBlock Text="Sexta" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardSexta" Background="#8873B9F9" Width="470" Height="400">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosSexta}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- SABADO -->
+                            <Grid Grid.Row="2" Grid.Column="2">
+                                <StackPanel>
+                                    <TextBlock Text="Sabado" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardSabado" Background="#8873B9F9" Width="470" Height="400">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosSabado}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- DOMINGO -->
+                            <Grid Grid.Row="3" Grid.Column="1">
+                                <StackPanel>
+                                    <TextBlock Text="Domingo" FontSize="20" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" Width="154" Background="#FF13FF00" TextAlignment="Center" FontFamily="Segoe UI Black"/>
+                                    <hc:Card x:Name="cardDomingo" Background="#8873B9F9"  Width="470" Height="300">
+                                        <ItemsControl ItemsSource="{Binding AgendamentosDomingo}" HorizontalAlignment="Left">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock FontSize="16"
+                                                   FontFamily="Segoe UI Semibold"
+                                                   Padding="4"
+                                                   TextWrapping="Wrap">>>
+                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Pacote}"/>
+                                    <Run Text=" ("/>
+                                    <Run Text="{Binding Data, StringFormat=dd/MM/yyyy}"/>
+                                    <Run Text=" - "/>
+                                    <Run Text="{Binding Horario}"/>
+                                    <Run Text=")"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </hc:Card>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+        <TabItem Header="Mensal">
+                <Grid Margin="-6,0,0,0">
+                    <Grid.Background>
+                        <ImageBrush ImageSource="/Imagens/baixados.jpeg"/>
+                    </Grid.Background>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="678*"/>
+                        <ColumnDefinition Width="723*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Calendar Language="pt-br" Cursor="Hand" HorizontalAlignment="Left"
+                              Margin="-132,24,0,0" VerticalAlignment="Top"
+                              Height="328" Width="445" Grid.ColumnSpan="3">
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="2.0" ScaleY="2.0"/>
+                        </Calendar.LayoutTransform>
+                    </Calendar>
+
+                    <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}"
+                              Grid.Column="2" Grid.ColumnSpan="2" Margin="634,0,0,0"/>
+
+                    <TextBlock x:Name="txtteste" Grid.Column="3" Visibility="Hidden"
+                               HorizontalAlignment="Left" Margin="26,330,0,0"
+                               TextWrapping="Wrap" Text="TextBlock"
+                               VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+
+        <TextBlock TextWrapping="Wrap" Text="TextBlock"/>
+    </TabControl>
+</DockPanel>
+ </Window>
+
