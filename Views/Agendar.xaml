@@ -35,7 +35,11 @@
                  SelectionTextBrush="Black" Height="53"/>
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,80,0,91" Grid.RowSpan="2">
-            <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente" Text="{Binding NovoAgendamento.Cliente, Mode=TwoWay}"
+            <hc:ComboBox hc:InfoElement.Placeholder="Cliente" IsEditable="True"
+                 DisplayMemberPath="Nome"
+                 ItemsSource="{Binding ListaClientes, Mode=TwoWay}"
+                 SelectedItem="{Binding NovoCliente, Mode=TwoWay}"
+                 Text="{Binding NovoCliente.Nome, Mode=TwoWay}"
                  FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
                  Background="#88D1D3D8" Foreground="Black"
                  BorderBrush="Transparent" Language="pt-br" Width="706"
@@ -92,10 +96,10 @@
 
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
-            <DataGrid Height="449" Width="1396" Margin="-10,20,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
+                <DataGrid Height="449" Width="1396" Margin="-10,20,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente}" />
+                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                     <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
                     <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
                     <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
