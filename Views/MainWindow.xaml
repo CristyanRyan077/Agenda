@@ -207,7 +207,7 @@
                                                    FontFamily="Segoe UI Semibold"
                                                    Padding="4"
                                                    TextWrapping="Wrap">>>
-                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text="{Binding Cliente.Nome}"/>
                                     <Run Text=" - "/>
                                     <Run Text="{Binding Pacote}"/>
                                     <Run Text=" ("/>
@@ -235,7 +235,7 @@
                                                    FontFamily="Segoe UI Semibold"
                                                    Padding="4"
                                                    TextWrapping="Wrap">>>
-                                    <Run Text="{Binding Cliente}"/>
+                                    <Run Text="{Binding Cliente.Nome}"/>
                                     <Run Text=" - "/>
                                     <Run Text="{Binding Pacote}"/>
                                     <Run Text=" ("/>
