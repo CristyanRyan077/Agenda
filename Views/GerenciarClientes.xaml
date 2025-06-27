@@ -1,0 +1,137 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AgendaNovo"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="AgendaNovo.GerenciarClientes"
+        mc:Ignorable="d"
+        WindowState="Maximized"
+         ResizeMode="NoResize"
+        Title="GerenciarClientes" Height="900" Width="1440">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Clientes">
+                <Grid>
+                    <Grid.Background>
+                        <LinearGradientBrush>
+                            <GradientStop Color="#7be9f6" Offset="0.1"/>
+                            <GradientStop Color="#f093da" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="32*" />
+                        <ColumnDefinition Width="101*"/>
+                        <ColumnDefinition Width="133*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid Grid.Column="2" Margin="0,32,0,29"/>
+                    <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"
+                                Margin="12,60,0,0"
+                                TextWrapping="Wrap"
+                                Width="416" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
+                    <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Margin="12,125,0,0"
+                        TextWrapping="Wrap"
+                        Width="416" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
+                    <hc:TextBox x:Name="txtEmail" hc:InfoElement.Placeholder="Email"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Margin="12,188,0,0"
+                        TextWrapping="Wrap"
+                        Width="416" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
+                    <hc:TextBox x:Name="txtId" hc:InfoElement.Placeholder="ID"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Margin="141,252,0,0"
+                        TextWrapping="Wrap"
+                        Width="117" BorderBrush="Black" Height="46" Grid.ColumnSpan="2"/>
+
+                    <Button x:Name="btnSalvar" Content="Salvar" 
+                            Background="#FF37FF00"
+                            hc:BorderElement.CornerRadius="10"
+                            HorizontalAlignment="Left"
+                            Margin="16,248,0,0"
+                            VerticalAlignment="Top"
+                            Height="50" Width="96" BorderBrush="White"
+                            />
+                    <Button x:Name="btnExcluir" Content="Excluir" 
+                        Background="Red"
+                        hc:BorderElement.CornerRadius="10"
+                        HorizontalAlignment="Left"
+                        Margin="123,248,0,0"
+                        VerticalAlignment="Top"
+                        Height="48" Width="104" BorderBrush="Black" Grid.Column="1"
+                            />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Criança">
+                <Grid>
+                    <Grid.Background>
+                        <LinearGradientBrush>
+                            <GradientStop Color="#7be9f6" Offset="1"/>
+                            <GradientStop Color="#f093da" Offset="0.1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" />
+                        <ColumnDefinition Width="681*"/>
+                        <ColumnDefinition Width="719*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid Grid.Column="2" Margin="0,32,0,29"/>
+                    <hc:TextBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"
+                               HorizontalAlignment="Left" VerticalAlignment="Top"
+                               Margin="10,51,0,0"
+                               TextWrapping="Wrap"
+                               Width="416" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
+                    <hc:TextBox x:Name="txtResponsavel" hc:InfoElement.Placeholder="Responsável"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="10,118,0,0"
+                       TextWrapping="Wrap"
+                       Width="416" BorderBrush="Black" Height="42" Grid.ColumnSpan="2"/>
+                    <hc:ComboBox x:Name="txtGenero" hc:InfoElement.Placeholder="Gênero"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="10,186,0,0"
+                       Width="140" BorderBrush="Black" Height="38" Grid.ColumnSpan="2"/>
+                    <hc:TextBox x:Name="txtIdCrianca" hc:InfoElement.Placeholder="ID"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="87,248,0,0"
+                       TextWrapping="Wrap"
+                       Width="117"  BorderBrush="Black" Grid.Column="1" Height="53"/>
+
+                    <Button x:Name="btnSalvar2" Content="Salvar" 
+                           Background="#FF37FF00"
+                           hc:BorderElement.CornerRadius="10"
+                           HorizontalAlignment="Left"
+                           Margin="7,248,0,0"
+                           VerticalAlignment="Top"
+                           Height="56" Width="105" BorderBrush="White" Grid.ColumnSpan="2"
+                           />
+                    <Button x:Name="btnExcluir2" Content="Excluir" 
+                       Background="Red"
+                       hc:BorderElement.CornerRadius="10"
+                       HorizontalAlignment="Left"
+                       Margin="219,248,0,0"
+                       VerticalAlignment="Top"
+                       Height="60" Width="94" BorderBrush="Black" Grid.Column="1"
+                           />
+                    <hc:TextBox x:Name="txtNascimento" hc:InfoElement.Placeholder="Nascimento"
+                                GotFocus="txtNascimento_GotFocus" LostFocus="txtNascimento_LostFocus"
+                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Margin="122,184,0,0"
+                       TextWrapping="Wrap"
+                       Width="269" BorderBrush="Black" Height="42" Grid.Column="1"/>
+                    <Calendar Name="calendario" GotFocus="calendario_GotFocus" SelectedDatesChanged="calendario_SelectedDatesChanged"
+                              HorizontalAlignment="Left" Margin="8,320,0,0" Visibility="Hidden" Language="pt-br" VerticalAlignment="Top" Grid.ColumnSpan="2">
+
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.60"/>
+                        </Calendar.LayoutTransform>
+                    </Calendar>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
