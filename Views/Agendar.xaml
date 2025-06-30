@@ -1,10 +1,11 @@
-﻿    <Window x:Class="AgendaNovo.Agendar"
+﻿<Window x:Class="AgendaNovo.Agendar"
             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:hc="https://handyorg.github.io/handycontrol"
             xmlns:vm="clr-namespace:AgendaNovo;assembly=AgendaNovo"
+            xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:local="clr-namespace:AgendaNovo"
             mc:Ignorable="d"
@@ -12,7 +13,7 @@
             WindowState="Maximized"
             ResizeMode="NoResize"
             Title="Agendar" Height="900" Width="1440">
-    
+
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/Imagens/images.png"/>
@@ -29,6 +30,7 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="0" Grid.Row="0" Margin="-590,15,0,202">
             <hc:TextBox x:Name="txtID" hc:InfoElement.Placeholder="ID" Text="{Binding NovoAgendamento.Id, Mode=TwoWay }"
+                        
                  FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
                  Background="#88D1D3D8" Foreground="Black"
                  BorderBrush="Transparent" Language="pt-br" Width="109"
@@ -36,9 +38,9 @@
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,80,0,91" Grid.RowSpan="2">
             <hc:ComboBox hc:InfoElement.Placeholder="Cliente" IsEditable="True"
-                 DisplayMemberPath="Nome"
+                         LostFocus="ComboBox_LostFocus"
+                 DisplayMemberPath="Nome" IsTextSearchEnabled="True"
                  ItemsSource="{Binding ListaClientes, Mode=TwoWay}"
-                 SelectedItem="{Binding NovoCliente, Mode=TwoWay}"
                  Text="{Binding NovoCliente.Nome, Mode=TwoWay}"
                  FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
                  Background="#88D1D3D8" Foreground="Black"
@@ -71,16 +73,38 @@
                 <hc:AutoCompleteTextBoxItem Content="8:00"/>
                 <hc:AutoCompleteTextBoxItem Content="9:00"/>
                 <hc:AutoCompleteTextBoxItem Content="10:00"/>
+                <hc:AutoCompleteTextBoxItem Content="13:00"/>
+                <hc:AutoCompleteTextBoxItem Content="14:00"/>
+                <hc:AutoCompleteTextBoxItem Content="15:00"/>
+                <hc:AutoCompleteTextBoxItem Content="16:00"/>
+                <hc:AutoCompleteTextBoxItem Content="17:00"/>
+                <hc:AutoCompleteTextBoxItem Content="18:00"/>
             </hc:ComboBox>
+            <hc:ComboBox Name="txtTelefone" hc:InfoElement.Placeholder="Telefone"
+             Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="False"
+             FontFamily="#heveltica" FontSize="32"
+             Background="#88D1D3D8" Foreground="Black" Margin="299,-40,0,0"
+             BorderBrush="Transparent" Language="pt-br" Width="411"
+             hc:InfoElement.Necessary="True" SelectionTextBrush="Black" Height="40" FontWeight="Bold"/>
+            <Border Name="bordaTelefone" Height="2" 
+             Background="White"
+             Opacity="0.5" />
+
+            <materialDesign:PackIcon Name="iconTel" Kind="Telephone"
+                     Width="72" Height="39"
+                     Opacity="0.5" Margin="650,-40,0,0"
+                     BorderBrush="White" Foreground="White" />
+
             <Button
-                x:Name="btnAgendar" Command="{Binding AgendarCommand}" Width="240" Content="Agendar" Margin="-460,99,0,0" hc:BorderElement.CornerRadius="10" Background="#FF00FF1B" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Click="btnAgendar_Click" Height="58"
+                x:Name="btnAgendar" Command="{Binding AgendarCommand}" Width="240" Content="Agendar" Margin="-460,99,0,0" hc:BorderElement.CornerRadius="10" Background="#FF00FF1B" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Height="58"
                 />
 
             <materialDesign:PackIcon x:Name="iconPacote" Kind="BoxAdd"
                                  Width="49" Height="61" Opacity="0.5" Margin="660,-263,0,0"
                                  BorderBrush="White" Foreground="White" Grid.Column="1" />
             <Button
-                x:Name="btnExcluir" Command="{Binding ExcluirCommand}" Width="240" Margin="150,-60,0,0" Content="Excluir" hc:BorderElement.CornerRadius="10" Background="Red" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Click="btnAgendar_Click" Height="58"
+                x:Name="btnExcluir" Command="{Binding ExcluirCommand}" Width="240" Margin="150,-60,0,0" Content="Excluir" hc:BorderElement.CornerRadius="10" Background="Red" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Height="58"
                 />
 
         </StackPanel>
@@ -96,11 +120,12 @@
 
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
-                <DataGrid Height="449" Width="1396" Margin="-10,20,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
+            <DataGrid Height="449" Width="1396" Margin="-10,20,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
                     <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                     <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                    <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                     <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
                     <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                 </DataGrid.Columns>

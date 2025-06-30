@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "y6B4QvfiW0Q=",
+  "dgSpecHash": "/d/HIG6PswE=",
   "success": true,
   "projectFilePath": "C:\\Users\\Foco na Arte\\Source\\Repos\\Agenda\\AgendaNovo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Foco na Arte\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
     "C:\\Users\\Foco na Arte\\.nuget\\packages\\controlzex\\4.4.0\\controlzex.4.4.0.nupkg.sha512",
+    "C:\\Users\\Foco na Arte\\.nuget\\packages\\extended.wpf.toolkit\\4.7.25104.5739\\extended.wpf.toolkit.4.7.25104.5739.nupkg.sha512",
     "C:\\Users\\Foco na Arte\\.nuget\\packages\\handycontrol\\3.5.1\\handycontrol.3.5.1.nupkg.sha512",
     "C:\\Users\\Foco na Arte\\.nuget\\packages\\mahapps.metro\\2.4.10\\mahapps.metro.2.4.10.nupkg.sha512",
     "C:\\Users\\Foco na Arte\\.nuget\\packages\\materialdesigncolors\\5.2.1\\materialdesigncolors.5.2.1.nupkg.sha512",

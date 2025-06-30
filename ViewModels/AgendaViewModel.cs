@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using AgendaNovo.Models;
+using System.Windows.Data;
 
 namespace AgendaNovo
 {
@@ -17,19 +18,66 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private Agendamento? agendamentoSelecionado;
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+        [ObservableProperty] private Cliente? clienteSelecionado;
+
+        private DayOfWeek _diaAtual;
+        public DayOfWeek DiaAtual
+        {
+            get => _diaAtual;
+            set
+            {
+                SetProperty(ref _diaAtual, value);
+                OnPropertyChanged(nameof(DiaChkSeg));
+                OnPropertyChanged(nameof(DiaChkTer));
+                OnPropertyChanged(nameof(DiaChkQuar));
+                OnPropertyChanged(nameof(DiaChkQui));
+                OnPropertyChanged(nameof(DiaChkSex));
+                OnPropertyChanged(nameof(DiaChkSab));
+                OnPropertyChanged(nameof(DiaChkDom));
+            }
+        }
+
+        public bool DiaChkSeg => DiaAtual == DayOfWeek.Monday;
+        public bool DiaChkTer => DiaAtual == DayOfWeek.Tuesday;
+        public bool DiaChkQuar => DiaAtual == DayOfWeek.Wednesday;
+        public bool DiaChkQui => DiaAtual == DayOfWeek.Thursday;
+        public bool DiaChkSex => DiaAtual == DayOfWeek.Friday;
+        public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
+        public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
+
+
+
+        partial void OnNovoAgendamentoChanged(Agendamento? value)
+        {
+            if (value?.Cliente != null)
+            {
+                NovoCliente = new Cliente
+                {
+                    Nome = value.Cliente.Nome,
+                    Telefone = value.Cliente.Telefone
+                };
+
+                ClienteSelecionado = ListaClientes
+                    .FirstOrDefault(c => c.Nome == NovoCliente.Nome);
+            }
+            else
+            {
+                NovoCliente = new Cliente();
+                ClienteSelecionado = null;
+            }
+        }
 
 
         public AgendaViewModel()
         {
-            NovoAgendamento = new Agendamento();
+            DiaAtual = DateTime.Today.DayOfWeek;
+            NovoAgendamento = new Agendamento
+            {
+                Cliente = NovoCliente
+            };
             novoCliente = new Cliente();
             ListaAgendamentos = new ObservableCollection<Agendamento>();
-            ListaClientes = new ObservableCollection<Cliente>
-            {
-                new Cliente { Id = 1, Nome = "Maria Silva", Telefone = "1111-1111" },
-                new Cliente { Id = 2, Nome = "João Souza", Telefone = "2222-2222" },
-                new Cliente { Id = 3, Nome = "Ana Oliveira", Telefone = "3333-3333" }
-            };
+            ListaClientes = new ObservableCollection<Cliente>();
         }
 
         [RelayCommand] private void Agendar()
@@ -41,21 +89,24 @@ namespace AgendaNovo
             var clienteExistente = ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
             if (clienteExistente == null)
             {
-                ListaClientes.Add(NovoCliente);
+                ListaClientes.Add(new Cliente
+                {
+                    Nome = NovoCliente.Nome,
+                    Telefone = NovoCliente.Telefone,
+                    //Crianca = NovoCliente.Crianca
+                });
             }
-            else
-            {
-                NovoCliente = clienteExistente;
-            }
 
 
-
+            
 
             var novo = new Agendamento
             {
                 Cliente = new Cliente
                 {
                     Nome = NovoCliente.Nome,
+                    //Crianca = NovoCliente.Crianca,
+                    Telefone = NovoCliente.Telefone,
                 },
                 Pacote = NovoAgendamento.Pacote,
                 Horario = NovoAgendamento.Horario,
@@ -85,7 +136,25 @@ namespace AgendaNovo
         {
             ListaAgendamentos.Remove(NovoAgendamento);
             AtualizarAgendamentos();
-            NovoAgendamento = new Agendamento();
+
+            bool clienteAindaTemAgendamentos = ListaAgendamentos.Any(a =>
+            a.Cliente?.Nome == clienteSelecionado?.Nome);
+
+            if (!clienteAindaTemAgendamentos && clienteSelecionado != null)
+            {
+                var clienteNaLista = ListaClientes.FirstOrDefault(c => c.Nome == clienteSelecionado.Nome);
+                if (clienteNaLista != null)
+                    ListaClientes.Remove(clienteNaLista);
+            }
+            NovoCliente = new Cliente();
+            NovoAgendamento = new Agendamento
+            {
+                Cliente = new Cliente()
+            };
+            novoCliente.Telefone = string.Empty;
+            ClienteSelecionado = null;
+            OnPropertyChanged(nameof(ClienteSelecionado));
+            ListaClientes = new ObservableCollection<Cliente>(ListaClientes.ToList());
         }
         private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia) =>
         ListaAgendamentos.Where(a =>
