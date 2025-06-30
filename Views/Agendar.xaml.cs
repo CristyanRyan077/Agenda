@@ -27,9 +27,23 @@ namespace AgendaNovo
             }
 
 
-        private void btnAgendar_Click(object sender, RoutedEventArgs e)
-        {
 
+        private void ComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var vm = (AgendaViewModel)this.DataContext;
+            var nome = vm.NovoCliente?.Nome;
+            string? nomeDigitado = (sender as ComboBox)?.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(nomeDigitado))
+            {
+                var existente = vm.ListaClientes.FirstOrDefault(c => string.Equals(c.Nome.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase));
+                if (existente is not null && existente.Nome.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase))
+                {
+                    vm.NovoCliente.Telefone = existente.Telefone;
+                    vm.NovoCliente.Crianca = existente.Crianca;
+                }
+            }
+            BindingExpression be = txtTelefone.GetBindingExpression(ComboBox.TextProperty);
+            be?.UpdateTarget();
         }
     }
 }
