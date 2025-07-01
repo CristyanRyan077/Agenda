@@ -13,12 +13,24 @@ namespace AgendaNovo
 {
     public partial class AgendaViewModel : ObservableObject
     {
+        //Agendamento
         [ObservableProperty] private Agendamento novoAgendamento = new();
-        [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
-        [ObservableProperty] private Agendamento? agendamentoSelecionado;
-        [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+
+        //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
+        [ObservableProperty] private Cliente novoCliente = new();
+        [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+
+        //Data e horario
+        [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
+        [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
+
+        private readonly List<string> _horariosFixos = new()
+        {
+            "8:00", "9:00", "10:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+        };
 
         private DayOfWeek _diaAtual;
         public DayOfWeek DiaAtual
@@ -29,7 +41,7 @@ namespace AgendaNovo
                 SetProperty(ref _diaAtual, value);
                 OnPropertyChanged(nameof(DiaChkSeg));
                 OnPropertyChanged(nameof(DiaChkTer));
-                OnPropertyChanged(nameof(DiaChkQuar));
+                OnPropertyChanged(nameof(DiaChkQua));
                 OnPropertyChanged(nameof(DiaChkQui));
                 OnPropertyChanged(nameof(DiaChkSex));
                 OnPropertyChanged(nameof(DiaChkSab));
@@ -39,13 +51,42 @@ namespace AgendaNovo
 
         public bool DiaChkSeg => DiaAtual == DayOfWeek.Monday;
         public bool DiaChkTer => DiaAtual == DayOfWeek.Tuesday;
-        public bool DiaChkQuar => DiaAtual == DayOfWeek.Wednesday;
+        public bool DiaChkQua => DiaAtual == DayOfWeek.Wednesday;
         public bool DiaChkQui => DiaAtual == DayOfWeek.Thursday;
         public bool DiaChkSex => DiaAtual == DayOfWeek.Friday;
         public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
         public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
 
+        private void FiltrarAgendamentos()
+        {
+            AgendamentosFiltrados.Clear();
 
+            var filtrados = ListaAgendamentos
+                .Where(a => a.Data.Date == DataSelecionada.Date);   
+            foreach (var agendamento in filtrados)
+                AgendamentosFiltrados.Add(agendamento);
+        }
+
+        partial void OnDataSelecionadaChanged(DateTime value)
+        {
+            FiltrarAgendamentos();
+            AtualizarHorariosDisponiveis();
+        }
+        public void AtualizarHorariosDisponiveis()
+        {
+            var ocupados = ListaAgendamentos
+                .Where(a => a.Data.Date == DataSelecionada.Date)
+                .Select(a => a.Horario)
+                .ToList();
+
+            var livres = _horariosFixos
+                .Where(h => !ocupados.Contains(h))
+                .ToList();
+
+            HorariosDisponiveis.Clear();
+            foreach (var h in livres)
+                HorariosDisponiveis.Add(h);
+        }
 
         partial void OnNovoAgendamentoChanged(Agendamento? value)
         {
@@ -70,6 +111,7 @@ namespace AgendaNovo
 
         public AgendaViewModel()
         {
+            AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoAgendamento = new Agendamento
             {
@@ -78,6 +120,7 @@ namespace AgendaNovo
             novoCliente = new Cliente();
             ListaAgendamentos = new ObservableCollection<Agendamento>();
             ListaClientes = new ObservableCollection<Cliente>();
+            agendamentosFiltrados = new ObservableCollection<Agendamento>();
         }
 
         [RelayCommand] private void Agendar()
@@ -110,7 +153,8 @@ namespace AgendaNovo
                 },
                 Pacote = NovoAgendamento.Pacote,
                 Horario = NovoAgendamento.Horario,
-                Data = NovoAgendamento.Data.Date
+                Data = NovoAgendamento.Data.Date,
+                Tema = NovoAgendamento.Tema
             };
 
             ListaAgendamentos.Add(novo);
@@ -119,7 +163,8 @@ namespace AgendaNovo
             NovoAgendamento = new Agendamento { Data = NovoAgendamento.Data.Date };
             NovoCliente = new Cliente();
             AtualizarAgendamentos();
-           
+            AtualizarHorariosDisponiveis();
+
         }
         private void AtualizarAgendamentos()
         {
