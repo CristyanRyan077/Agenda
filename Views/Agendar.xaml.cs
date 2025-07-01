@@ -39,7 +39,7 @@ namespace AgendaNovo
                 if (existente is not null && existente.Nome.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase))
                 {
                     vm.NovoCliente.Telefone = existente.Telefone;
-                    vm.NovoCliente.Crianca = existente.Crianca;
+                    //vm.NovoCliente.Crianca = existente.Crianca;
                 }
             }
             BindingExpression be = txtTelefone.GetBindingExpression(ComboBox.TextProperty);

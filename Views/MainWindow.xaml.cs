@@ -38,5 +38,10 @@ namespace AgendaNovo
             GerenciarClientes clientes = new GerenciarClientes();
             clientes.ShowDialog();
         }
+
+        private void Calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

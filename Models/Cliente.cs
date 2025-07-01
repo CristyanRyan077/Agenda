@@ -12,9 +12,9 @@ namespace AgendaNovo.Models
     {
         public int Id { get; set; }
         public string ?Nome { get; set; }
-        public string ?Crianca { get; set; }
         public string ?Telefone { get; set; }
-
+        public string ?Email { get; set; }
         public List<Agendamento> Agendamentos { get; set; } = new();
+        public List<Crianca> Criancas { get; set; } = new();
     }
 }
