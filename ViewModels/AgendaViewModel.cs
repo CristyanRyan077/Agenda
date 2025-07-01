@@ -17,6 +17,7 @@ namespace AgendaNovo
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+        [ObservableProperty] private decimal valorPacote;
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
@@ -30,6 +31,13 @@ namespace AgendaNovo
         private readonly List<string> _horariosFixos = new()
         {
             "8:00", "9:00", "10:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+        };
+
+        private readonly Dictionary<string, decimal> _pacotesFixos = new()
+{
+        { "Infantil pct01", 150m },
+        { "Gestante pct01", 200m },
+        { "Aniversario pct01", 450m }
         };
 
         private DayOfWeek _diaAtual;
@@ -88,7 +96,7 @@ namespace AgendaNovo
                 HorariosDisponiveis.Add(h);
         }
 
-        partial void OnNovoAgendamentoChanged(Agendamento? value)
+        partial void OnNovoAgendamentoChanged(Agendamento value)
         {
             if (value?.Cliente != null)
             {
@@ -183,11 +191,11 @@ namespace AgendaNovo
             AtualizarAgendamentos();
 
             bool clienteAindaTemAgendamentos = ListaAgendamentos.Any(a =>
-            a.Cliente?.Nome == clienteSelecionado?.Nome);
+            a.Cliente?.Nome == ClienteSelecionado?.Nome);
 
-            if (!clienteAindaTemAgendamentos && clienteSelecionado != null)
+            if (!clienteAindaTemAgendamentos && ClienteSelecionado != null)
             {
-                var clienteNaLista = ListaClientes.FirstOrDefault(c => c.Nome == clienteSelecionado.Nome);
+                var clienteNaLista = ListaClientes.FirstOrDefault(c => c.Nome == ClienteSelecionado.Nome);
                 if (clienteNaLista != null)
                     ListaClientes.Remove(clienteNaLista);
             }
@@ -196,7 +204,7 @@ namespace AgendaNovo
             {
                 Cliente = new Cliente()
             };
-            novoCliente.Telefone = string.Empty;
+            NovoCliente.Telefone = string.Empty;
             ClienteSelecionado = null;
             OnPropertyChanged(nameof(ClienteSelecionado));
             ListaClientes = new ObservableCollection<Cliente>(ListaClientes.ToList());
