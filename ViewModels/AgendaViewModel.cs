@@ -18,11 +18,15 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
         [ObservableProperty] private decimal valorPacote;
+        public ObservableCollection<string> PacotesDisponiveis => new(_pacotesFixos.Keys);
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+
+        //Crianca
+        private ObservableCollection<Crianca> listaCriancas = new();
 
         //Data e horario
         [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
@@ -114,6 +118,7 @@ namespace AgendaNovo
                 NovoCliente = new Cliente();
                 ClienteSelecionado = null;
             }
+            
         }
 
 
@@ -125,10 +130,37 @@ namespace AgendaNovo
             {
                 Cliente = NovoCliente
             };
-            novoCliente = new Cliente();
+            NovoCliente = new Cliente();
             ListaAgendamentos = new ObservableCollection<Agendamento>();
             ListaClientes = new ObservableCollection<Cliente>();
             agendamentosFiltrados = new ObservableCollection<Agendamento>();
+        }
+        public void PreencherCamposSeClienteExistir(string? nomeDigitado, Action<Cliente> preencher)
+        {
+            if (string.IsNullOrWhiteSpace(nomeDigitado))
+                return;
+
+            var cliente = ListaClientes.FirstOrDefault(c =>
+                string.Equals(c.Nome.Trim(), nomeDigitado.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (cliente is not null)
+            {
+                preencher(cliente);
+
+                listaCriancas.Clear();
+                foreach (var crianca in cliente.Criancas)
+                    listaCriancas.Add(crianca);
+            }
+        }
+        public void PreencherPacote(string? pacoteDigitado, Action<decimal> preencher)
+        {
+            if (string.IsNullOrWhiteSpace(pacoteDigitado))
+                return;
+
+            if (_pacotesFixos.TryGetValue(pacoteDigitado.Trim(), out var valor))
+            {
+                preencher(valor);
+            }
         }
 
         [RelayCommand] private void Agendar()
@@ -144,7 +176,7 @@ namespace AgendaNovo
                 {
                     Nome = NovoCliente.Nome,
                     Telefone = NovoCliente.Telefone,
-                    //Crianca = NovoCliente.Crianca
+                    
                 });
             }
 
@@ -155,14 +187,15 @@ namespace AgendaNovo
             {
                 Cliente = new Cliente
                 {
-                    Nome = NovoCliente.Nome,
-                    //Crianca = NovoCliente.Crianca,
+                    Nome = NovoCliente.Nome,                   
                     Telefone = NovoCliente.Telefone,
                 },
+                Crianca = NovoAgendamento.Crianca,
                 Pacote = NovoAgendamento.Pacote,
                 Horario = NovoAgendamento.Horario,
                 Data = NovoAgendamento.Data.Date,
-                Tema = NovoAgendamento.Tema
+                Tema = NovoAgendamento.Tema,
+                Valor = NovoAgendamento.Valor
             };
 
             ListaAgendamentos.Add(novo);
