@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using AgendaNovo.Models;
 
 namespace AgendaNovo
 {
@@ -28,22 +29,25 @@ namespace AgendaNovo
 
 
 
-        private void ComboBox_LostFocus(object sender, RoutedEventArgs e)
+
+
+        private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
         {
             var vm = (AgendaViewModel)this.DataContext;
-            var nome = vm.NovoCliente?.Nome;
-            string? nomeDigitado = (sender as ComboBox)?.Text?.Trim();
-            if (!string.IsNullOrWhiteSpace(nomeDigitado))
-            {
-                var existente = vm.ListaClientes.FirstOrDefault(c => string.Equals(c.Nome.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase));
-                if (existente is not null && existente.Nome.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase))
-                {
-                    vm.NovoCliente.Telefone = existente.Telefone;
-                    //vm.NovoCliente.Crianca = existente.Crianca;
-                }
-            }
-            BindingExpression be = txtTelefone.GetBindingExpression(ComboBox.TextProperty);
-            be?.UpdateTarget();
+            var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
+
+            vm.PreencherCamposSeClienteExistir(nomeDigitado, cliente => { vm.NovoCliente.Telefone = cliente.Telefone; });
+
+            txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+        }
+
+        private void txtpacote_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var vm = (AgendaViewModel)this.DataContext;
+            var pacoteDigitado = (sender as ComboBox)?.Text?.Trim();
+
+            vm.PreencherPacote(pacoteDigitado, valor => { vm.NovoAgendamento.Valor = valor; });
+            txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }
     }
 }

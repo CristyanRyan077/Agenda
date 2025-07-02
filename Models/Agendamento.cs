@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AgendaNovo.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AgendaNovo
 {
-    public class Agendamento
+    public partial class Agendamento : ObservableObject
     {
         public int Id { get; set; }
 
@@ -17,10 +18,12 @@ namespace AgendaNovo
         public Crianca? Crianca { get; set; }
 
         public string ?Servico { get; set; }
-        public string ?Pacote { get; set; }
+
+        [ObservableProperty] private string? pacote;
         public string ?Horario { get; set; }
         public string ?Tema { get; set; }
-        public decimal Valor { get; set; }
+
+        [ObservableProperty] private decimal valor;
         public decimal ValorPendente { get; set; }
         public DateTime Data { get; set; } = DateTime.Today;
     }

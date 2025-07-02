@@ -20,176 +20,232 @@
 
     <!-- CONTEÚDO SCROLLÁVEL -->
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <Grid Margin="30">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="1.5*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Linha 0: Cliente e Telefone -->
-            <Grid Grid.Row="0" Grid.Column="0">
+        <Grid>
+            <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
 
-                <hc:ComboBox Grid.Column="0" Width="300" Height="50"
+                <!-- Linha 0: Cliente e Telefone -->
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="50"
                              hc:InfoElement.Placeholder="Cliente"
-                             IsEditable="True" LostFocus="ComboBox_LostFocus"
+                             IsEditable="True" LostFocus="txtCliente_LostFocus"
                              DisplayMemberPath="Nome"
                              ItemsSource="{Binding ListaClientes}"
                              Text="{Binding NovoCliente.Nome}"
                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                <materialDesign:PackIcon Grid.Column="0" Kind="Account"
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Account"
                                          Width="46" Height="46"
                                          
                                          HorizontalAlignment="Right" VerticalAlignment="Center"
                                          Foreground="White"/>
 
-                <hc:ComboBox Name="txtTelefone" Grid.Column="1" Width="300" Height="50"
+                    <hc:ComboBox Name="txtTelefone" Grid.Column="1" Width="305" Height="50"
                              hc:InfoElement.Placeholder="Telefone"
-                             Text="{Binding NovoCliente.Telefone}"
+                             Text="{Binding NovoCliente.Telefone,UpdateSourceTrigger=PropertyChanged}"
                              IsEditable="True"
                              Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                <materialDesign:PackIcon Grid.Column="1" Kind="Phone"
-                                         Width="24" Height="24"
-                                         Margin="270,5,0,0"
-                                         HorizontalAlignment="Left" VerticalAlignment="Center"
-                                         Foreground="White"/>
-            </Grid>
+                    <materialDesign:PackIcon Grid.Column="  1" Kind="Phone"
+                                         Width="34" Height="34"
+                                         HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
 
-            <!-- Linha 1: Pacote e Horário -->
-            <Grid Grid.Row="1" Grid.Column="0" Margin="0,10,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <!-- Linha 1: Pacote e Horário -->
+                <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <hc:ComboBox Grid.Column="0" Width="300" Height="50"
-                             hc:InfoElement.Placeholder="Pacote"
-                             Text="{Binding NovoAgendamento.Pacote}"
-                             FontSize="20">
-                    <hc:AutoCompleteTextBoxItem Content="Acompanhamento Infantil"/>
-                    <hc:AutoCompleteTextBoxItem Content="Smash the cake"/>
-                </hc:ComboBox>
-                <materialDesign:PackIcon Grid.Column="0" Kind="BoxAdd"
-                                         Width="24" Height="24"
-                                         Margin="270,5,0,0"
-                                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                                         Foreground="White"/>
+                    <hc:ComboBox Name="txtpacote" Width="400" Height="55"
+                             hc:InfoElement.Placeholder="Pacote" LostFocus="txtpacote_LostFocus"
+                             Text="{Binding NovoAgendamento.Pacote}" ItemsSource="{Binding PacotesDisponiveis }"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3">
 
-                <hc:ComboBox Grid.Column="1" Width="200" Height="50" HorizontalAlignment="Left"
+                    </hc:ComboBox>
+
+                    <materialDesign:PackIcon Grid.Column="1" Grid.Row="0" Kind="BoxAdd"
+                                         Width="34" Height="34" VerticalAlignment="Center" HorizontalAlignment="Left"
+                                         Foreground="White" Margin="50,0,0,0"/>
+
+                    <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
                              hc:InfoElement.Placeholder="Horário"
                              ItemsSource="{Binding HorariosDisponiveis}"
                              SelectedItem="{Binding NovoAgendamento.Horario}"
-                             FontSize="20"/>
-                <materialDesign:PackIcon Grid.Column="1" Kind="ClockOutline"
-                                         Width="24" Height="24"
-                                         Margin="170,5,0,0"
-                                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                                         Foreground="White"/>
-            </Grid>
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Grid.Column="2" Kind="ClockOutline"
+                                         Width="31" Height="34" HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
 
-            <!-- Linha 2: Tema e Valores -->
-            <Grid Grid.Row="2" Grid.Column="0" Margin="0,10,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+                <!-- Linha 2: Tema e Valores -->
+                <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <hc:ComboBox Grid.Column="0" Width="300" Height="50" Margin="0,0,10,0"
+                    <hc:ComboBox Grid.Column="0" Width="305" Height="50" Margin="0,0,0,0"
                              hc:InfoElement.Placeholder="Tema"
-                             Text="{Binding NovoAgendamento.Tema}"
-                             FontSize="20">
-                    <hc:AutoCompleteTextBoxItem Content="Safari"/>
-                    <hc:AutoCompleteTextBoxItem Content="ToyStory"/>
-                    <hc:AutoCompleteTextBoxItem Content="Fazendinha"/>
-                </hc:ComboBox>
-                <materialDesign:PackIcon Grid.Column="0" Kind="Theatre"
-                                         Width="24" Height="24"
-                                         Margin="270,5,0,0"
-                                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                                         Foreground="White"/>
+                              Text="{Binding NovoAgendamento.Tema}"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black">
+                        <hc:AutoCompleteTextBoxItem Content="Safari"/>
+                        <hc:AutoCompleteTextBoxItem Content="ToyStory"/>
+                        <hc:AutoCompleteTextBoxItem Content="Fazendinha"/>
+                    </hc:ComboBox>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Theatre"
+                                         Width="34" Height="34"
+                                         HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
 
-                <hc:TextBox Grid.Column="1" Width="150" Height="50"
+                    <hc:TextBox Name="txtValor" Grid.Column="1" Width="140" Height="50"
                             hc:InfoElement.Placeholder="Valor"
-                            Text="{Binding ValorPacote}"
-                            FontSize="20"/>
+                             Text="{Binding NovoAgendamento.Valor, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged}"
+                            IsReadOnly="True"
+                            Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                            BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.8" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
 
-                <hc:TextBox Grid.Column="2" Width="150" Height="50"
-                            hc:InfoElement.Placeholder="Valor Pago"
-                            FontSize="20"/>
-            </Grid>
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente }"
+                            Grid.Column="2" Width="150" Height="50" HorizontalAlignment="Right"
+                            hc:InfoElement.Placeholder="Pago"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="CashCycle" Opacity="0.8" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Width="32" Height="32" Foreground="#FFA6FF9F"/>
 
-            <!-- Linha 3: Criança -->
-            <Grid Grid.Row="3" Grid.Column="0" Margin="0,10,0,0">
-                <hc:ComboBox Width="300" Height="50"
-                             hc:InfoElement.Placeholder="Criança"
-                             IsEditable="True" IsTextSearchEnabled="False"
-                             LostFocus="ComboBox_LostFocus"
-                             DisplayMemberPath="Nome"
-                             ItemsSource="{Binding ListaClientes}"
-                             Text="{Binding NovoCliente.Nome}"
-                             FontSize="20"/>
-                <materialDesign:PackIcon Kind="BabyFaceOutline"
-                                         Width="24" Height="24"
-                                         Margin="270,5,0,0"
-                                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                                         Foreground="#FF00EDFF"/>
-            </Grid>
 
-            <!-- Calendário -->
-            <StackPanel Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
-                        Margin="20,0,0,0" HorizontalAlignment="Right">
-                <Calendar Width="350" Height="300"
+                </Grid>
+
+
+
+                <!-- Linha 3: Criança -->
+                <Grid Grid.Row="3" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <!-- Criança -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Gênero -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Idade -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Criança -->
+                    <Grid Grid.Column="0">
+                        <hc:ComboBox Height="50"
+                     hc:InfoElement.Placeholder="Criança"
+                     IsEditable="True"
+                     DisplayMemberPath="Nome"
+                     ItemsSource="{Binding ListaClientes}"
+                     Text="{Binding NovoAgendamento.Crianca.Nome}"
+                     Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
+                     FontSize="24" FontWeight="Bold" BorderBrush="Transparent"
+                     SelectionTextBrush="Black" />
+                        <materialDesign:PackIcon Kind="BabyFaceOutline"
+                                 Width="24" Height="24"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,5,0"
+                                 Foreground="#FF00EDFF"/>
+                    </Grid>
+
+                    <!-- Gênero -->
+                    <hc:ComboBox Grid.Column="1" Height="50"
+                 hc:InfoElement.Placeholder="Gênero"
+                 Text="{Binding crianca.Genero}"
+                 Background="#88D1D3D8" Foreground="Black"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 BorderBrush="Transparent" SelectionTextBrush="Black"
+                 >
+                        <hc:AutoCompleteTextBoxItem Content="M"/>
+                        <hc:AutoCompleteTextBoxItem Content="F"/>
+                    </hc:ComboBox>
+
+                    <!-- Idade -->
+                    <hc:ComboBox Grid.Column="2" Height="50"
+                 hc:InfoElement.Placeholder="Idade"
+                 IsEditable="True"
+                 DisplayMemberPath="Nome"
+                 ItemsSource="{Binding ListaClientes}"
+                 Text="{Binding NovoCliente.Nome}"
+                 Background="#88D1D3D8" Foreground="Black"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 BorderBrush="Transparent" SelectionTextBrush="Black"
+                 />
+                </Grid>
+
+                <!-- Calendário -->
+                <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Right">
+                    <Calendar Width="350" Height="300"
                           SelectedDate="{Binding DataSelecionada}"
                           Language="pt-br">
-                    <Calendar.LayoutTransform>
-                        <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
-                    </Calendar.LayoutTransform>
-                </Calendar>
-            </StackPanel>
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Calendar.LayoutTransform>
+                    </Calendar>
+                </StackPanel>
 
-            <!-- Linha 4: DataGrid e Botões -->
-            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,10,0">
-                <DataGrid AutoGenerateColumns="False"
+                <!-- Linha 4: DataGrid e Botões -->
+                <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,0,10,0">
+                    <DataGrid AutoGenerateColumns="False"
                           Height="200"
                           ItemsSource="{Binding ListaAgendamentos}"
                           SelectedItem="{Binding NovoAgendamento}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                        <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                        <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
-                        <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
-                        <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
-                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Pago" Binding="{Binding ValorPendente, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0">
-                    <Button Content="Agendar"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0">
+                        <Button Content="Agendar"
                             Command="{Binding AgendarCommand}"
                             Width="180" Height="50"
                             FontWeight="Bold" FontSize="16"
                             Background="Green" Foreground="White"/>
-                    <Button Content="Excluir"
+
+                        <Button Content="Editar"
+                            Command="{Binding AgendarCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Blue" Foreground="White"/>
+
+                        <Button Content="Excluir"
                             Command="{Binding ExcluirCommand}"
                             Width="180" Height="50"
                             FontWeight="Bold" FontSize="16"
                             Background="Red" Foreground="White"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </Window>
