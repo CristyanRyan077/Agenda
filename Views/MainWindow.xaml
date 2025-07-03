@@ -9,7 +9,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
-        Width="1440" Height="900"
         x:Name="main"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="MainWindow">
@@ -209,13 +208,13 @@
                                 <TextBlock Text="Quarta" FontSize="20" FontWeight="Bold" Foreground="Black"
                                            HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
                                            TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="470" Margin="5,30,4,14">
+                                <Border Width="450" Height="350">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
                                             <Setter Property="BorderBrush" Value="Transparent"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Tag, ElementName=QuarProxy}" Value="True">
+                                                <DataTrigger Binding="{Binding Tag, ElementName=QuaProxy}" Value="True">
                                                     <Setter Property="BorderBrush" Value="Red"/>
                                                     <Setter Property="BorderThickness" Value="3"/>
                                                 </DataTrigger>
