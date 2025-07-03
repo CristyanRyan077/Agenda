@@ -58,7 +58,7 @@
 
                     <hc:ComboBox Name="txtTelefone" Grid.Column="1" Width="305" Height="50"
                              hc:InfoElement.Placeholder="Telefone"
-                             Text="{Binding NovoCliente.Telefone,UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              IsEditable="True"
                              Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
@@ -128,7 +128,7 @@
                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Kind="Cash100" Opacity="0.8" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
 
-                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente }"
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged }"
                             Grid.Column="2" Width="150" Height="50" HorizontalAlignment="Right"
                             hc:InfoElement.Placeholder="Pago"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
@@ -153,12 +153,13 @@
 
                     <!-- Criança -->
                     <Grid Grid.Column="0">
-                        <hc:ComboBox Height="50"
+                        <hc:ComboBox  Name="txtcrianca"
+                     Height="50"
                      hc:InfoElement.Placeholder="Criança"
                      IsEditable="True"
                      DisplayMemberPath="Nome"
-                     ItemsSource="{Binding ListaClientes}"
-                     Text="{Binding NovoAgendamento.Crianca.Nome}"
+                     ItemsSource="{Binding ListaCriancas}"     
+                     Text="{Binding NovoAgendamento.Crianca.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
                      FontSize="24" FontWeight="Bold" BorderBrush="Transparent"
                      SelectionTextBrush="Black" />
@@ -173,7 +174,7 @@
                     <!-- Gênero -->
                     <hc:ComboBox Grid.Column="1" Height="50"
                  hc:InfoElement.Placeholder="Gênero"
-                 Text="{Binding crianca.Genero}"
+                 Text="{Binding NovoAgendamento.Crianca.Genero}"
                  Background="#88D1D3D8" Foreground="Black"
                  FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                  BorderBrush="Transparent" SelectionTextBrush="Black"
@@ -215,6 +216,9 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
                             <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />

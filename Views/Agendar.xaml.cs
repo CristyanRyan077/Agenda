@@ -33,13 +33,21 @@ namespace AgendaNovo
 
         private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
         {
-            var vm = (AgendaViewModel)this.DataContext;
+            var vm = (AgendaViewModel)DataContext;
             var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
 
-            vm.PreencherCamposSeClienteExistir(nomeDigitado, cliente => { vm.NovoCliente.Telefone = cliente.Telefone; });
+            if (string.IsNullOrEmpty(nomeDigitado)) return;
 
+            // Encontra o cliente (com comparação case insensitive)
+            vm.ClienteSelecionado = vm.ListaClientes.FirstOrDefault(c =>
+                c.Nome?.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase) ?? false);
+
+            // Atualiza os bindings
             txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+            txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
+            txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
         }
+
 
         private void txtpacote_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -48,6 +56,32 @@ namespace AgendaNovo
 
             vm.PreencherPacote(pacoteDigitado, valor => { vm.NovoAgendamento.Valor = valor; });
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+        }
+
+        private void txtcrianca_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var vm = (AgendaViewModel)DataContext;
+            var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
+
+            if (string.IsNullOrEmpty(nomeDigitado))
+                return;
+
+            var criancaExistente = vm.ListaCriancas
+                .FirstOrDefault(c => string.Equals(c.Nome, nomeDigitado, StringComparison.OrdinalIgnoreCase));
+
+            if (criancaExistente != null)
+            {
+                vm.NovoAgendamento.Crianca = criancaExistente;
+            }
+            else
+            {
+                vm.NovoAgendamento.Crianca = new Crianca { Nome = nomeDigitado };
+                // Opcional: adicionar na lista para aparecer no autocomplete
+                vm.ListaCriancas.Add(vm.NovoAgendamento.Crianca);
+            }
+
+            // Atualiza binding para garantir a UI sincronizada
+            txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
         }
     }
 }

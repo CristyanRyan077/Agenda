@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using AgendaNovo.Models;
 using System.Windows.Data;
+using System.Windows;
 
 namespace AgendaNovo
 {
@@ -26,7 +27,7 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
 
         //Crianca
-        private ObservableCollection<Crianca> listaCriancas = new();
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
 
         //Data e horario
         [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
@@ -121,16 +122,48 @@ namespace AgendaNovo
             
         }
 
+        partial void OnClienteSelecionadoChanged(Cliente value)
+        {
+            if (value != null)
+            {
+                NovoCliente.Nome = value.Nome;
+                NovoCliente.Telefone = value.Telefone;
+
+                // Atualiza a lista de crianças
+                ListaCriancas.Clear();
+                foreach (var crianca in value.Criancas)
+                {
+                    ListaCriancas.Add(crianca);
+                }
+
+                // Se houver apenas uma criança, seleciona automaticamente
+                if (value.Criancas.Count == 1)
+                {
+                    NovoAgendamento.Crianca = value.Criancas.First();
+                }
+            }
+            else
+            {
+                NovoCliente = new Cliente();
+                ListaCriancas.Clear();
+            }
+
+            // Força a atualização dos bindings
+            OnPropertyChanged(nameof(NovoAgendamento));
+            OnPropertyChanged(nameof(NovoAgendamento.Crianca));
+        }
+
 
         public AgendaViewModel()
         {
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
+            NovoCliente = new Cliente();
             NovoAgendamento = new Agendamento
             {
-                Cliente = NovoCliente
+                Cliente = NovoCliente,
+                Crianca = new Crianca(),
             };
-            NovoCliente = new Cliente();
             ListaAgendamentos = new ObservableCollection<Agendamento>();
             ListaClientes = new ObservableCollection<Cliente>();
             agendamentosFiltrados = new ObservableCollection<Agendamento>();
@@ -152,6 +185,17 @@ namespace AgendaNovo
                     listaCriancas.Add(crianca);
             }
         }
+        public void PreencherCampoCrianca(string? nomeDigitado, Action<Crianca> preencher)
+        {
+            if (string.IsNullOrWhiteSpace(nomeDigitado))
+                return;
+
+            var crianca = listaCriancas.FirstOrDefault(c =>
+                string.Equals(c.Nome.Trim(), nomeDigitado.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (crianca is not null)
+                preencher(crianca);
+        }
+
         public void PreencherPacote(string? pacoteDigitado, Action<decimal> preencher)
         {
             if (string.IsNullOrWhiteSpace(pacoteDigitado))
@@ -172,22 +216,38 @@ namespace AgendaNovo
             var clienteExistente = ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
             if (clienteExistente == null)
             {
-                ListaClientes.Add(new Cliente
+                clienteExistente = new Cliente
                 {
                     Nome = NovoCliente.Nome,
                     Telefone = NovoCliente.Telefone,
-                    
-                });
+                    Criancas = new List<Crianca>()
+                };
+                ListaClientes.Add(clienteExistente);
             }
-
-
-            
+            else
+            {
+                clienteExistente.Criancas ??= new List<Crianca>();
+            }
+            if (NovoAgendamento.Crianca != null &&
+            !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+            {
+                var criancaExistente = clienteExistente.Criancas
+                .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+                if (criancaExistente == null)
+                {
+                    clienteExistente.Criancas.Add(NovoAgendamento.Crianca);
+                }
+                else
+                {
+                    NovoAgendamento.Crianca = criancaExistente;
+                }
+            }
 
             var novo = new Agendamento
             {
                 Cliente = new Cliente
                 {
-                    Nome = NovoCliente.Nome,                   
+                    Nome = NovoCliente.Nome,
                     Telefone = NovoCliente.Telefone,
                 },
                 Crianca = NovoAgendamento.Crianca,
@@ -201,12 +261,13 @@ namespace AgendaNovo
             ListaAgendamentos.Add(novo);
 
 
-            NovoAgendamento = new Agendamento { Data = NovoAgendamento.Data.Date };
+            NovoAgendamento = new Agendamento { Crianca = new Crianca(), Data = NovoAgendamento.Data.Date };
             NovoCliente = new Cliente();
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
 
         }
+  
         private void AtualizarAgendamentos()
         {
             OnPropertyChanged(nameof(AgendamentosDomingo));
@@ -232,15 +293,22 @@ namespace AgendaNovo
                 if (clienteNaLista != null)
                     ListaClientes.Remove(clienteNaLista);
             }
-            NovoCliente = new Cliente();
+
             NovoAgendamento = new Agendamento
             {
-                Cliente = new Cliente()
+                Cliente = new Cliente(),
+                Crianca = new Crianca(),
+                Data = DateTime.Today
             };
+            NovoCliente = new Cliente();
             NovoCliente.Telefone = string.Empty;
             ClienteSelecionado = null;
+            ListaCriancas.Clear();
+            OnPropertyChanged(nameof(NovoAgendamento));
+            OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ClienteSelecionado));
-            ListaClientes = new ObservableCollection<Cliente>(ListaClientes.ToList());
+            OnPropertyChanged(nameof(ListaCriancas));
+            AtualizarHorariosDisponiveis();
         }
         private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia) =>
         ListaAgendamentos.Where(a =>
