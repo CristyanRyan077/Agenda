@@ -34,8 +34,8 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Image Name="imgstudio" Source="/Imagens/SÓ LOGO.png"
-                               Grid.Row="0" Margin="175,2,320,278" Stretch="UniformToFill" Grid.RowSpan="2"/>
+                        <Image Name="imgstudio" Source="/Imagens/SÓ LOGO.png" HorizontalAlignment="Left"
+                               Grid.Row="0" Width="300" Height="250" Margin="224,1,0,1"/>
 
                         <Label x:Name="lblNome" Content="Usuario"
                                Margin="16,23,0,0"

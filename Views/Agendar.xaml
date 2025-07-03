@@ -1,141 +1,257 @@
 ﻿<Window x:Class="AgendaNovo.Agendar"
-            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-            xmlns:hc="https://handyorg.github.io/handycontrol"
-            xmlns:vm="clr-namespace:AgendaNovo;assembly=AgendaNovo"
-            xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-            xmlns:local="clr-namespace:AgendaNovo"
-            mc:Ignorable="d"
-            d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
-            WindowState="Maximized"
-            ResizeMode="NoResize"
-            Title="Agendar" Height="900" Width="1440">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:vm="clr-namespace:AgendaNovo"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
+        Title="Agendar"
+        MinWidth="1024" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
 
-    <Grid>
-        <Grid.Background>
-            <ImageBrush ImageSource="/Imagens/images.png"/>
-        </Grid.Background>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-        </Grid.ColumnDefinitions>
+    <!-- BACKGROUND DE IMAGEM -->
+    <Window.Background>
+        <ImageBrush ImageSource="/Imagens/images.png" Stretch="UniformToFill"/>
+    </Window.Background>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="275.993"/>
-            <RowDefinition Height="142.007"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0" Margin="-590,15,0,202">
-            <hc:TextBox x:Name="txtID" hc:InfoElement.Placeholder="ID" Text="{Binding NovoAgendamento.Id, Mode=TwoWay }"
-                        
-                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
+    <!-- CONTEÚDO SCROLLÁVEL -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Linha 0: Cliente e Telefone -->
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="50"
+                             hc:InfoElement.Placeholder="Cliente"
+                             IsEditable="True" LostFocus="txtCliente_LostFocus"
+                             DisplayMemberPath="Nome"
+                             ItemsSource="{Binding ListaClientes}"
+                             Text="{Binding NovoCliente.Nome}"
+                             Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Account"
+                                         Width="46" Height="46"
+                                         
+                                         HorizontalAlignment="Right" VerticalAlignment="Center"
+                                         Foreground="White"/>
+
+                    <hc:ComboBox Name="txtTelefone" Grid.Column="1" Width="305" Height="50"
+                             hc:InfoElement.Placeholder="Telefone"
+                             Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             IsEditable="True"
+                             Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Grid.Column="  1" Kind="Phone"
+                                         Width="34" Height="34"
+                                         HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Linha 1: Pacote e Horário -->
+                <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <hc:ComboBox Name="txtpacote" Width="400" Height="55"
+                             hc:InfoElement.Placeholder="Pacote" LostFocus="txtpacote_LostFocus"
+                             Text="{Binding NovoAgendamento.Pacote}" ItemsSource="{Binding PacotesDisponiveis }"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3">
+
+                    </hc:ComboBox>
+
+                    <materialDesign:PackIcon Grid.Column="1" Grid.Row="0" Kind="BoxAdd"
+                                         Width="34" Height="34" VerticalAlignment="Center" HorizontalAlignment="Left"
+                                         Foreground="White" Margin="50,0,0,0"/>
+
+                    <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
+                             hc:InfoElement.Placeholder="Horário"
+                             ItemsSource="{Binding HorariosDisponiveis}"
+                             SelectedItem="{Binding NovoAgendamento.Horario}"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Grid.Column="2" Kind="ClockOutline"
+                                         Width="31" Height="34" HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Linha 2: Tema e Valores -->
+                <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <hc:ComboBox Grid.Column="0" Width="305" Height="50" Margin="0,0,0,0"
+                             hc:InfoElement.Placeholder="Tema"
+                              Text="{Binding NovoAgendamento.Tema}"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black">
+                        <hc:AutoCompleteTextBoxItem Content="Safari"/>
+                        <hc:AutoCompleteTextBoxItem Content="ToyStory"/>
+                        <hc:AutoCompleteTextBoxItem Content="Fazendinha"/>
+                    </hc:ComboBox>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Theatre"
+                                         Width="34" Height="34"
+                                         HorizontalAlignment="Right"
+                                         Foreground="White" VerticalAlignment="Center"/>
+
+                    <hc:TextBox Name="txtValor" Grid.Column="1" Width="140" Height="50"
+                            hc:InfoElement.Placeholder="Valor"
+                             Text="{Binding NovoAgendamento.Valor, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged}"
+                            IsReadOnly="True"
+                            Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                            BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.8" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
+
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged }"
+                            Grid.Column="2" Width="150" Height="50" HorizontalAlignment="Right"
+                            hc:InfoElement.Placeholder="Pago"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="CashCycle" Opacity="0.8" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Width="32" Height="32" Foreground="#FFA6FF9F"/>
+
+
+                </Grid>
+
+
+
+                <!-- Linha 3: Criança -->
+                <Grid Grid.Row="3" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <!-- Criança -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Gênero -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Idade -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Criança -->
+                    <Grid Grid.Column="0">
+                        <hc:ComboBox  Name="txtcrianca"
+                     Height="50"
+                     hc:InfoElement.Placeholder="Criança"
+                     IsEditable="True"
+                     DisplayMemberPath="Nome"
+                     ItemsSource="{Binding ListaCriancas}"     
+                     Text="{Binding NovoAgendamento.Crianca.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
+                     FontSize="24" FontWeight="Bold" BorderBrush="Transparent"
+                     SelectionTextBrush="Black" />
+                        <materialDesign:PackIcon Kind="BabyFaceOutline"
+                                 Width="24" Height="24"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,5,0"
+                                 Foreground="#FF00EDFF"/>
+                    </Grid>
+
+                    <!-- Gênero -->
+                    <hc:ComboBox Grid.Column="1" Height="50"
+                 hc:InfoElement.Placeholder="Gênero"
+                 Text="{Binding NovoAgendamento.Crianca.Genero}"
                  Background="#88D1D3D8" Foreground="Black"
-                 BorderBrush="Transparent" Language="pt-br" Width="110"
-                 SelectionTextBrush="Black" Height="55">
-            </hc:TextBox>
-
-            <hc:ComboBox x:Name="txtTema" hc:InfoElement.Placeholder="Tema" Text="{Binding NovoAgendamento.Tema, Mode=TwoWay }"
-                Margin="790,-55,0,0"      
-                FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
-                Background="#88D1D3D8" Foreground="Black"
-                BorderBrush="Transparent" Language="pt-br" Width="512"
-                SelectionTextBrush="Black" Height="56"/>
-        </StackPanel>
-        <materialDesign:PackIcon Name="iconTema" Kind="Theatre" Width="52" Height="30" Margin="664,29,0,0"/>
-
-        <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,85,0,91" Grid.RowSpan="2">
-            <hc:ComboBox hc:InfoElement.Placeholder="Cliente" IsEditable="True"
-                         LostFocus="ComboBox_LostFocus"
-                 DisplayMemberPath="Nome" IsTextSearchEnabled="True"
-                 ItemsSource="{Binding ListaClientes, Mode=TwoWay}"
-                 Text="{Binding NovoCliente.Nome, Mode=TwoWay}"
-                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold" 
-                 Background="#88D1D3D8" Foreground="Black"
-                 BorderBrush="Transparent" Language="pt-br" Width="706"
-                 hc:InfoElement.Necessary="True" SelectionTextBrush="Black" Height="58"/>
-            <Border Name="bordaCliente" Height="2" 
-                Background="White"
-                Opacity="0.5" />
-
-            <materialDesign:PackIcon Name="iconAcc" Kind="Account"
-                                 Width="98" Height="55"
-                                 Opacity="0.8" Margin="630,-55,0,0"
-                                 BorderBrush="White" Foreground="White" />
-
-        </StackPanel>
-
-        <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,156,0,0" Grid.RowSpan="2">
-            <hc:ComboBox x:Name="cboPacote" hc:InfoElement.Placeholder="Pacote" Text="{Binding NovoAgendamento.Pacote, Mode=TwoWay}"
                  FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                 Background="#88D1D3D8" Foreground="Black" BorderBrush="Transparent" SelectionTextBrush="Black" Height="55"
+                 BorderBrush="Transparent" SelectionTextBrush="Black"
                  >
+                        <hc:AutoCompleteTextBoxItem Content="M"/>
+                        <hc:AutoCompleteTextBoxItem Content="F"/>
+                    </hc:ComboBox>
 
-                <hc:AutoCompleteTextBoxItem Content="Acompanhamento Infantil"/>
-                <hc:AutoCompleteTextBoxItem Content="Smash the cake"/>
-            </hc:ComboBox>
-            <Border x:Name="bordaPacote"
-                Background="White" Height="2" Opacity="0.5"/>
-            <hc:ComboBox x:Name="horario" hc:InfoElement.Placeholder="Horário"
-                         Margin="-420,10,0,0" SelectedItem="{Binding NovoAgendamento.Horario, Mode=TwoWay}"
-                         ItemsSource="{Binding HorariosDisponiveis}"
-                         Width="285" Height="37" FontSize="20">
-            </hc:ComboBox>
-            <hc:ComboBox Name="txtTelefone" hc:InfoElement.Placeholder="Telefone"
-             Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-             IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="False"
-             FontFamily="#heveltica" FontSize="32"
-             Background="#88D1D3D8" Foreground="Black" Margin="299,-40,0,0"
-             BorderBrush="Transparent" Language="pt-br" Width="411"
-             hc:InfoElement.Necessary="True" SelectionTextBrush="Black" Height="40" FontWeight="Bold"/>
-            <Border Name="bordaTelefone" Height="2" 
-             Background="White"
-             Opacity="0.5" />
+                    <!-- Idade -->
+                    <hc:ComboBox Grid.Column="2" Height="50"
+                 hc:InfoElement.Placeholder="Idade"
+                 IsEditable="True"
+                 DisplayMemberPath="Nome"
+                 ItemsSource="{Binding ListaClientes}"
+                 Text="{Binding NovoCliente.Nome}"
+                 Background="#88D1D3D8" Foreground="Black"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 BorderBrush="Transparent" SelectionTextBrush="Black"
+                 />
+                </Grid>
 
-            <materialDesign:PackIcon Name="iconTel" Kind="Telephone"
-                     Width="72" Height="39"
-                     Opacity="0.8" Margin="650,-40,0,0"
-                     BorderBrush="White" Foreground="White" />
+                <!-- Calendário -->
+                <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Right">
+                    <Calendar Width="350" Height="300"
+                          SelectedDate="{Binding DataSelecionada}"
+                          Language="pt-br">
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Calendar.LayoutTransform>
+                    </Calendar>
+                </StackPanel>
 
-            <Button
-                x:Name="btnAgendar" Command="{Binding AgendarCommand}" Width="240" Content="Agendar" Margin="-460,99,0,0" hc:BorderElement.CornerRadius="10" Background="#FF00FF1B" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Height="58"
-                />
+                <!-- Linha 4: DataGrid e Botões -->
+                <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,0,10,0">
+                    <DataGrid AutoGenerateColumns="False"
+                          Height="200"
+                          ItemsSource="{Binding ListaAgendamentos}"
+                          SelectedItem="{Binding NovoAgendamento}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Pago" Binding="{Binding ValorPendente, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-            <materialDesign:PackIcon x:Name="iconPacote" Kind="BoxAdd"
-                                 Width="49" Height="61" Opacity="0.8" Margin="660,-263,0,0"
-                                 BorderBrush="White" Foreground="White" Grid.Column="1" />
-            <Button
-                x:Name="btnExcluir" Command="{Binding ExcluirCommand}" Width="240" Margin="150,-60,0,0" Content="Excluir" hc:BorderElement.CornerRadius="10" Background="Red" FontWeight="Bold" FontFamily="Cooper Black" FontSize="20" Height="58"
-                />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0">
+                        <Button Content="Agendar"
+                            Command="{Binding AgendarCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Green" Foreground="White"/>
 
-        </StackPanel>
+                        <Button Content="Editar"
+                            Command="{Binding AgendarCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Blue" Foreground="White"/>
 
-
-        <StackPanel Grid.Column="1" Grid.RowSpan="2">
-            <Calendar Name="calendario" Language="pt-br" Height="319" Width="430" Focusable="False"  SelectedDate="{Binding DataSelecionada, Mode=TwoWay}">
-                <Calendar.LayoutTransform>
-                    <ScaleTransform ScaleX="1.30" ScaleY="1.30"/>
-                </Calendar.LayoutTransform>
-
-            </Calendar>
-
-        </StackPanel>
-        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
-            <DataGrid Height="264" Width="1396" Margin="-10,200,0,0" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" ItemsSource="{Binding ListaAgendamentos}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                    <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
-                    <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                    <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
-                    <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
-                    <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
-                </DataGrid.Columns>
-            </DataGrid>
-
-        </StackPanel>
-
-    </Grid>
+                        <Button Content="Excluir"
+                            Command="{Binding ExcluirCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Red" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>
+
+
