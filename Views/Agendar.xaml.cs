@@ -75,16 +75,12 @@ namespace AgendaNovo
             }
             else
             {
-<<<<<<< HEAD
                 vm.NovoAgendamento.Crianca = new Crianca
                 {
                     Nome = criancaExistente.Nome,
                     Idade = criancaExistente.Idade,
                     Genero = criancaExistente.Genero
                 };
-=======
-                vm.NovoAgendamento.Crianca = new Crianca { Nome = nomeDigitado };
->>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
                 // Opcional: adicionar na lista para aparecer no autocomplete
                 vm.ListaCriancas.Add(vm.NovoAgendamento.Crianca);
             }
