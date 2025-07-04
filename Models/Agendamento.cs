@@ -24,7 +24,11 @@ namespace AgendaNovo
         public string ?Tema { get; set; }
 
         [ObservableProperty] private decimal valor;
-        public decimal ValorPendente { get; set; }
+
+        [ObservableProperty] private decimal valorPendente;
+
+        public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPendente, 2);
+
         public DateTime Data { get; set; } = DateTime.Today;
     }
 }

@@ -45,6 +45,12 @@ namespace AgendaNovo
         { "Aniversario pct01", 450m }
         };
 
+        public ObservableCollection<string> UnidadesIdade { get; } = new()
+        {
+            "meses",
+            "anos"
+        };
+
         private DayOfWeek _diaAtual;
         public DayOfWeek DiaAtual
         {
@@ -139,7 +145,13 @@ namespace AgendaNovo
                 // Se houver apenas uma criança, seleciona automaticamente
                 if (value.Criancas.Count == 1)
                 {
-                    NovoAgendamento.Crianca = value.Criancas.First();
+                    var crianca = value.Criancas.First();
+                    NovoAgendamento.Crianca = new Crianca
+                    {
+                        Nome = crianca.Nome,
+                        Idade = crianca.Idade,
+                        Genero = crianca.Genero
+                    };
                 }
             }
             else
@@ -232,41 +244,59 @@ namespace AgendaNovo
             !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
             {
                 var criancaExistente = clienteExistente.Criancas
-                .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+                    .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+
                 if (criancaExistente == null)
                 {
-                    clienteExistente.Criancas.Add(NovoAgendamento.Crianca);
+                    // Adiciona à lista do cliente (salva o "cadastro")
+                    clienteExistente.Criancas.Add(new Crianca
+                    {
+                        Nome = NovoAgendamento.Crianca.Nome,
+                        Idade = NovoAgendamento.Crianca.Idade,
+                        Genero = NovoAgendamento.Crianca.Genero
+                    });
                 }
-                else
+
+                // SEMPRE cria uma nova instância da criança para o agendamento
+                NovoAgendamento.Crianca = new Crianca
                 {
-                    NovoAgendamento.Crianca = criancaExistente;
-                }
+                    Nome = NovoAgendamento.Crianca.Nome,
+                    Idade = NovoAgendamento.Crianca.Idade,
+                    Genero = NovoAgendamento.Crianca.Genero
+                };
+
+
+                var novo = new Agendamento
+                {
+                    Cliente = new Cliente
+                    {
+                        Nome = NovoCliente.Nome,
+                        Telefone = NovoCliente.Telefone,
+                    },
+                    Crianca = new Crianca
+                    {
+                        Nome = NovoAgendamento.Crianca.Nome,
+                        Idade = NovoAgendamento.Crianca.Idade,
+                        Genero = NovoAgendamento.Crianca.Genero
+                    },
+                    Pacote = NovoAgendamento.Pacote,
+                    Horario = NovoAgendamento.Horario,
+                    Data = NovoAgendamento.Data.Date,
+                    Tema = NovoAgendamento.Tema,
+                    Valor = NovoAgendamento.Valor,
+                    ValorPendente = NovoAgendamento.ValorPendente
+                };
+
+                ListaAgendamentos.Add(novo);
+
+
+                NovoAgendamento = new Agendamento { Crianca = new Crianca(), Data = NovoAgendamento.Data.Date };
+                NovoCliente = new Cliente();
+                AtualizarAgendamentos();
+                AtualizarHorariosDisponiveis();
             }
-
-            var novo = new Agendamento
-            {
-                Cliente = new Cliente
-                {
-                    Nome = NovoCliente.Nome,
-                    Telefone = NovoCliente.Telefone,
-                },
-                Crianca = NovoAgendamento.Crianca,
-                Pacote = NovoAgendamento.Pacote,
-                Horario = NovoAgendamento.Horario,
-                Data = NovoAgendamento.Data.Date,
-                Tema = NovoAgendamento.Tema,
-                Valor = NovoAgendamento.Valor
-            };
-
-            ListaAgendamentos.Add(novo);
-
-
-            NovoAgendamento = new Agendamento { Crianca = new Crianca(), Data = NovoAgendamento.Data.Date };
-            NovoCliente = new Cliente();
-            AtualizarAgendamentos();
-            AtualizarHorariosDisponiveis();
-
         }
+
   
         private void AtualizarAgendamentos()
         {

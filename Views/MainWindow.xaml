@@ -313,11 +313,24 @@
 
                                                                 <!-- Pacote -->
                                                                 <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Foreground" Value="Red"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                    <Setter Property="Foreground" Value="Green"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
 
                                                                 <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
+
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -548,8 +561,14 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Pago" Binding="{Binding ValorPendente, StringFormat=R$ {0:N2}}" />
                             <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
                             <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                         </DataGrid.Columns>

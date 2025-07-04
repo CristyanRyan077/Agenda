@@ -25,7 +25,15 @@
                         <ColumnDefinition Width="101*"/>
                         <ColumnDefinition Width="133*" />
                     </Grid.ColumnDefinitions>
-                    <DataGrid Grid.Column="2" Margin="0,32,0,29"/>
+                    <DataGrid Grid.Column="2" ItemsSource="{Binding ListaAgendamentos}"
+                         SelectedItem="{Binding NovoAgendamento}"
+                         AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Top"
                                 Margin="12,60,0,0"
@@ -78,7 +86,15 @@
                         <ColumnDefinition Width="681*"/>
                         <ColumnDefinition Width="719*" />
                     </Grid.ColumnDefinitions>
-                    <DataGrid Grid.Column="2" Margin="0,32,0,29"/>
+                    <DataGrid Grid.Column="2">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <hc:TextBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"
                                HorizontalAlignment="Left" VerticalAlignment="Top"
                                Margin="10,51,0,0"
