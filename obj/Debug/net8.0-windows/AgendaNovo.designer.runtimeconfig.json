@@ -13,7 +13,7 @@
     ],
     "additionalProbingPaths": [
       "C:\\Users\\Foco na Arte\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\aluno\\.nuget\\packages",
+      "C:\\Users\\Foco na Arte\\.nuget\\packages",
       "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
     ],
     "configProperties": {
