@@ -128,7 +128,11 @@
                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Kind="Cash100" Opacity="0.8" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
 
+<<<<<<< HEAD
                     <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, UpdateSourceTrigger=PropertyChanged }"
+=======
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged }"
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
                             Grid.Column="2" Width="150" Height="50" HorizontalAlignment="Right"
                             hc:InfoElement.Placeholder="Pago"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
@@ -173,10 +177,17 @@
 
                     <!-- Gênero -->
                     <hc:ComboBox Grid.Column="1" Height="50"
+<<<<<<< HEAD
                  hc:InfoElement.Placeholder="Gênero" Width="150"
                  Text="{Binding NovoAgendamento.Crianca.Genero}"
                  Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
                  FontFamily="#heveltica" FontSize="20" FontWeight="Bold"
+=======
+                 hc:InfoElement.Placeholder="Gênero"
+                 Text="{Binding NovoAgendamento.Crianca.Genero}"
+                 Background="#88D1D3D8" Foreground="Black"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
                  BorderBrush="Transparent" SelectionTextBrush="Black"
                  >
                         <hc:AutoCompleteTextBoxItem Content="M"/>
@@ -184,6 +195,7 @@
                     </hc:ComboBox>
 
                     <!-- Idade -->
+<<<<<<< HEAD
                     <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left">
                         <TextBox Width="70" Height="50"
                          Text="{Binding NovoAgendamento.Crianca.Idade, UpdateSourceTrigger=PropertyChanged}"
@@ -246,6 +258,66 @@
                             FontWeight="Bold" FontSize="16"
                             Background="Blue" Foreground="White"/>
 
+=======
+                    <hc:ComboBox Grid.Column="2" Height="50"
+                 hc:InfoElement.Placeholder="Idade"
+                 IsEditable="True"
+                 DisplayMemberPath="Nome"
+                 ItemsSource="{Binding ListaClientes}"
+                 Text="{Binding NovoCliente.Nome}"
+                 Background="#88D1D3D8" Foreground="Black"
+                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 BorderBrush="Transparent" SelectionTextBrush="Black"
+                 />
+                </Grid>
+
+                <!-- Calendário -->
+                <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Right">
+                    <Calendar Width="350" Height="300"
+                          SelectedDate="{Binding DataSelecionada}"
+                          Language="pt-br">
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Calendar.LayoutTransform>
+                    </Calendar>
+                </StackPanel>
+
+                <!-- Linha 4: DataGrid e Botões -->
+                <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,0,10,0">
+                    <DataGrid AutoGenerateColumns="False"
+                          Height="200"
+                          ItemsSource="{Binding ListaAgendamentos}"
+                          SelectedItem="{Binding NovoAgendamento}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Pago" Binding="{Binding ValorPendente, StringFormat=R$ {0:N2}}" />
+                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,10,0">
+                        <Button Content="Agendar"
+                            Command="{Binding AgendarCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Green" Foreground="White"/>
+
+                        <Button Content="Editar"
+                            Command="{Binding AgendarCommand}"
+                            Width="180" Height="50"
+                            FontWeight="Bold" FontSize="16"
+                            Background="Blue" Foreground="White"/>
+
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
                         <Button Content="Excluir"
                             Command="{Binding ExcluirCommand}"
                             Width="180" Height="50"

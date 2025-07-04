@@ -16,8 +16,11 @@ namespace AgendaNovo.Models
         [ObservableProperty] private int? idade;
 
         [ObservableProperty] private string? genero;
+<<<<<<< HEAD
 
         [ObservableProperty] private string idadeUnidade = "anos";
+=======
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
         public int ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
 
