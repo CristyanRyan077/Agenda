@@ -130,3 +130,89 @@ C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.pd
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.genruntimeconfig.cache
 C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.pdb
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\ref\AgendaNovo.dll
+<<<<<<< HEAD
+=======
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.Aero.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.Metro.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.VS2010.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.Toolkit.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\cs-CZ\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\de\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\es\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\fr\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\hu\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\it\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\ja-JP\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\pt-BR\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\ro\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\ru\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\sv\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.exe
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.deps.json
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.runtimeconfig.json
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.pdb
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\CommunityToolkit.Mvvm.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\ControlzEx.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.Aero.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.Metro.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.Themes.VS2010.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.AvalonDock.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Xceed.Wpf.Toolkit.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\HandyControl.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\MahApps.Metro.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\MaterialDesignColors.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\MaterialDesignThemes.Wpf.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.EntityFrameworkCore.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Caching.Abstractions.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Logging.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Options.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Extensions.Primitives.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\Microsoft.Xaml.Behaviors.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\System.Diagnostics.DiagnosticSource.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\cs-CZ\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\de\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\es\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\fr\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\hu\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\it\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\ja-JP\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\pt-BR\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\ro\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\ru\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\sv\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\de\MahApps.Metro.resources.dll
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.AssemblyReference.cache
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Agendar.g.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\GerenciarClientes.g.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Login.g.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\MainWindow.g.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.cache
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.lref
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\App.baml
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Agendar.baml
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\GerenciarClientes.baml
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Login.baml
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\MainWindow.baml
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.g.resources
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.AssemblyInfoInputs.cache
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.AssemblyInfo.cs
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.CoreCompileInputs.cache
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.sourcelink.json
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.Up2Date
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.dll
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\refint\AgendaNovo.dll
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.pdb
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.genruntimeconfig.cache
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\ref\AgendaNovo.dll
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714

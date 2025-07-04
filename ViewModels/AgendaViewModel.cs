@@ -45,12 +45,15 @@ namespace AgendaNovo
         { "Aniversario pct01", 450m }
         };
 
+<<<<<<< HEAD
         public ObservableCollection<string> UnidadesIdade { get; } = new()
         {
             "meses",
             "anos"
         };
 
+=======
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
         private DayOfWeek _diaAtual;
         public DayOfWeek DiaAtual
         {
@@ -145,6 +148,7 @@ namespace AgendaNovo
                 // Se houver apenas uma criança, seleciona automaticamente
                 if (value.Criancas.Count == 1)
                 {
+<<<<<<< HEAD
                     var crianca = value.Criancas.First();
                     NovoAgendamento.Crianca = new Crianca
                     {
@@ -152,6 +156,9 @@ namespace AgendaNovo
                         Idade = crianca.Idade,
                         Genero = crianca.Genero
                     };
+=======
+                    NovoAgendamento.Crianca = value.Criancas.First();
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
                 }
             }
             else
@@ -235,8 +242,32 @@ namespace AgendaNovo
                     Criancas = new List<Crianca>()
                 };
                 ListaClientes.Add(clienteExistente);
+<<<<<<< HEAD
             }
             else
+=======
+            }
+            else
+            {
+                clienteExistente.Criancas ??= new List<Crianca>();
+            }
+            if (NovoAgendamento.Crianca != null &&
+            !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+            {
+                var criancaExistente = clienteExistente.Criancas
+                .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+                if (criancaExistente == null)
+                {
+                    clienteExistente.Criancas.Add(NovoAgendamento.Crianca);
+                }
+                else
+                {
+                    NovoAgendamento.Crianca = criancaExistente;
+                }
+            }
+
+            var novo = new Agendamento
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
             {
                 clienteExistente.Criancas ??= new List<Crianca>();
             }
@@ -248,6 +279,7 @@ namespace AgendaNovo
 
                 if (criancaExistente == null)
                 {
+<<<<<<< HEAD
                     // Adiciona à lista do cliente (salva o "cadastro")
                     clienteExistente.Criancas.Add(new Crianca
                     {
@@ -256,6 +288,18 @@ namespace AgendaNovo
                         Genero = NovoAgendamento.Crianca.Genero
                     });
                 }
+=======
+                    Nome = NovoCliente.Nome,
+                    Telefone = NovoCliente.Telefone,
+                },
+                Crianca = NovoAgendamento.Crianca,
+                Pacote = NovoAgendamento.Pacote,
+                Horario = NovoAgendamento.Horario,
+                Data = NovoAgendamento.Data.Date,
+                Tema = NovoAgendamento.Tema,
+                Valor = NovoAgendamento.Valor
+            };
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
 
                 // SEMPRE cria uma nova instância da criança para o agendamento
                 NovoAgendamento.Crianca = new Crianca
@@ -266,6 +310,7 @@ namespace AgendaNovo
                 };
 
 
+<<<<<<< HEAD
                 var novo = new Agendamento
                 {
                     Cliente = new Cliente
@@ -286,6 +331,12 @@ namespace AgendaNovo
                     Valor = NovoAgendamento.Valor,
                     ValorPendente = NovoAgendamento.ValorPendente
                 };
+=======
+            NovoAgendamento = new Agendamento { Crianca = new Crianca(), Data = NovoAgendamento.Data.Date };
+            NovoCliente = new Cliente();
+            AtualizarAgendamentos();
+            AtualizarHorariosDisponiveis();
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
 
                 ListaAgendamentos.Add(novo);
 
@@ -296,7 +347,10 @@ namespace AgendaNovo
                 AtualizarHorariosDisponiveis();
             }
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 339a18d4c7781204c8c80dd673286d34e4ee8714
   
         private void AtualizarAgendamentos()
         {
