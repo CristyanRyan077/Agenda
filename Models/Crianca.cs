@@ -16,9 +16,12 @@ namespace AgendaNovo.Models
         [ObservableProperty] private int? idade;
 
         [ObservableProperty] private string? genero;
+
+        [ObservableProperty] private string idadeUnidade = "anos";
         public int ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
 
+        public string IdadeFormatada => $"{Idade} {IdadeUnidade}";
         public List<Agendamento> Agendamentos { get; set; } = new();
     }
 }

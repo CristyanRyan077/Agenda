@@ -128,7 +128,7 @@
                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Kind="Cash100" Opacity="0.8" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
 
-                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged }"
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPendente, UpdateSourceTrigger=PropertyChanged }"
                             Grid.Column="2" Width="150" Height="50" HorizontalAlignment="Right"
                             hc:InfoElement.Placeholder="Pago"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
@@ -173,10 +173,10 @@
 
                     <!-- Gênero -->
                     <hc:ComboBox Grid.Column="1" Height="50"
-                 hc:InfoElement.Placeholder="Gênero"
+                 hc:InfoElement.Placeholder="Gênero" Width="150"
                  Text="{Binding NovoAgendamento.Crianca.Genero}"
-                 Background="#88D1D3D8" Foreground="Black"
-                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                 FontFamily="#heveltica" FontSize="20" FontWeight="Bold"
                  BorderBrush="Transparent" SelectionTextBrush="Black"
                  >
                         <hc:AutoCompleteTextBoxItem Content="M"/>
@@ -184,16 +184,20 @@
                     </hc:ComboBox>
 
                     <!-- Idade -->
-                    <hc:ComboBox Grid.Column="2" Height="50"
-                 hc:InfoElement.Placeholder="Idade"
-                 IsEditable="True"
-                 DisplayMemberPath="Nome"
-                 ItemsSource="{Binding ListaClientes}"
-                 Text="{Binding NovoCliente.Nome}"
-                 Background="#88D1D3D8" Foreground="Black"
-                 FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                 BorderBrush="Transparent" SelectionTextBrush="Black"
-                 />
+                    <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left">
+                        <TextBox Width="70" Height="50"
+                         Text="{Binding NovoAgendamento.Crianca.Idade, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                                FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
+                                BorderBrush="Transparent" SelectionTextBrush="Black"/>
+
+                        <ComboBox Width="90" Height="50"
+                                          Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                                          FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
+                                          BorderBrush="Transparent"
+                                          ItemsSource="{Binding UnidadesIdade}"
+                                          SelectedItem="{Binding NovoAgendamento.Crianca.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
                 </Grid>
 
                 <!-- Calendário -->
@@ -218,7 +222,7 @@
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                             <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
                             <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
-                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.IdadeFormatada}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
                             <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
