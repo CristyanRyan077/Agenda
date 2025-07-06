@@ -8,6 +8,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         x:Name="main"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
@@ -20,19 +21,19 @@
     </Window.Resources>
     <DockPanel>
     <ToolBarTray DockPanel.Dock="Top">
-        <ToolBar Height="73" Margin="0,0,-1525,0" Background="White">
+        <ToolBar Height="73"  Background="White">
             <Button x:Name="btnAgenda" Padding="4" Click="btnAgenda_Click"
                         Height="60" BorderBrush="Black" BorderThickness="1" FontSize="14">
                 <StackPanel>
-                    <Image Source="C:\Users\Foco na Arte\Desktop\Cristyan\Imagens\agenda.png" Height="32" Width="30"/>
-                    <TextBlock FontWeight="Bold" Foreground="Blue">Agendar</TextBlock>
+                        <materialDesign:PackIcon Height="32" Width="55" Kind="BookAdd"/>
+                        <TextBlock FontWeight="Bold" Foreground="Blue">Agendar</TextBlock>
                 </StackPanel>
             </Button>
             <Button x:Name="btnClientes" Padding="4" Click="btnClientes_Click"
                         Height="60" Margin="10,0,0,0" BorderBrush="Black" FontSize="14">
                 <StackPanel>
-                    <Image Source="C:\Users\Foco na Arte\Desktop\Cristyan\Imagens\1077114.png" Height="32" Width="30"/>
-                    <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
+                        <materialDesign:PackIcon Kind="UserAdd" Height="32" Width="55"/>
+                        <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
                 </StackPanel>
             </Button>
         </ToolBar>
@@ -46,7 +47,7 @@
                             <ImageBrush ImageSource="/Imagens/download.jpeg"/>
                         </Grid.Background>
 
-                        <Grid>
+                        <Grid HorizontalAlignment="Center" Margin="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -69,18 +70,17 @@
                             <!-- SEGUNDA -->
                             <Grid Grid.Row="1" Grid.Column="0">
                                 <TextBlock Text="Segunda"
-                                           FontSize="20"
-                                           FontWeight="Bold"
-                                           Foreground="Black"
-                                           HorizontalAlignment="Center"
-                                           Width="154"
-                                           Background="#FF13FF00"
-                                           TextAlignment="Center"
-                                           FontFamily="Segoe UI Black"
-                                           Margin="0,1,0,396"/>
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="Black"
+                                               HorizontalAlignment="Center"
+                                               Width="154" Height="32"
+                                               Background="#FF13FF00"
+                                               TextAlignment="Center"
+                                               FontFamily="Segoe UI Black" VerticalAlignment="Top"
+                                                />
 
-                                <!-- Container com borda destacada se for o dia atual -->
-                                <Border Width="470" Margin="5,30,4,14">
+                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -88,25 +88,24 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Tag, ElementName=SegProxy}" Value="True">
                                                     <Setter Property="BorderBrush" Value="Red"/>
-                                                    <Setter Property="BorderThickness" Value="5"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
 
-                                    <!-- Card com scroll e layout horizontal dos agendamentos -->
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
+                                    <hc:Card Background="#88FFFFFF" HorizontalAlignment="Stretch" MinWidth="470" Opacity="1.0">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosSegunda}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
-                                                        <WrapPanel Orientation="Horizontal" />
+                                                        <StackPanel Orientation="Vertical"/>
                                                     </ItemsPanelTemplate>
                                                 </ItemsControl.ItemsPanel>
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="210"
+                                                        <Border Width="430"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
@@ -115,18 +114,41 @@
                                                                 BorderThickness="1"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <!-- Nome e telefone -->
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
                                                                 </StackPanel>
 
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
 
-                                                                <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -144,8 +166,8 @@
                             <Grid Grid.Row="1" Grid.Column="1">
                                 <TextBlock Text="Terça" FontSize="20" FontWeight="Bold" Foreground="Black"
                                            HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-                                           TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>      
-                                <Border Width="470" Margin="5,30,4,14">
+                                           TextAlignment="Center" Height="32" FontFamily="Segoe UI Black" VerticalAlignment="Top"/>
+                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -169,133 +191,7 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="210"
-                                                                 Margin="6"
-                                                                 Padding="8"
-                                                                 CornerRadius="8"
-                                                                 Background="White"
-                                                                 BorderBrush="#DDD"
-                                                                 BorderThickness="1"
-                                                                 Effect="{StaticResource DropShadow}">
-                                                            <StackPanel>
-                                                                <!-- Nome e telefone -->
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
-                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
-                                                                </StackPanel>
-
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
-
-                                                                <!-- Data e horário -->
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
-                                                                </StackPanel>
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
-                                    </hc:Card>
-                                </Border>
-                            </Grid>
-
-                            <!-- QUARTA -->
-                            <Grid Grid.Row="1" Grid.Column="2">
-                                <TextBlock Text="Quarta" FontSize="20" FontWeight="Bold" Foreground="Black"
-                                           HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-                                           TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="450" Height="350">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="BorderBrush" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Tag, ElementName=QuaProxy}" Value="True">
-                                                    <Setter Property="BorderBrush" Value="Red"/>
-                                                    <Setter Property="BorderThickness" Value="3"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
-                                            <ItemsControl ItemsSource="{Binding AgendamentosQuarta}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel Orientation="Horizontal" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Width="210"
-                                                                 Margin="6"
-                                                                 Padding="8"
-                                                                 CornerRadius="8"
-                                                                 Background="White"
-                                                                 BorderBrush="#DDD"
-                                                                 BorderThickness="1"
-                                                                 Effect="{StaticResource DropShadow}">
-                                                            <StackPanel>
-                                                                <!-- Nome e telefone -->
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
-                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
-                                                                </StackPanel>
-
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
-
-                                                                <!-- Data e horário -->
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
-                                                                </StackPanel>
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
-                                    </hc:Card>
-                                </Border>
-                            </Grid>
-
-                            <!-- QUINTA -->
-                            <Grid Grid.Row="2" Grid.Column="0">
-                                <TextBlock Text="Quinta" FontSize="20" FontWeight="Bold" Foreground="Black"
-               HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-               TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="470" Margin="5,30,4,14">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="BorderBrush" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Tag, ElementName=QuiProxy}" Value="True">
-                                                    <Setter Property="BorderBrush" Value="Red"/>
-                                                    <Setter Property="BorderThickness" Value="3"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
-                                            <ItemsControl ItemsSource="{Binding AgendamentosQuinta}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel Orientation="Horizontal" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Width="210"
+                                                        <Border Width="430"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
@@ -304,33 +200,43 @@
                                                                 BorderThickness="1"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <!-- Nome e telefone -->
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
                                                                 </StackPanel>
 
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
-                                                                <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica">
-                                                                    <TextBlock.Style>
-                                                                        <Style TargetType="TextBlock">
-                                                                            <Setter Property="Foreground" Value="Red"/>
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding EstaPago}" Value="True">
-                                                                                    <Setter Property="Foreground" Value="Green"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </TextBlock.Style>
-                                                                </TextBlock>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
 
-                                                                <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
-
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -342,12 +248,15 @@
                                 </Border>
                             </Grid>
 
-                            <!-- SEXTA -->
+
+
+
+                            <!-- Sexta -->
                             <Grid Grid.Row="2" Grid.Column="1">
-                                <TextBlock Text="Sexta" FontSize="20" FontWeight="Bold" Foreground="Black"
-               HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-               TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="470" Margin="5,30,4,14">
+                                <TextBlock Text="Sexta" FontSize="20" Height="32" FontWeight="Bold" Foreground="Black"
+                                           HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
+                                           TextAlignment="Center" FontFamily="Segoe UI Black" VerticalAlignment="Top"/>
+                                <Border HorizontalAlignment="Stretch" MinWidth="430"  Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -368,30 +277,207 @@
                                                         <WrapPanel Orientation="Horizontal" />
                                                     </ItemsPanelTemplate>
                                                 </ItemsControl.ItemsPanel>
-
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="210"
-                               Margin="6"
-                               Padding="8"
-                               CornerRadius="8"
-                               Background="White"
-                               BorderBrush="#DDD"
-                               BorderThickness="1"
-                               Effect="{StaticResource DropShadow}">
+                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                                Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <!-- Nome e telefone -->
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
                                                                 </StackPanel>
 
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
 
-                                                                <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </hc:Card>
+                                </Border>
+                            </Grid>
+
+                            <!-- QUINTA -->
+                            <Grid Grid.Row="2" Grid.Column="0">
+                                <TextBlock Text="Quinta" FontSize="20" FontWeight="Bold" Foreground="Black"
+                                           HorizontalAlignment="Center" Width="154" Height="32"  Background="#FF13FF00"
+                                           TextAlignment="Center" VerticalAlignment="Top" FontFamily="Segoe UI Black"/>
+                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="5,30,4,14">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Tag, ElementName=QuiProxy}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="Red"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
+                                            <ItemsControl ItemsSource="{Binding AgendamentosQuinta}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                                Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                Effect="{StaticResource DropShadow}">
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </hc:Card>
+                                </Border>
+                            </Grid>
+
+                            <!-- QUARTA -->
+                            <Grid Grid.Row="1" Grid.Column="2">
+                                <TextBlock Text="Quarta" FontSize="20" Height="32" FontWeight="Bold" Foreground="Black"
+                                               HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
+                                               TextAlignment="Center" FontFamily="Segoe UI Black" VerticalAlignment="Top"/>
+                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="5,30,4,14">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Tag, ElementName=QuaProxy}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="Red"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
+                                            <ItemsControl ItemsSource="{Binding AgendamentosQuarta}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Vertical" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                                Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                Effect="{StaticResource DropShadow}">
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -407,10 +493,18 @@
 
                             <!-- SÁBADO -->
                             <Grid Grid.Row="2" Grid.Column="2">
-                                <TextBlock Text="Sábado" FontSize="20" FontWeight="Bold" Foreground="Black"
-               HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-               TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="470" Margin="5,30,4,14">
+                                <TextBlock Text="Sábado"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="Black"
+                                           HorizontalAlignment="Center"
+                                           Width="154" Height="32"
+                                           Background="#FF13FF00"
+                                           TextAlignment="Center"
+                                           FontFamily="Segoe UI Black" VerticalAlignment="Top"
+                                            />
+
+                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="0,30,0,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -423,38 +517,62 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
+
                                     <hc:Card Background="#88FFFFFF" Opacity="1.0">
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
+                                        <ScrollViewer HorizontalScrollBarVisibility="Auto" Height="380" VerticalScrollBarVisibility="Auto">
                                             <ItemsControl ItemsSource="{Binding AgendamentosSabado}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
-                                                        <WrapPanel Orientation="Horizontal" />
+                                                        <WrapPanel Orientation="Vertical" />
                                                     </ItemsPanelTemplate>
                                                 </ItemsControl.ItemsPanel>
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="210"
-                               Margin="6"
-                               Padding="8"
-                               CornerRadius="8"
-                               Background="White"
-                               BorderBrush="#DDD"
-                               BorderThickness="1"
-                               Effect="{StaticResource DropShadow}">
+                                                        <Border Width="430"
+                                                                Margin="6"
+                                                                Padding="8"
+                                                                CornerRadius="8"
+                                                                Background="White"
+                                                                BorderBrush="#DDD"
+                                                                BorderThickness="1"
+                                                                Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <!-- Nome e telefone -->
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
                                                                 </StackPanel>
 
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
 
-                                                                <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -468,12 +586,21 @@
                                 </Border>
                             </Grid>
 
+
                             <!-- DOMINGO -->
                             <Grid Grid.Row="3" Grid.Column="1">
-                                <TextBlock Text="Domingo" FontSize="20" FontWeight="Bold" Foreground="Black"
-                                   HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
-                                   TextAlignment="Center" FontFamily="Segoe UI Black" Margin="0,0,0,397"/>
-                                <Border Width="470" Margin="5,30,4,14">
+                                <TextBlock Text="Domingo"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="Black"
+                                           HorizontalAlignment="Center"
+                                           Width="154" Height="32"
+                                           Background="#FF13FF00"
+                                           TextAlignment="Center"
+                                           FontFamily="Segoe UI Black" VerticalAlignment="Top"
+                                            />
+
+                                <Border MinWidth="430" Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -481,11 +608,12 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Tag, ElementName=DomProxy}" Value="True">
                                                     <Setter Property="BorderBrush" Value="Red"/>
-                                                    <Setter Property="BorderThickness" Value="5"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
+
                                     <hc:Card Background="#88FFFFFF" Opacity="1.0">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosDomingo}">
@@ -497,27 +625,50 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="210"
-                               Margin="6"
-                               Padding="8"
-                               CornerRadius="8"
-                               Background="White"
-                               BorderBrush="#DDD"
-                               BorderThickness="1"
-                               Effect="{StaticResource DropShadow}">
+                                                        <Border Width="430"
+                                                                Margin="6"
+                                                                Padding="8"
+                                                                CornerRadius="8"
+                                                                Background="White"
+                                                                BorderBrush="#DDD"
+                                                                BorderThickness="1"
+                                                                Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <!-- Nome e telefone -->
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
-                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontWeight="Bold" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
-                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
                                                                 </StackPanel>
 
-                                                                <!-- Pacote -->
-                                                                <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
+                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                </StackPanel>
 
-                                                                <!-- Data e horário -->
                                                                 <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                                        <Setter Property="Foreground" Value="Green"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                    <TextBlock Text=" / " Foreground="Gray"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                </StackPanel>
+
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -531,56 +682,121 @@
                                 </Border>
                             </Grid>
 
-
                         </Grid>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
 
-        <TabItem Header="Mensal">
-                <Grid Margin="-6,0,0,0">
-                    <Grid.Background>
+            <TabItem Header="Mensal">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.Background>
                         <ImageBrush ImageSource="/Imagens/baixados.jpeg"/>
-                    </Grid.Background>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="25*"/>
-                        <ColumnDefinition Width="21*"/>
-                        <ColumnDefinition Width="678*"/>
-                        <ColumnDefinition Width="723*"/>
-                    </Grid.ColumnDefinitions>
+                        </Grid.Background>
 
-                    <Calendar SelectedDate="{Binding DataSelecionada, Mode=TwoWay}" Language="pt-br" Cursor="Hand" HorizontalAlignment="Left"
-                              Margin="-132,24,0,0" VerticalAlignment="Top"
-                              Height="328" Width="445" Grid.ColumnSpan="3">
-                        <Calendar.LayoutTransform>
-                            <ScaleTransform ScaleX="2.0" ScaleY="2.0"/>
-                        </Calendar.LayoutTransform>
-                    </Calendar>
+                        <!-- Coluna Esquerda: Calendário -->
+                        <hc:Card Grid.Column="0" Padding="10" Margin="0,0,20,0" Background="Transparent">
+                            <Calendar SelectedDate="{Binding DataSelecionada, Mode=TwoWay}"
+                          Language="pt-br"
+                          Cursor="Hand"
+                          HorizontalAlignment="Center"
+                          Height="328" Width="300">
+                                <Calendar.LayoutTransform>
+                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                </Calendar.LayoutTransform>
+                            </Calendar>
+                        </hc:Card>
 
-                    <DataGrid Height="800" Width="1396" Grid.Column="3" ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}" SelectedItem="{Binding NovoAgendamento, Mode=TwoWay}" AutoGenerateColumns="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
-                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
-                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
-                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
-                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
-                            <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
-                            <DataGridTextColumn Header="Pago" Binding="{Binding ValorPendente, StringFormat=R$ {0:N2}}" />
-                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
-                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <TextBlock x:Name="txtteste" Grid.Column="3" Visibility="Hidden"
-                               HorizontalAlignment="Left" Margin="26,330,0,0"
-                               TextWrapping="Wrap" Text="TextBlock"
-                               VerticalAlignment="Top"/>
-                </Grid>
+                        <!-- Coluna Direita: Filtros, Botões, DataGrid -->
+                        <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Top">
+
+                            <!-- Linha de pesquisa -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <hc:TextBox Width="250" Height="60"
+                                FontSize="24" FontFamily="Arial"
+                                hc:InfoElement.Placeholder="Pesquisar" />
+                                <materialDesign:PackIcon Kind="Search" Height="50" Width="50"
+                                             Margin="-45,0,0,0" VerticalAlignment="Center" />
+                                <hc:TextBox Text="{Binding NovoAgendamento.ValorPendente, UpdateSourceTrigger=PropertyChanged }"
+                                Width="170" Height="60" Margin="10,0,0,0"
+                                hc:InfoElement.Placeholder="Pago"
+                                Background="White" Foreground="Black" FontFamily="Helvetica" FontSize="24" FontWeight="Bold"
+                                BorderBrush="Transparent" SelectionTextBrush="Black" />
+                            </StackPanel>
+
+                            <!-- Linha de botões -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+                                <Button Content="✓" Width="90" Height="60"
+                            FontWeight="Bold" FontSize="24"
+                            Background="Green" Foreground="White"
+                            Command="{Binding AgendarCommand}" />
+
+                                <Button Content="❌" Width="90" Height="60" Margin="10,0"
+                            FontWeight="Bold" FontSize="24"
+                            Background="Red" Foreground="White"
+                            Command="{Binding ExcluirCommand}" />
+
+                                <Button Content="Limpar" Width="150" Height="60" Margin="10,0"
+                            FontWeight="Bold" FontSize="18"
+                            Background="Orange" Foreground="White"
+                            Command="{Binding LimparAnterioresCommand}" />
+                            </StackPanel>
+
+                            <!-- DataGrid -->
+                            <hc:Card Padding="10" Background="White">
+                                <DataGrid Height="300" Width="1000"
+                              VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.CanContentScroll="True"
+                              ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}"
+                              SelectedItem="{Binding ItemSelecionado, Mode=TwoWay}"
+                              AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                                        <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
+                                        <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                                        <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                                        <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                                        <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                                        <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                                        <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
+                                        <DataGridTemplateColumn Header="Pago">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}"
+                                                   FontWeight="Bold" FontSize="13" FontFamily="Helvetica">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="Red" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                                        <Setter Property="Foreground" Value="Green" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </hc:Card>
+
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
+    
 
-        <TextBlock TextWrapping="Wrap" Text="TextBlock"/>
+
+            <TextBlock TextWrapping="Wrap" Text="TextBlock"/>
     </TabControl>
 </DockPanel>
  </Window>

@@ -29,7 +29,7 @@ namespace AgendaNovo
         private void btnAgenda_Click(object sender, RoutedEventArgs e)
         {
             var agendarWindow = new Agendar(vm);
-            agendarWindow.ShowDialog();
+            agendarWindow.Show();
         
         } 
 

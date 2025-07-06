@@ -23,5 +23,13 @@ namespace AgendaNovo.Models
 
         public string IdadeFormatada => $"{Idade} {IdadeUnidade}";
         public List<Agendamento> Agendamentos { get; set; } = new();
+        partial void OnIdadeUnidadeChanged(string value)
+        {
+            OnPropertyChanged(nameof(IdadeFormatada));
+        }
+        partial void OnIdadeChanged(int? value)
+        {
+            OnPropertyChanged(nameof(IdadeFormatada));
+        }
     }
 }
