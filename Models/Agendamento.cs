@@ -20,8 +20,10 @@ namespace AgendaNovo
         public string ?Servico { get; set; }
 
         [ObservableProperty] private string? pacote;
-        public string ?Horario { get; set; }
-        public string ?Tema { get; set; }
+
+        [ObservableProperty] private string? horario;
+
+        [ObservableProperty] private string? tema;
 
         [ObservableProperty] private decimal valor;
 
@@ -29,6 +31,14 @@ namespace AgendaNovo
 
         public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPendente, 2);
 
-        public DateTime Data { get; set; } = DateTime.Today;
+        [ObservableProperty] private DateTime data = DateTime.Today;
+        partial void OnValorChanged(decimal oldValue, decimal newValue)
+        {
+            OnPropertyChanged(nameof(EstaPago));
+        }
+        partial void OnValorPendenteChanged(decimal oldValue, decimal newValue)
+        {
+            OnPropertyChanged(nameof(EstaPago));
+        }
     }
 }
