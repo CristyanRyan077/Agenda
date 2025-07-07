@@ -2,11 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:vm="clr-namespace:AgendaNovo"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="AgendaNovo.GerenciarClientes"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         WindowState="Maximized"
          ResizeMode="NoResize"
         Title="GerenciarClientes" Height="900" Width="1440">
@@ -25,19 +27,23 @@
                         <ColumnDefinition Width="101*"/>
                         <ColumnDefinition Width="133*" />
                     </Grid.ColumnDefinitions>
-                    <DataGrid Grid.Column="2" ItemsSource="{Binding ListaAgendamentos}"
-                         SelectedItem="{Binding NovoAgendamento}"
+                    <DataGrid Grid.Column="2" ItemsSource="{Binding ListaClientes}"
+                         SelectedItem="{Binding NovoCliente}"
                          AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-                            <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                            <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
+                            <DataGridTextColumn Header="Cliente" Binding="{Binding Nome}" />
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}"
+                            <DataGridTextColumn Header="Telefone" Binding="{Binding }" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
+                    <hc:ComboBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                                IsEditable="True" LostFocus="txtCliente_LostFocus"
+                                DisplayMemberPath="Nome"
+                                ItemsSource="{Binding ListaClientes}"
+                                Text="{Binding NovoCliente.Nome}"
                                 Margin="12,60,0,0"
-                                TextWrapping="Wrap"
                                 Width="416" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
                     <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone"
                         HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -86,13 +92,12 @@
                         <ColumnDefinition Width="681*"/>
                         <ColumnDefinition Width="719*" />
                     </Grid.ColumnDefinitions>
-                    <DataGrid Grid.Column="2">
+                    <DataGrid Grid.Column="2" AutoGenerateColumns="False" ItemsSource="{Binding ListaCriancas}" >
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-
-                            <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
-                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
-                            <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
+                            <DataGridTextColumn Header="Crianca" Binding="{Binding Nome}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Genero}" />
+                            <DataGridTextColumn Header="Idade"  IsReadOnly="True" Binding="{Binding IdadeFormatada}" />
                         </DataGrid.Columns>
                     </DataGrid>
                     <hc:TextBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"

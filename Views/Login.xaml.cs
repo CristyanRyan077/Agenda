@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using SplashScreen = AgendaNovo.Views.SplashScreen;
 
 namespace AgendaNovo
 {
@@ -19,11 +20,9 @@ namespace AgendaNovo
     /// </summary>
     public partial class Login : Window
     {
-        private AgendaViewModel vm = new AgendaViewModel();
         public Login()
         {
             InitializeComponent();
-                this.DataContext = vm;
         }
 
         private void txtNome_GotFocus(object sender, RoutedEventArgs e)
@@ -55,12 +54,24 @@ namespace AgendaNovo
         {
             return (string.Equals(senha.Trim(), "cristyan653", StringComparison.OrdinalIgnoreCase));
         }
-        private void LoginSucesso()
+        private async void LoginSucesso()
         {
             if (AutenticacaoLogin(passboxSenha.Password))
             {
-                MainWindow mainwindow = new MainWindow();
-                mainwindow.Show();
+                var splash = new SplashScreen();
+                splash.Show();
+
+                var db = new AgendaContext();
+                var vm = new AgendaViewModel(db);
+
+                await Task.Run(() =>
+                {
+                    vm.CarregarDadosDoBanco(); // <- apenas isso roda em background
+                });
+                splash.Close();
+                var mainWindow = new MainWindow(vm);
+                mainWindow.Show();
+
                 this.Close();
             }
             else

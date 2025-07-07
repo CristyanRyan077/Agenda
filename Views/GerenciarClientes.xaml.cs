@@ -19,9 +19,10 @@ namespace AgendaNovo
     /// </summary>
     public partial class GerenciarClientes : Window
     {
-        public GerenciarClientes()
+        public GerenciarClientes(AgendaViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
         }
 
         private void txtNascimento_GotFocus(object sender, RoutedEventArgs e)

@@ -20,11 +20,10 @@ namespace AgendaNovo
     /// </summary>
         public partial class Agendar : Window
         {
-
             public Agendar(AgendaViewModel vm)
             {
                 InitializeComponent();
-                this.DataContext = vm;
+                DataContext = vm;
             }
 
 
@@ -33,7 +32,9 @@ namespace AgendaNovo
 
         private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
         {
-            var vm = (AgendaViewModel)DataContext;
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
             var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
 
             if (string.IsNullOrEmpty(nomeDigitado)) return;
@@ -51,7 +52,9 @@ namespace AgendaNovo
 
         private void txtpacote_LostFocus(object sender, RoutedEventArgs e)
         {
-            var vm = (AgendaViewModel)this.DataContext;
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
             var pacoteDigitado = (sender as ComboBox)?.Text?.Trim();
 
             vm.PreencherPacote(pacoteDigitado, valor => { vm.NovoAgendamento.Valor = valor; });
@@ -60,7 +63,9 @@ namespace AgendaNovo
 
         private void txtcrianca_LostFocus(object sender, RoutedEventArgs e)
         {
-            var vm = (AgendaViewModel)DataContext;
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
             var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
 
             if (string.IsNullOrEmpty(nomeDigitado))

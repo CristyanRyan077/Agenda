@@ -10,7 +10,6 @@ namespace AgendaNovo
     /// </summary>
     public partial class App : Application
     {
-        private AgendaViewModel vm = new AgendaViewModel();
         protected override void OnStartup(StartupEventArgs e)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-BR");
