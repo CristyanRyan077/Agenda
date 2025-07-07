@@ -19,29 +19,36 @@ namespace AgendaNovo
     {
         public AgendaViewModel vm { get; }
 
-        public MainWindow()
+        public MainWindow(AgendaViewModel vm)
         {
             InitializeComponent();
-            vm = new AgendaViewModel();
-            this.DataContext = vm;
 
+            var context = new AgendaContext();
+            vm = new AgendaViewModel(context);
+            DataContext = vm;
+
+            Loaded += async (_, __) =>
+            {
+                await Task.Run(() => vm.CarregarDadosDoBanco());
+            };
         }
+
         private void btnAgenda_Click(object sender, RoutedEventArgs e)
         {
-            var agendarWindow = new Agendar(vm);
-            agendarWindow.Show();
-        
-        } 
+            if (DataContext is AgendaViewModel vm)
+            {
+                var agendarWindow = new Agendar(vm);
+                agendarWindow.ShowDialog();
+            }
+        }
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
-            GerenciarClientes clientes = new GerenciarClientes();
-            clientes.ShowDialog();
-        }
-
-        private void Calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
-        {
-
+            if (DataContext is AgendaViewModel vm)
+            {
+                GerenciarClientes clientes = new GerenciarClientes(vm);
+                clientes.ShowDialog();
+            }
         }
     }
 }
