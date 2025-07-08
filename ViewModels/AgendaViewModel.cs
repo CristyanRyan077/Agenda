@@ -33,6 +33,8 @@ namespace AgendaNovo
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
+        [ObservableProperty] private Crianca? criancaSelecionada = new();
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
 
         //Data e horario
         [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
@@ -146,12 +148,18 @@ namespace AgendaNovo
                 Email = cliente.Email
             };
 
+            ListaCriancasDoCliente.Clear();
+            foreach (var c in cliente.Criancas)
+            {
+                ListaCriancasDoCliente.Add(c);
+            }
+
             if (ClienteCriancaSelecionado.CriancaId is int criancaId)
             {
                 var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
                 if (crianca is not null)
                 {
-                    NovoAgendamento.Crianca = new Crianca
+                    CriancaSelecionada = new Crianca
                     {
                         Id = crianca.Id,
                         Nome = crianca.Nome,
@@ -163,7 +171,7 @@ namespace AgendaNovo
             }
             else
             {
-                NovoAgendamento.Crianca = new Crianca();
+                CriancaSelecionada = new Crianca();
             }
         }
 
@@ -174,12 +182,25 @@ namespace AgendaNovo
                 return;
 
             // Verifica se cliente já existe (por ID ou nome)
-            var cliente = ListaClientes.FirstOrDefault(c => c.Id == NovoCliente.Id)
-                       ?? ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
+            var clienteExistente = ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
+            var clienteFoiEditado = ListaClientes.Any(c => c.Id == NovoCliente.Id);
+            Cliente cliente;
 
-            if (cliente == null)
+            if (clienteExistente != null && !clienteFoiEditado)
             {
-                // Novo cliente
+                cliente = clienteExistente;
+                NovoCliente = cliente;
+            }
+            else if (clienteFoiEditado)
+            {
+                // Atualiza cliente
+                cliente = ListaClientes.First(c => c.Id == NovoCliente.Id);
+                cliente.Nome = NovoCliente.Nome;
+                cliente.Telefone = NovoCliente.Telefone;
+                cliente.Email = NovoCliente.Email;
+            }
+            else
+            {
                 cliente = new Cliente
                 {
                     Nome = NovoCliente.Nome,
@@ -192,40 +213,35 @@ namespace AgendaNovo
                 _db.SaveChanges();
                 ListaClientes.Add(cliente);
             }
-            else
-            {
-                // Atualiza cliente
-                cliente.Nome = NovoCliente.Nome;
-                cliente.Telefone = NovoCliente.Telefone;
-                cliente.Email = NovoCliente.Email;
-            }
 
             // Verifica se há criança para salvar
-            if (!string.IsNullOrWhiteSpace(NovoAgendamento.Crianca?.Nome))
+            if (CriancaSelecionada != null && !string.IsNullOrWhiteSpace(CriancaSelecionada.Nome))
             {
-                var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == NovoAgendamento.Crianca.Id)
-                           ?? cliente.Criancas.FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+                var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == CriancaSelecionada.Id)
+                ?? cliente.Criancas.FirstOrDefault(c => c.Nome == CriancaSelecionada.Nome);
 
                 if (crianca == null)
                 {
                     crianca = new Crianca
                     {
-                        Nome = NovoAgendamento.Crianca.Nome,
-                        Idade = NovoAgendamento.Crianca.Idade,
-                        Genero = NovoAgendamento.Crianca.Genero,
-                        IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
+                        Nome = CriancaSelecionada.Nome,
+                        Idade = CriancaSelecionada.Idade,
+                        Genero = CriancaSelecionada.Genero,
+                        IdadeUnidade = CriancaSelecionada.IdadeUnidade,
                         ClienteId = cliente.Id
                     };
 
-                    cliente.Criancas.Add(crianca);
+                    ListaCriancas.Add(crianca);
                     _db.Criancas.Add(crianca);
+                    _db.SaveChanges();
                 }
                 else
                 {
-                    crianca.Nome = NovoAgendamento.Crianca.Nome;
-                    crianca.Idade = NovoAgendamento.Crianca.Idade;
-                    crianca.Genero = NovoAgendamento.Crianca.Genero;
-                    crianca.IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade;
+                    crianca.Nome = CriancaSelecionada.Nome;
+                    crianca.Idade = CriancaSelecionada.Idade;
+                    crianca.Genero = CriancaSelecionada.Genero;
+                    crianca.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
+
                 }
             }
 
@@ -239,10 +255,28 @@ namespace AgendaNovo
         {
             if (ClienteCriancaSelecionado is null)
                 return;
-
             var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteCriancaSelecionado.ClienteId);
+
             if (cliente is null)
                 return;
+
+            if (ClienteCriancaSelecionado.CriancaId is int criancaId)
+            {
+                var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
+                if (crianca is not null)
+                {
+                    cliente.Criancas.Remove(crianca);
+
+                    var criancaDb = _db.Criancas.FirstOrDefault(c => c.Id == criancaId);
+                    if (criancaDb is not null)
+                        _db.Criancas.Remove(criancaDb);
+
+                    var itemRemover = ListaClienteCrianca.FirstOrDefault(x => x.CriancaId == criancaId);
+                    if (itemRemover is not null)
+                        ListaClienteCrianca.Remove(itemRemover);
+                    CriancaSelecionada = null;
+                }
+            }
 
             // se o usuário quiser excluir o cliente
             if (MessageBox.Show($"Deseja excluir o cliente '{cliente.Nome}' e todas as crianças vinculadas?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -261,9 +295,11 @@ namespace AgendaNovo
                     return;
                 }
                 _db.Clientes.Remove(cliente);
-                _db.SaveChanges();
                 ListaClientes.Remove(cliente);
+                _db.SaveChanges();
                 AtualizarListaClienteCrianca();
+                LimparCampos();
+                return;
             }
         }
 
@@ -394,8 +430,11 @@ namespace AgendaNovo
             };
 
             NovoCliente = new Cliente();
+            NovoCliente.Id = 0;
+            CriancaSelecionada = new Crianca();
             ClienteSelecionado = null;
             ListaCriancas.Clear();
+            ListaCriancasDoCliente.Clear();
             ValorPacote = 0;
 
             OnPropertyChanged(nameof(NovoAgendamento));
