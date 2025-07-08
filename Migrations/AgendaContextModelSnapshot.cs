@@ -129,7 +129,7 @@ namespace AgendaNovo.Migrations
                     b.HasOne("AgendaNovo.Models.Cliente", "Cliente")
                         .WithMany("Agendamentos")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AgendaNovo.Models.Crianca", "Crianca")

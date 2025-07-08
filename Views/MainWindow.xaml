@@ -11,6 +11,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         x:Name="main"
+        MinWidth="800" MinHeight="600"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="MainWindow">
     <Window.Resources>
@@ -693,7 +694,7 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="850" />
                         </Grid.ColumnDefinitions>
                         <Grid.Background>
                         <ImageBrush ImageSource="/Imagens/baixados.jpeg"/>
@@ -748,9 +749,9 @@
                             </StackPanel>
 
                             <!-- DataGrid -->
-                            <hc:Card Padding="10" Background="White">
-                                <DataGrid Height="300" Width="1000"
-                              VerticalScrollBarVisibility="Auto"
+
+                                <DataGrid Height="300" Width="830" Grid.Column="1"
+                              VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left"
                               ScrollViewer.CanContentScroll="True"
                               ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}"
                               SelectedItem="{Binding ItemSelecionado, Mode=TwoWay}"
@@ -762,7 +763,15 @@
                                         <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
                                         <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                                         <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                                        <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
+                                    <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                                <Setter Property="ToolTip" Value="{Binding Pacote}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
                                         <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
                                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                                         <DataGridTemplateColumn Header="Pago">
@@ -788,7 +797,7 @@
                                         <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
-                            </hc:Card>
+
 
                         </StackPanel>
                     </Grid>
