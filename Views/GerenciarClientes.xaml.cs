@@ -23,30 +23,8 @@ namespace AgendaNovo
         {
             InitializeComponent();
             DataContext = vm;
+            vm.Inicializar();
         }
 
-        private void txtNascimento_GotFocus(object sender, RoutedEventArgs e)
-        {
-            calendario.Visibility = Visibility.Visible;
-        }
-
-        private void txtNascimento_LostFocus(object sender, RoutedEventArgs e)
-        {
-            calendario.Visibility = Visibility.Collapsed;
-        }
-
-        private void calendario_GotFocus(object sender, RoutedEventArgs e)
-        {
-            calendario.Visibility = Visibility.Visible;
-        }
-
-        private void calendario_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (calendario.SelectedDate.HasValue)
-            {
-                txtNascimento.Text = calendario.SelectedDate.Value.ToString("dd/MM/yyyy");
-
-            }
-        }
     }
 }
