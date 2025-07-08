@@ -219,11 +219,14 @@ C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\runtimes\win-
 C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Debug\net8.0-windows\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.AssemblyReference.cache
+C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\SplashScreen.baml
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Agendar.g.cs
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\GerenciarClientes.g.cs
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\Login.g.cs
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\MainWindow.g.cs
+C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\SplashScreen.g.cs
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.cache
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.lref
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\App.baml
@@ -243,6 +246,3 @@ C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\refint\Agenda
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.pdb
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.genruntimeconfig.cache
 C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\ref\AgendaNovo.dll
-C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\SplashScreen.baml
-C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\Views\SplashScreen.g.cs
-C:\Users\Foco na Arte\Source\Repos\Agenda\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs

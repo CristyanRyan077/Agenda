@@ -30,21 +30,21 @@ namespace AgendaNovo
                 .HasOne(a => a.Cliente)
                 .WithMany(c => c.Agendamentos)
                 .HasForeignKey(a => a.ClienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relação entre Agendamento e Criança (caso tenha)
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Crianca)
                 .WithMany()
                 .HasForeignKey(a => a.CriancaId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Relação entre Criança e Cliente (evitando múltiplos caminhos em cascata)
             modelBuilder.Entity<Crianca>()
                 .HasOne(c => c.Cliente)
                 .WithMany(c => c.Criancas)
                 .HasForeignKey(c => c.ClienteId)
-                .OnDelete(DeleteBehavior.Restrict); // ou .NoAction()
+                .OnDelete(DeleteBehavior.Cascade); // ou .NoAction()
 
             base.OnModelCreating(modelBuilder);
         }
