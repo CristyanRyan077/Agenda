@@ -61,7 +61,7 @@
             <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
                                          Width="40" Height="40" Grid.Row="0"                                
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                         Foreground="Black" Margin="0,0,0,0" />
+                                         Foreground="Black" Margin="0,0,9,0" />
 
 
             <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone"
@@ -103,7 +103,7 @@
             <materialDesign:PackIcon Grid.Column="0" Kind="ChildFriendly"
                               Width="34" Height="34" Cursor="Hand"
                               HorizontalAlignment="Right"
-                              Foreground="Black" Margin="0,9,1,0" Grid.Row="2"/>
+                              Foreground="Black" Margin="0,9,18,0" Grid.Row="2"/>
 
             <hc:ComboBox Grid.Column="0" Height="38" Grid.Row="2"
                         hc:InfoElement.Placeholder="Gênero" Width="150"

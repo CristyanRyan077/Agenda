@@ -23,7 +23,7 @@ namespace AgendaNovo
             modelBuilder.Entity<Agendamento>(entity =>
             {
                 entity.Property(a => a.Valor).HasColumnType("decimal(18,2)");
-                entity.Property(a => a.ValorPendente).HasColumnType("decimal(18,2)");
+                entity.Property(a => a.ValorPago).HasColumnType("decimal(18,2)");
             });
             // Relação entre Agendamento e Cliente
             modelBuilder.Entity<Agendamento>()

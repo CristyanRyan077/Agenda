@@ -60,18 +60,27 @@ namespace AgendaNovo
             {
                 var splash = new SplashScreen();
                 splash.Show();
+                await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                await Task.Delay(150);
 
                 var db = new AgendaContext();
                 var vm = new AgendaViewModel(db);
 
                 await Task.Run(() =>
                 {
-                    vm.CarregarDadosDoBanco(); // <- apenas isso roda em background
+                    vm.CarregarDadosDoBanco();
+                });
+
+                var mainWindow = new MainWindow(vm)
+                {
+                    Visibility = Visibility.Hidden
+                };
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    mainWindow.Visibility = Visibility.Visible;
+                    mainWindow.Show();
                 });
                 splash.Close();
-                var mainWindow = new MainWindow(vm);
-                mainWindow.Show();
-
                 this.Close();
             }
             else

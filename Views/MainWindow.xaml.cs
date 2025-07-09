@@ -22,15 +22,23 @@ namespace AgendaNovo
         public MainWindow(AgendaViewModel vm)
         {
             InitializeComponent();
-
-            var context = new AgendaContext();
-            vm = new AgendaViewModel(context);
+            this.vm = vm;
             DataContext = vm;
 
-            Loaded += async (_, __) =>
+    
+        }
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var vm = DataContext as AgendaViewModel;
+            if (vm is null) return;
+            if (sender is Border border && border.DataContext is Agendamento agendamento)
             {
-                await Task.Run(() => vm.CarregarDadosDoBanco());
-            };
+                if (MessageBox.Show("Agendamento confirmado e pago?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    vm.AtualizarPago(agendamento);
+                }
+
+            }
         }
 
         private void btnAgenda_Click(object sender, RoutedEventArgs e)
