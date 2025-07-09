@@ -21,10 +21,10 @@
             <ImageBrush ImageSource="/Imagens/background2.jpg"/>
         </Border.Background>
         <Border CornerRadius="10" BorderThickness="1">
-            <Grid Cursor="Hand">
-                <hc:Card Name="cardLogin" Height="auto" Padding="20" Margin="427,50,242,50"
+            <Grid>
+                <hc:Card Name="cardLogin" Width="600" Height="auto" Padding="20" HorizontalAlignment="Center"
                          Background="Transparent" BorderBrush="Transparent">
-                    <Grid Background="#88000000" Cursor="Hand">
+                    <Grid Background="#88000000">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="252"/>
                             <RowDefinition Height="302"/>
@@ -34,8 +34,8 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Image Name="imgstudio" Source="/Imagens/SÓ LOGO.png" HorizontalAlignment="Center"
-                               Grid.Row="0" Width="270" Height="250"/>
+                        <Image Name="imgstudio" Source="/Imagens/SÓ LOGO.png" HorizontalAlignment="Left"
+                               Grid.Row="0" Width="270" Height="250" Margin="136,1,0,1"/>
 
                         <Label x:Name="lblNome" Content="Usuario"
                                Margin="16,23,0,0"
@@ -78,8 +78,8 @@
                     </Grid>
                 </hc:Card>
                 <TextBlock HorizontalAlignment="Left" IsHitTestVisible="false" Margin="3,0,0,0" TextWrapping="Wrap" Text="Login" VerticalAlignment="Top" Foreground="White" FontFamily="Microsoft Sans Serif" FontSize="18" Width="644" Background="Black" OpacityMask="White"/>
-                <Button Content="━" Cursor="Hand" HorizontalAlignment="Left" Margin="1187,0,0,0" VerticalAlignment="Top" Width="140" FontSize="16" FontFamily="Cascadia Code" Background="DeepSkyBlue" BorderBrush="Black" Click="Button_Click_1" Height="41"/>
-                <Button Content="❌" Cursor="Hand" HorizontalAlignment="Left" Margin="1327,0,0,0" VerticalAlignment="Top" Width="104" FontSize="16" FontFamily="Cascadia Code" Background="Red" BorderBrush="Black" Click="Button_Click" Height="41"/>
+                <Button Content="━" Cursor="Hand" HorizontalAlignment="Right" Margin="0,0,110,0" VerticalAlignment="Top" Width="140" FontSize="16" FontFamily="Cascadia Code" Background="DeepSkyBlue" BorderBrush="Black" Click="Button_Click_1" Height="41"/>
+                <Button Content="❌" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Width="120" FontSize="16" FontFamily="Cascadia Code" Background="Red" BorderBrush="Black" Click="Button_Click" Height="41"/>
             </Grid>
         </Border>
     </Border>

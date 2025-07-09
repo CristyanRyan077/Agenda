@@ -75,7 +75,7 @@
                                                FontWeight="Bold"
                                                Foreground="Black"
                                                HorizontalAlignment="Center"
-                                               Width="154" Height="32"
+                                               Width="152" Height="32"
                                                Background="#FF13FF00"
                                                TextAlignment="Center"
                                                FontFamily="Segoe UI Black" VerticalAlignment="Top"
@@ -95,7 +95,7 @@
                                         </Style>
                                     </Border.Style>
 
-                                    <hc:Card Background="#88FFFFFF" HorizontalAlignment="Stretch" MinWidth="470" Opacity="1.0">
+                                    <hc:Card Background="#88FFFFFF" HorizontalAlignment="Stretch" Opacity="1.0">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosSegunda}">
                                                 <ItemsControl.ItemsPanel>
@@ -106,21 +106,24 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430"
+                                                        <Border Width="420"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
                                                                 Background="White"
                                                                 BorderBrush="#DDD"
                                                                 BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
-                                                                <TextBlock Text="{Binding Cliente.Email}" FontSize="14"/>
+
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
                                                                     <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
@@ -132,8 +135,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -182,7 +185,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                    <hc:Card Background="#88FFFFFF" >
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosTerca}">
                                                 <ItemsControl.ItemsPanel>
@@ -193,19 +196,22 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430"
+                                                        <Border Width="420"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
                                                                 Background="White"
                                                                 BorderBrush="#DDD"
                                                                 BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
@@ -218,8 +224,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -258,7 +264,7 @@
                                 <TextBlock Text="Sexta" FontSize="20" Height="32" FontWeight="Bold" Foreground="Black"
                                            HorizontalAlignment="Center" Width="154" Background="#FF13FF00"
                                            TextAlignment="Center" FontFamily="Segoe UI Black" VerticalAlignment="Top"/>
-                                <Border HorizontalAlignment="Stretch" MinWidth="430"  Margin="5,30,4,14">
+                                <Border HorizontalAlignment="Stretch" Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -271,7 +277,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                    <hc:Card Background="#88FFFFFF">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosSexta}">
                                                 <ItemsControl.ItemsPanel>
@@ -281,14 +287,18 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                        <Border Width="420" Margin="6" Padding="8" CornerRadius="8"
                                                                 Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                                                 Effect="{StaticResource DropShadow}">
+
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
@@ -301,8 +311,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -351,7 +361,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                    <hc:Card Background="#88FFFFFF" >
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosQuinta}">
                                                 <ItemsControl.ItemsPanel>
@@ -361,14 +371,17 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                        <Border Width="420" Margin="6" Padding="8" CornerRadius="8"
                                                                 Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"                                                               
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
@@ -381,8 +394,9 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="14" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -395,7 +409,7 @@
                                                                         </TextBlock.Style>
                                                                     </TextBlock>
                                                                     <TextBlock Text=" / " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 0 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="14" Margin="0 0 0 4" FontFamily="Helvetica"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -431,7 +445,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <hc:Card Background="#88FFFFFF" Opacity="1.0">
+                                    <hc:Card Background="#88FFFFFF">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" Height="380">
                                             <ItemsControl ItemsSource="{Binding AgendamentosQuarta}">
                                                 <ItemsControl.ItemsPanel>
@@ -441,16 +455,18 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430" Margin="6" Padding="8" CornerRadius="8"
+                                                        <Border Width="420" Margin="6" Padding="8" CornerRadius="8"
                                                                 Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"                                                               
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
-
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
                                                                     <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
                                                                     <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
@@ -461,8 +477,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -506,7 +522,7 @@
                                            FontFamily="Segoe UI Black" VerticalAlignment="Top"
                                             />
 
-                                <Border HorizontalAlignment="Stretch" MinWidth="430" Margin="0,30,0,14">
+                                <Border HorizontalAlignment="Stretch" Margin="5,30,4,14">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderThickness" Value="0"/>
@@ -531,19 +547,22 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430"
+                                                        <Border Width="420"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
                                                                 Background="White"
                                                                 BorderBrush="#DDD"
                                                                 BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
@@ -556,8 +575,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -627,19 +646,22 @@
 
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Width="430"
+                                                        <Border Width="420"
                                                                 Margin="6"
                                                                 Padding="8"
                                                                 CornerRadius="8"
                                                                 Background="White"
                                                                 BorderBrush="#DDD"
                                                                 BorderThickness="1"
+                                                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                                                 Effect="{StaticResource DropShadow}">
                                                             <StackPanel>
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 4">
+                                                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
                                                                     <TextBlock Text="{Binding Cliente.Nome}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16"/>
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Telefone}" FontSize="14"/>
+                                                                    <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
+                                                                    <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
@@ -652,8 +674,8 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="14" Margin="0 0 10 4" FontFamily="Helvetica"/>
-                                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
+                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
                                                                                 <Setter Property="Foreground" Value="Red"/>
@@ -718,12 +740,13 @@
 
                             <!-- Linha de pesquisa -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <hc:TextBox Width="250" Height="60"
-                                FontSize="24" FontFamily="Arial"
+                                <hc:TextBox Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="250" Height="60"
+                                FontSize="24" FontFamily="Arial" 
                                 hc:InfoElement.Placeholder="Pesquisar" />
                                 <materialDesign:PackIcon Kind="Search" Height="50" Width="50"
-                                             Margin="-45,0,0,0" VerticalAlignment="Center" />
-                                <hc:TextBox Text="{Binding NovoAgendamento.ValorPendente, UpdateSourceTrigger=PropertyChanged }"
+                                 Margin="-45,0,0,0" VerticalAlignment="Center" />
+                                <hc:TextBox Text="{Binding NovoAgendamento.ValorPago, UpdateSourceTrigger=PropertyChanged }"
                                 Width="170" Height="60" Margin="10,0,0,0"
                                 hc:InfoElement.Placeholder="Pago"
                                 Background="White" Foreground="Black" FontFamily="Helvetica" FontSize="24" FontWeight="Bold"
@@ -737,10 +760,14 @@
                             Background="Green" Foreground="White"
                             Command="{Binding AgendarCommand}" />
 
-                                <Button Content="❌" Width="90" Height="60" Margin="10,0"
+                                <Button Content="❌" Width="80" Height="60" Margin="10,0"
                             FontWeight="Bold" FontSize="24"
                             Background="Red" Foreground="White"
                             Command="{Binding ExcluirCommand}" />
+                                <Button Content="Mostrar Todos" Background="Blue"
+                                        Width="120" Height="60" Margin="5,0,0,0"
+                                        Foreground="White" FontSize="14" FontWeight="Bold"
+                                        Command="{Binding MostrarTodosCommand}" />
 
                                 <Button Content="Limpar" Width="150" Height="60" Margin="10,0"
                             FontWeight="Bold" FontSize="18"
@@ -763,7 +790,7 @@
                                         <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
                                         <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                                         <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                                    <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}">
+                                    <DataGridTextColumn Header="Pacote" Width="70" Binding="{Binding Pacote}">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -777,7 +804,7 @@
                                         <DataGridTemplateColumn Header="Pago">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding ValorPendente, StringFormat=R$ {0:N2}}"
+                                                    <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}"
                                                    FontWeight="Bold" FontSize="13" FontFamily="Helvetica">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">

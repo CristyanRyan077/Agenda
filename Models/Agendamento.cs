@@ -27,16 +27,17 @@ namespace AgendaNovo
 
         [ObservableProperty] private decimal valor;
 
-        [ObservableProperty] private decimal valorPendente;
+        [ObservableProperty] private decimal valorPago;
 
-        public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPendente, 2);
+        public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPago, 2);
+        public bool Pago { get; set; }
 
         [ObservableProperty] private DateTime data = DateTime.Today;
         partial void OnValorChanged(decimal oldValue, decimal newValue)
         {
             OnPropertyChanged(nameof(EstaPago));
         }
-        partial void OnValorPendenteChanged(decimal oldValue, decimal newValue)
+        partial void OnValorPagoChanged(decimal oldValue, decimal newValue)
         {
             OnPropertyChanged(nameof(EstaPago));
         }

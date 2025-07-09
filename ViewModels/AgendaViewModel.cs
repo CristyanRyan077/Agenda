@@ -24,7 +24,7 @@ namespace AgendaNovo
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
-        public ObservableCollection<string> PacotesDisponiveis => new(_pacotesFixos.Keys);
+
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
@@ -39,6 +39,11 @@ namespace AgendaNovo
         //Data e horario
         [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
         [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
+
+        //Outros
+        [ObservableProperty] private string textoPesquisa = string.Empty;
+        public ObservableCollection<string> PacotesDisponiveis => new(_pacotesFixos.Keys);
+
 
         public void Inicializar()
         {
@@ -362,15 +367,18 @@ namespace AgendaNovo
         public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
         public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
 
-        private void FiltrarAgendamentos()
+        public void FiltrarAgendamentos()
         {
             AgendamentosFiltrados.Clear();
 
             var filtrados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date);   
-            foreach (var agendamento in filtrados)
-                AgendamentosFiltrados.Add(agendamento);
+                .Where(a => a.Data.Date == DataSelecionada.Date)
+                .ToList();
+            foreach (var item in filtrados)
+                AgendamentosFiltrados.Add(item);
         }
+
+
 
         partial void OnItemSelecionadoChanged(Agendamento? value)
         {
@@ -398,7 +406,7 @@ namespace AgendaNovo
                 Pacote = value.Pacote,
                 Tema = value.Tema,
                 Valor = value.Valor,
-                ValorPendente = value.ValorPendente
+                ValorPago = value.ValorPago
             };
             DataSelecionada = value.Data;
             NovoCliente = new Cliente
@@ -575,22 +583,23 @@ namespace AgendaNovo
         {
             using var db = new AgendaContext();
 
-            var clientes = _db.Clientes.Include(c => c.Criancas).ToList();
-            var agendamentos = _db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
+            var clientes = db.Clientes.Include(c => c.Criancas).ToList();
+            var agendamentos = db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
+                var clientesCollection = new ObservableCollection<Cliente>(clientes);
+                var agendamentosCollection = new ObservableCollection<Agendamento>(agendamentos);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
+                ListaAgendamentos.Clear();
+                foreach (var agendamento in agendamentos)
+                    ListaAgendamentos.Add(agendamento);
+
                 ListaClientes.Clear();
                 foreach (var cliente in clientes)
                     ListaClientes.Add(cliente);
-
-                ListaAgendamentos.Clear();
-                foreach (var a in agendamentos)
-                    ListaAgendamentos.Add(a);
-
-                FiltrarAgendamentos();
-                AtualizarHorariosDisponiveis();
             });
+            FiltrarAgendamentos();
+            AtualizarHorariosDisponiveis();
         }
 
         [RelayCommand]
@@ -600,7 +609,9 @@ namespace AgendaNovo
                 NovoAgendamento = new Agendamento();
             if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
-            var clienteExistente = ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
+            var clienteExistente = _db.Clientes
+                .Include(c => c.Criancas)
+                .FirstOrDefault(c => c.Nome == NovoCliente.Nome);
             if (clienteExistente == null)
             {
                 clienteExistente = new Cliente
@@ -662,7 +673,7 @@ namespace AgendaNovo
                 agendamentoExistente.Horario = NovoAgendamento.Horario;
                 agendamentoExistente.Data = DataSelecionada.Date;
                 agendamentoExistente.Valor = NovoAgendamento.Valor;
-                agendamentoExistente.ValorPendente = NovoAgendamento.ValorPendente;
+                agendamentoExistente.ValorPago = NovoAgendamento.ValorPago;
             }
             else
             {
@@ -676,7 +687,7 @@ namespace AgendaNovo
                     Data = DataSelecionada.Date,
                     Tema = NovoAgendamento.Tema,
                     Valor = NovoAgendamento.Valor,
-                    ValorPendente = NovoAgendamento.ValorPendente
+                    ValorPago = NovoAgendamento.ValorPago
                 };
                 _db.Agendamentos.Add(novo);
             }
@@ -694,9 +705,25 @@ namespace AgendaNovo
             ItemSelecionado = null;
             LimparCampos();
         }
+        public void AtualizarPago(Agendamento agendamento)
+        {
+            if (agendamento == null) return;
 
-  
-        private void AtualizarAgendamentos()
+            // Anexa ou obtém a entidade rastreada pelo contexto
+            var agendamentoDb = _db.Agendamentos.Find(agendamento.Id);
+
+            if (agendamentoDb != null)
+            {
+                _db.Agendamentos.Remove(agendamentoDb);
+                _db.SaveChanges();
+                ListaAgendamentos.Remove(agendamento);
+                FiltrarAgendamentos();
+                AtualizarAgendamentos();
+                AtualizarHorariosDisponiveis();
+            }
+        }
+
+        public void AtualizarAgendamentos()
         {
             OnPropertyChanged(nameof(AgendamentosDomingo));
             OnPropertyChanged(nameof(AgendamentosSegunda));
@@ -750,6 +777,28 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ListaCriancas));
             AtualizarHorariosDisponiveis();
         }
+
+        partial void OnTextoPesquisaChanged(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
+            }
+            else
+            {
+                var filtrado = ListaAgendamentos
+                    .Where(a => a.Cliente.Nome.Contains(value, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado);
+            }
+        }
+        [RelayCommand]
+        private void MostrarTodos()
+        {
+            TextoPesquisa = string.Empty;
+            AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
+        }
         private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia) =>
         ListaAgendamentos.Where(a =>
         a.Data.DayOfWeek == dia &&
@@ -776,6 +825,7 @@ namespace AgendaNovo
 
         public IEnumerable<Agendamento> AgendamentosSabado => FiltrarPorDia(DayOfWeek.Saturday);
     }
+
 
 
 }

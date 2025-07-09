@@ -257,9 +257,6 @@ C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\App.g.cs
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.cache
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo_MarkupCompile.lref
-C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.dll
-C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\refint\AgendaNovo.dll
-C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.pdb
 C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.exe
 C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.deps.json
 C:\Users\aluno\Source\Repos\Agenda\bin\Debug\net8.0-windows\AgendaNovo.runtimeconfig.json
@@ -426,5 +423,8 @@ C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.AssemblyI
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.CoreCompileInputs.cache
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.sourcelink.json
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.csproj.Up2Date
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.dll
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\refint\AgendaNovo.dll
+C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.pdb
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\AgendaNovo.genruntimeconfig.cache
 C:\Users\aluno\Source\Repos\Agenda\obj\Debug\net8.0-windows\ref\AgendaNovo.dll

@@ -48,6 +48,9 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Pacote")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Pago")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Servico")
                         .HasColumnType("nvarchar(max)");
 
@@ -57,7 +60,7 @@ namespace AgendaNovo.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ValorPendente")
+                    b.Property<decimal>("ValorPago")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
