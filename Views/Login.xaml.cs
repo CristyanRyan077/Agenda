@@ -61,7 +61,7 @@ namespace AgendaNovo
                 var splash = new SplashScreen();
                 splash.Show();
                 await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
-                await Task.Delay(150);
+                await Task.Delay(350);
 
                 var db = new AgendaContext();
                 var vm = new AgendaViewModel(db);
