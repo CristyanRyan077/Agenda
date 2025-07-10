@@ -42,7 +42,6 @@ namespace AgendaNovo
 
         //Outros
         [ObservableProperty] private string textoPesquisa = string.Empty;
-        public ObservableCollection<string> PacotesDisponiveis => new(_pacotesFixos.Keys);
 
 
         public void Inicializar()
@@ -65,12 +64,25 @@ namespace AgendaNovo
 
         private readonly List<string> _horariosFixos = new()
         {
-            "8:00", "9:00", "10:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+            "9:00", "10:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
         };
 
+        public IEnumerable<String> PacotesDisponiveis =>
+        _pacotesFixos
+        .OrderBy(p => p.Key)
+        .Select(p => p.Key);
+
+        public class PacoteView
+        {
+            public string Nome { get; set; } = "";
+            public decimal Valor { get; set; }
+
+            public string Display => $"{Nome} - R$ {Valor:N2}";
+        }
+
+
         private readonly Dictionary<string, decimal> _pacotesFixos = new()
-                {
-        
+        {      
             {"Smash The Cake - Compartilhado",350m},
             {"Smash The Cake - Pct 01: Basico",450m},
             {"Smash The Cake - Pct 02: Premium", 600m},
@@ -89,7 +101,21 @@ namespace AgendaNovo
             {"Evento - Casamento Civil: pct01",350m},
             {"Evento - Casamento Civil: pct02",550m},
             {"Evento - Casamentos: pct01",500m},
-
+            {"Evento - Casamentos: pct02",900m},
+            {"Evento - Casamentos: pct03",1400m},
+            {"B-Day Adulto - pct01: Prata",350m},
+            {"B-Day Adulto - pct02: Diamante",550m},
+            {"Casal - pct01",150m},
+            {"Familia - pct01",200m},
+            {"B-Day Infantil - pct01",200m},
+            {"B-Day Infantil - pct02",350m},
+            {"B-Day Infantil - pct03",500m},
+            {"Chá de Revelação - pct01",350m},
+            {"Pack de Fotos - pct01",200m},
+            {"Pack de Fotos - pct02",150m},
+            {"Corporativos - Interno",100m},
+            {"Evento - Batismo",250m},
+            {"Ensaio 15 Anos - Interno",350m},
         };
 
         public ObservableCollection<string> UnidadesIdade { get; } = new()
@@ -265,25 +291,7 @@ namespace AgendaNovo
             if (cliente is null)
                 return;
 
-            if (ClienteCriancaSelecionado.CriancaId is int criancaId)
-            {
-                var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
-                if (crianca is not null)
-                {
-                    cliente.Criancas.Remove(crianca);
 
-                    var criancaDb = _db.Criancas.FirstOrDefault(c => c.Id == criancaId);
-                    if (criancaDb is not null)
-                        _db.Criancas.Remove(criancaDb);
-
-                    var itemRemover = ListaClienteCrianca.FirstOrDefault(x => x.CriancaId == criancaId);
-                    if (itemRemover is not null)
-                        ListaClienteCrianca.Remove(itemRemover);
-                    CriancaSelecionada = null;
-                }
-            }
-
-            // se o usuário quiser excluir o cliente
             if (MessageBox.Show($"Deseja excluir o cliente '{cliente.Nome}' e todas as crianças vinculadas?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 var agendamentosDoCliente = _db.Agendamentos
@@ -298,6 +306,24 @@ namespace AgendaNovo
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
+                }
+
+                if (ClienteCriancaSelecionado.CriancaId is int criancaId)
+                {
+                    var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
+                    if (crianca is not null)
+                    {
+                        cliente.Criancas.Remove(crianca);
+
+                        var criancaDb = _db.Criancas.FirstOrDefault(c => c.Id == criancaId);
+                        if (criancaDb is not null)
+                            _db.Criancas.Remove(criancaDb);
+
+                        var itemRemover = ListaClienteCrianca.FirstOrDefault(x => x.CriancaId == criancaId);
+                        if (itemRemover is not null)
+                            ListaClienteCrianca.Remove(itemRemover);
+                        CriancaSelecionada = null;
+                    }
                 }
                 _db.Clientes.Remove(cliente);
                 ListaClientes.Remove(cliente);
@@ -359,13 +385,7 @@ namespace AgendaNovo
             }
         }
 
-        public bool DiaChkSeg => DiaAtual == DayOfWeek.Monday;
-        public bool DiaChkTer => DiaAtual == DayOfWeek.Tuesday;
-        public bool DiaChkQua => DiaAtual == DayOfWeek.Wednesday;
-        public bool DiaChkQui => DiaAtual == DayOfWeek.Thursday;
-        public bool DiaChkSex => DiaAtual == DayOfWeek.Friday;
-        public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
-        public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
+
 
         public void FiltrarAgendamentos()
         {
@@ -558,6 +578,7 @@ namespace AgendaNovo
                     ListaCriancas.Add(crianca);
             }
         }
+
         public void PreencherCampoCrianca(string? nomeDigitado, Action<Crianca> preencher)
         {
             if (string.IsNullOrWhiteSpace(nomeDigitado))
@@ -581,12 +602,9 @@ namespace AgendaNovo
         }
         public void CarregarDadosDoBanco()
         {
-            using var db = new AgendaContext();
 
-            var clientes = db.Clientes.Include(c => c.Criancas).ToList();
-            var agendamentos = db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
-                var clientesCollection = new ObservableCollection<Cliente>(clientes);
-                var agendamentosCollection = new ObservableCollection<Agendamento>(agendamentos);
+            var clientes = _db.Clientes.Include(c => c.Criancas).ToList();
+            var agendamentos = _db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -674,6 +692,8 @@ namespace AgendaNovo
                 agendamentoExistente.Data = DataSelecionada.Date;
                 agendamentoExistente.Valor = NovoAgendamento.Valor;
                 agendamentoExistente.ValorPago = NovoAgendamento.ValorPago;
+
+               
             }
             else
             {
@@ -690,6 +710,16 @@ namespace AgendaNovo
                     ValorPago = NovoAgendamento.ValorPago
                 };
                 _db.Agendamentos.Add(novo);
+                var texto = $"Agendamento Confirmado\n\n" +
+                            $"Cliente: {novo.Cliente.Nome}\n" +
+                            $"Telefone: {novo.Cliente.Telefone}\n" +
+                            $"Criança: {novo.Crianca?.Nome} ({novo.Crianca?.Idade} {novo.Crianca?.IdadeUnidade})\n" +
+                            $"Tema: {novo.Tema}\n" +
+                            $"Pacote: {novo.Pacote}\n" +
+                            $"Data: {novo.Data:dd/MM/yyyy} às {novo.Horario}\n" +
+                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}";
+                Clipboard.SetText(texto);
+                MessageBox.Show("Agendamento copiado para a área de transferência!");
             }
 
 
@@ -704,6 +734,7 @@ namespace AgendaNovo
             FiltrarAgendamentos();
             ItemSelecionado = null;
             LimparCampos();
+
         }
         public void AtualizarPago(Agendamento agendamento)
         {
@@ -738,7 +769,6 @@ namespace AgendaNovo
         {
             if (ItemSelecionado is not null)
             {
-                _db.Attach(ItemSelecionado);
                 _db.Agendamentos.Remove(ItemSelecionado);
             }
 
@@ -824,6 +854,14 @@ namespace AgendaNovo
 
 
         public IEnumerable<Agendamento> AgendamentosSabado => FiltrarPorDia(DayOfWeek.Saturday);
+
+        public bool DiaChkSeg => DiaAtual == DayOfWeek.Monday;
+        public bool DiaChkTer => DiaAtual == DayOfWeek.Tuesday;
+        public bool DiaChkQua => DiaAtual == DayOfWeek.Wednesday;
+        public bool DiaChkQui => DiaAtual == DayOfWeek.Thursday;
+        public bool DiaChkSex => DiaAtual == DayOfWeek.Friday;
+        public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
+        public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
     }
 
 

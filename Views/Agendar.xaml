@@ -83,7 +83,7 @@
 
                     <materialDesign:PackIcon Grid.Column="1" Kind="BoxAdd"
                                          Width="34" Height="34" VerticalAlignment="Center"
-                                         Foreground="White" Margin="37,0,0,0"/>
+                                         Foreground="White" Margin="59,0,0,0"/>
 
                     <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
                              hc:InfoElement.Placeholder="Horário"
