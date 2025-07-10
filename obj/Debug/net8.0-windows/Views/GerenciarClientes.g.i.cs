@@ -135,7 +135,7 @@ namespace AgendaNovo {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/AgendaNovo;V1.0.0.0;component/views/gerenciarclientes.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/AgendaNovo;component/views/gerenciarclientes.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\GerenciarClientes.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
