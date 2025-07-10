@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AgendaNovo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b912e0456670b5bd085a66b1add5e9ad45b7a33")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+21e11fe1197623a603ada482c7ea56ef6012468b")]
 [assembly: System.Reflection.AssemblyProductAttribute("AgendaNovo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AgendaNovo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
