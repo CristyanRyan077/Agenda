@@ -26,5 +26,20 @@ namespace AgendaNovo
             vm.Inicializar();
         }
 
+        private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
+            var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
+
+            if (string.IsNullOrEmpty(nomeDigitado)) return;
+
+            vm.ClienteSelecionado = vm.ListaClientes.FirstOrDefault(c =>
+                c.Nome?.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase) ?? false);
+
+            txtTel.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+            txtEmail.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+        }
     }
 }

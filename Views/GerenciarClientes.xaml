@@ -52,7 +52,7 @@
 
             <hc:ComboBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                 Grid.Row="0"
+                                 Grid.Row="0" LostFocus="txtCliente_LostFocus"
                                 IsEditable="True" Margin="12,0,0,2"
                                 DisplayMemberPath="Nome"
                                 ItemsSource="{Binding ListaClientes}"
@@ -74,9 +74,9 @@
                                          HorizontalAlignment="Right"
                                          Foreground="Black" Margin="0,5,1,0" Grid.Row="1"/>
 
-            <hc:ComboBox x:Name="txtEmail" hc:InfoElement.Placeholder="Email"
+            <hc:TextBox x:Name="txtEmail" hc:InfoElement.Placeholder="Email"
                         HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.ColumnSpan="2"
-                        Margin="12,0,0,1" IsEditable="True" Grid.Row="1"
+                        Margin="12,0,0,1" Grid.Row="1"
                         Text="{Binding NovoCliente.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="410" Height="42" BorderBrush="Black"/>
 

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\aluno\\Source\\Repos\\Agenda\\AgendaNovo.csproj": {}
+    "C:\\Users\\aluno\\source\\repos\\Agenda\\AgendaNovo.csproj": {}
   },
   "projects": {
-    "C:\\Users\\aluno\\Source\\Repos\\Agenda\\AgendaNovo.csproj": {
+    "C:\\Users\\aluno\\source\\repos\\Agenda\\AgendaNovo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\aluno\\Source\\Repos\\Agenda\\AgendaNovo.csproj",
+        "projectUniqueName": "C:\\Users\\aluno\\source\\repos\\Agenda\\AgendaNovo.csproj",
         "projectName": "AgendaNovo",
-        "projectPath": "C:\\Users\\aluno\\Source\\Repos\\Agenda\\AgendaNovo.csproj",
+        "projectPath": "C:\\Users\\aluno\\source\\repos\\Agenda\\AgendaNovo.csproj",
         "packagesPath": "C:\\Users\\aluno\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\aluno\\Source\\Repos\\Agenda\\obj\\",
+        "outputPath": "C:\\Users\\aluno\\source\\repos\\Agenda\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
