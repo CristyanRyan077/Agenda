@@ -1,0 +1,54 @@
+{
+  "$id": "1",
+  "$values": [
+    {
+      "$id": "2",
+      "Id": 15,
+      "ClienteId": 30,
+      "Cliente": {
+        "$id": "3",
+        "Id": 30,
+        "Agendamentos": {
+          "$id": "4",
+          "$values": [
+            {
+              "$ref": "2"
+            }
+          ]
+        },
+        "Criancas": {
+          "$id": "5",
+          "$values": []
+        },
+        "Nome": "Cristyan Ryan",
+        "Telefone": "9244-4928",
+        "Email": "crisryan077@gmail.com"
+      },
+      "CriancaId": 31,
+      "Crianca": {
+        "$id": "6",
+        "Id": 31,
+        "ClienteId": 30,
+        "Cliente": null,
+        "IdadeFormatada": "2 anos",
+        "Agendamentos": {
+          "$id": "7",
+          "$values": []
+        },
+        "Nome": "Sarah Melissa",
+        "Idade": 2,
+        "Genero": "F",
+        "IdadeUnidade": "anos"
+      },
+      "Servico": null,
+      "EstaPago": false,
+      "Pago": false,
+      "Pacote": "Aniversario pct02",
+      "Horario": "13:00",
+      "Tema": "Teste",
+      "Valor": 600.00,
+      "ValorPago": 300.00,
+      "Data": "2025-07-09T00:00:00"
+    }
+  ]
+}

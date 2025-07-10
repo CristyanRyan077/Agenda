@@ -61,37 +61,5 @@ namespace AgendaNovo
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }
 
-        private void txtcrianca_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var vm = DataContext as AgendaViewModel;
-            if (vm == null)
-                return;
-            var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
-
-            if (string.IsNullOrEmpty(nomeDigitado))
-                return;
-
-            var criancaExistente = vm.ListaCriancas
-                .FirstOrDefault(c => string.Equals(c.Nome, nomeDigitado, StringComparison.OrdinalIgnoreCase));
-
-            if (criancaExistente != null)
-            {
-                vm.NovoAgendamento.Crianca = criancaExistente;
-            }
-            else
-            {
-                vm.NovoAgendamento.Crianca = new Crianca
-                {
-                    Nome = criancaExistente.Nome,
-                    Idade = criancaExistente.Idade,
-                    Genero = criancaExistente.Genero
-                };
-                // Opcional: adicionar na lista para aparecer no autocomplete
-                vm.ListaCriancas.Add(vm.NovoAgendamento.Crianca);
-            }
-
-            // Atualiza binding para garantir a UI sincronizada
-            txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
-        }
     }
 }
