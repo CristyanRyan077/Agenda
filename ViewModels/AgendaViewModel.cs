@@ -14,6 +14,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace AgendaNovo
 {
@@ -435,6 +437,29 @@ namespace AgendaNovo
                 AgendamentosFiltrados.Add(item);
         }
 
+        [RelayCommand]
+        private void CopiarHorariosLivres()
+        {
+            var ocupados = ListaAgendamentos
+                .Where(a => a.Data.Date == DataSelecionada.Date)
+                .Select(a => a.Horario)
+                .ToList();
+
+            var livres = _horariosFixos
+                .Where(h => !ocupados.Contains(h))
+                .ToList();
+
+            if (livres.Count == 0)
+            {
+                MessageBox.Show("Não há horários livres para o dia selecionado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            string texto = $"Horários livres em {DataSelecionada:dd/MM/yyyy}:\n\n" + string.Join(", ", livres);
+            Clipboard.SetText(texto);
+
+            MessageBox.Show("Horários livres copiados para a área de transferência!", "Copiado", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
 
 
         partial void OnItemSelecionadoChanged(Agendamento? value)
@@ -477,8 +502,6 @@ namespace AgendaNovo
                 foreach (var crianca in value.Cliente.Criancas)
                     ListaCriancas.Add(crianca);
             }
-
-            ResetarFormulario();
             OnPropertyChanged(nameof(NovoAgendamento.Tema));
             OnPropertyChanged(nameof(NovoAgendamento.Horario));
             OnPropertyChanged(nameof(NovoAgendamento.Crianca));
@@ -638,8 +661,8 @@ namespace AgendaNovo
         public void CarregarDadosDoBanco()
         {
 
-            var clientes = _db.Clientes.Include(c => c.Criancas).AsNoTracking().ToList();
-            var agendamentos = _db.Agendamentos.Include(a => a.Cliente).AsNoTracking().Include(a => a.Crianca).ToList();
+            var clientes = _db.Clientes.Include(c => c.Criancas).ToList();
+            var agendamentos = _db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -753,16 +776,28 @@ namespace AgendaNovo
                     ValorPago = NovoAgendamento.ValorPago
                 };
                 _db.Agendamentos.Add(novo);
-                var texto = $"Agendamento Confirmado\n\n" +
+                var texto = Uri.EscapeDataString($"Agendamento Confirmado\n\n" +
                             $"Cliente: {novo.Cliente.Nome}\n" +
                             $"Telefone: {novo.Cliente.Telefone}\n" +
                             $"Criança: {novo.Crianca?.Nome} ({novo.Crianca?.Idade} {novo.Crianca?.IdadeUnidade})\n" +
                             $"Tema: {novo.Tema}\n" +
                             $"Pacote: {novo.Pacote}\n" +
                             $"Data: {novo.Data:dd/MM/yyyy} às {novo.Horario}\n" +
-                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}";
+                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}");
                 Clipboard.SetText(texto);
                 MessageBox.Show("Agendamento copiado para a área de transferência!");
+
+
+                var telefone = novo.Cliente.Telefone;
+                string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
+                string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
+                Thread.Sleep(1000);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+
             }
 
 
@@ -812,7 +847,11 @@ namespace AgendaNovo
         {
             if (ItemSelecionado is not null)
             {
-                _db.Agendamentos.Remove(ItemSelecionado);
+                var entidade = _db.Agendamentos.FirstOrDefault(a => a.Id == ItemSelecionado.Id);
+                if (entidade is not null)
+                {
+                    _db.Agendamentos.Remove(entidade);
+                }
             }
 
             _db.SaveChanges();

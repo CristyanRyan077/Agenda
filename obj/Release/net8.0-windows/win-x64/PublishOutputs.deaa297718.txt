@@ -1,0 +1,2 @@
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Release\net8.0-windows\win-x64\publish\AgendaNovo.pdb
+C:\Users\Foco na Arte\Source\Repos\Agenda\bin\Release\net8.0-windows\win-x64\publish\AgendaNovo.exe

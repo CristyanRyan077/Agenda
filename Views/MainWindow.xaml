@@ -751,6 +751,14 @@
                                 hc:InfoElement.Placeholder="Pago"
                                 Background="White" Foreground="Black" FontFamily="Helvetica" FontSize="24" FontWeight="Bold"
                                 BorderBrush="Transparent" SelectionTextBrush="Black" />
+                                <Button Content="Copiar horários livres"
+                                         Command="{Binding CopiarHorariosLivresCommand}"
+                                         FontSize="15" FontFamily="Arial" 
+                                         Width="170" Height="50"
+                                         Margin="10" Background="#FF00FFE2"   />
+                                <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
+                                                         Foreground="White"
+                                                         VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <!-- Linha de botões -->
