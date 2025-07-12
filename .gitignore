@@ -6,3 +6,6 @@
 *.exe
 *.msi
 *.zip
+bin/
+obj/
+.vs/
