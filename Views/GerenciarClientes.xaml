@@ -53,6 +53,8 @@
             <hc:ComboBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                  Grid.Row="0" LostFocus="txtCliente_LostFocus"
+                                PreviewTextInput="txtCliente_PreviewTextInput"
+                                
                                 IsEditable="True" Margin="12,0,0,2"
                                 DisplayMemberPath="Nome"
                                 ItemsSource="{Binding ListaClientes}"
@@ -119,8 +121,8 @@
             <hc:TextBox Width="90" Height="38" hc:InfoElement.Placeholder="Idade"
         Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
                 Background="White" Foreground="Black" HorizontalAlignment="Center"
-                FontSize="12" Grid.Row="2" VerticalAlignment="Top"
-                BorderBrush="Black" SelectionTextBrush="Black" Margin="0,49,0,0"/>
+                FontSize="12" Grid.Row="2" VerticalAlignment="Bottom" Margin="0,0,0,1"
+                BorderBrush="Black" SelectionTextBrush="Black" />
 
             <ComboBox Width="160" Height="38" Grid.Column="0"
                          Background="White" Foreground="Black" HorizontalAlignment="Right"

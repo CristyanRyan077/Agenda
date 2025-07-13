@@ -26,6 +26,7 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
         [ObservableProperty] private decimal valorPacote;
+        public ObservableCollection<string> ListaPacotes { get; } = new();
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
@@ -62,6 +63,10 @@ namespace AgendaNovo
                 foreach (var cliente in _db.Clientes.Include(c => c.Criancas))
                     ListaClientes.Add(cliente);
 
+                ListaPacotes.Clear();
+                foreach (var nome in _pacotesFixos.Keys.OrderBy(p => p))
+                    ListaPacotes.Add(nome);
+
                 FiltrarAgendamentos();
                 AtualizarHorariosDisponiveis();
             });
@@ -89,7 +94,7 @@ namespace AgendaNovo
 
         private readonly List<string> _horariosFixos = new()
         {
-            "9:00", "10:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+            "9:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
         };
 
         public IEnumerable<String> PacotesDisponiveis =>
@@ -111,7 +116,7 @@ namespace AgendaNovo
             {"Smash The Cake - Compartilhado",350m},
             {"Smash The Cake - Pct 01: Basico",450m},
             {"Smash The Cake - Pct 02: Premium", 600m},
-            {"Book Mensal - Acompanhamento: pct01",200m},
+            {"Book Mensal - Acompanhamento: pct01",80m},
             {"Book Mensal - Acompanhamento: pct02",150m},
             {"Book Mensal - Datas Comemorativas",100m},
             {"Gestante - pct01: Prata",200m },
@@ -265,7 +270,8 @@ namespace AgendaNovo
                     Criancas = new List<Crianca>()
                 };
 
-                _db.Clientes.Add(cliente);  
+                _db.Clientes.Add(cliente);
+                _db.SaveChanges();
                 ListaClientes.Add(cliente);
             }
 
@@ -776,10 +782,17 @@ namespace AgendaNovo
                     ValorPago = NovoAgendamento.ValorPago
                 };
                 _db.Agendamentos.Add(novo);
+
+                string textoCrianca = "";
+
+                if (novo.Crianca != null && !string.IsNullOrWhiteSpace(novo.Crianca.Nome))
+                {
+                    textoCrianca = $" {novo.Crianca.Nome} ({novo.Crianca.Idade} {novo.Crianca.IdadeUnidade})\n";
+                }
+
                 var texto = Uri.EscapeDataString($"Agendamento Confirmado\n\n" +
-                            $"Cliente: {novo.Cliente.Nome}\n" +
+                            $"Cliente: {novo.Cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {novo.Cliente.Telefone}\n" +
-                            $"Criança: {novo.Crianca?.Nome} ({novo.Crianca?.Idade} {novo.Crianca?.IdadeUnidade})\n" +
                             $"Tema: {novo.Tema}\n" +
                             $"Pacote: {novo.Pacote}\n" +
                             $"Data: {novo.Data:dd/MM/yyyy} às {novo.Horario}\n" +

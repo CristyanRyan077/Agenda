@@ -57,6 +57,9 @@ namespace AgendaNovo
                 return;
             var pacoteDigitado = (sender as ComboBox)?.Text?.Trim();
 
+            if (string.IsNullOrWhiteSpace(pacoteDigitado))
+                return;
+
             vm.PreencherPacote(pacoteDigitado, valor => { vm.NovoAgendamento.Valor = valor; });
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }

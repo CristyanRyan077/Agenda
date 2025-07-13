@@ -11,7 +11,7 @@
         Title="Agendar"
         MinWidth="600" MinHeight="400"
         WindowStartupLocation="CenterScreen"
-        WindowState="Maximized">
+        WindowState="Normal">
 
     <!-- BACKGROUND DE IMAGEM -->
     <Window.Background>
@@ -73,17 +73,18 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <hc:ComboBox Name="txtpacote" Width="400" Height="55"
-                             hc:InfoElement.Placeholder="Pacote" LostFocus="txtpacote_LostFocus"
-                             Text="{Binding NovoAgendamento.Pacote}" ItemsSource="{Binding PacotesDisponiveis }"
-                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                              BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3">
+                    <hc:ComboBox Name="txtpacote" Width="400" Height="55" 
+                                 IsEditable="True" IsTextSearchEnabled="True"
+                                 hc:InfoElement.Placeholder="Pacote" LostFocus="txtpacote_LostFocus"
+                                 Text="{Binding NovoAgendamento.Pacote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ListaPacotes }"
+                                  Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                                  BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3">
 
                     </hc:ComboBox>
 
                     <materialDesign:PackIcon Grid.Column="1" Kind="BoxAdd"
                                          Width="34" Height="34" VerticalAlignment="Center"
-                                         Foreground="White" Margin="59,0,0,0"/>
+                                         Foreground="White" Margin="39,0,0,0"/>
 
                     <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
                              hc:InfoElement.Placeholder="Horário"

@@ -24,6 +24,14 @@ namespace AgendaNovo
             InitializeComponent();
             DataContext = vm;
             vm.Inicializar();
+            txtCliente.Loaded += (s, e) =>
+            {
+                if (txtCliente.Template.FindName("PART_EditableTextBox", txtCliente) is TextBox innerTextBox)
+                {
+                    innerTextBox.PreviewTextInput += txtCliente_PreviewTextInput;
+                    DataObject.AddPastingHandler(innerTextBox, TxtCliente_OnPaste);
+                }
+            };
         }
 
         private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
@@ -40,6 +48,55 @@ namespace AgendaNovo
 
             txtTel.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
             txtEmail.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+        }
+
+        private void VerificarNomeComCrianca(string textoCompleto)
+        {
+            var partes = textoCompleto.Split('-', 2, StringSplitOptions.TrimEntries);
+            if (partes.Length == 2)
+            {
+                var vm = DataContext as AgendaViewModel;
+                if (vm != null)
+                {
+                    vm.NovoCliente.Nome = partes[0];
+                    vm.CriancaSelecionada.Nome = partes[1];
+
+                    txtCliente.Text = partes[0];
+                    txtCrianca.Text = partes[1];
+
+                    txtCrianca.Focus();
+                }
+            }
+        }
+
+        private void txtCliente_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text == "-")
+            {
+                if (sender is TextBox textBox)
+                {
+                    string textoAtual = textBox.Text;
+                    // Inclui o caractere que está sendo digitado, já que PreviewTextInput ocorre antes de entrar no TextBox
+                    string textoCompleto = textoAtual.Insert(textBox.SelectionStart, "-");
+
+                    VerificarNomeComCrianca(textoCompleto);
+                    e.Handled = true;
+                }
+            }
+
+        }
+
+        private void TxtCliente_OnPaste(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(DataFormats.Text))
+            {
+                var texto = e.DataObject.GetData(DataFormats.Text) as string;
+                if (!string.IsNullOrWhiteSpace(texto) && texto.Contains("-"))
+                {
+                    VerificarNomeComCrianca(texto);
+                    e.CancelCommand();
+                }
+            }
         }
     }
 }

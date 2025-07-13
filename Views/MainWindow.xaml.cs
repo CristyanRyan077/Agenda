@@ -17,6 +17,8 @@ namespace AgendaNovo
     /// </summary>
     public partial class MainWindow : Window
     {
+        private GerenciarClientes _janelaClientes;
+        private Agendar _janelaAgenda;
         public AgendaViewModel vm { get; }
 
         public MainWindow(AgendaViewModel vm)
@@ -45,8 +47,15 @@ namespace AgendaNovo
         {
             if (DataContext is AgendaViewModel vm)
             {
-                var agendarWindow = new Agendar(vm);
-                agendarWindow.ShowDialog();
+                if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
+                {
+                    _janelaAgenda = new Agendar(vm);
+                    _janelaAgenda.Show();
+                }
+                else
+                {
+                    _janelaClientes.Focus();
+                }
             }
         }
 
@@ -54,8 +63,15 @@ namespace AgendaNovo
         {
             if (DataContext is AgendaViewModel vm)
             {
-                GerenciarClientes clientes = new GerenciarClientes(vm);
-                clientes.ShowDialog();
+                if (_janelaClientes == null || !_janelaClientes.IsLoaded)
+                {
+                    _janelaClientes = new GerenciarClientes(vm);
+                    _janelaClientes.Show();
+                }
+                else
+                {
+                    _janelaClientes.Focus();
+                }
             }
         }
     }
