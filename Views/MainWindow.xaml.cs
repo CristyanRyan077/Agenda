@@ -8,64 +8,67 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AgendaNovo.ViewModels;
 using MaterialDesignThemes.Wpf;
 
-namespace AgendaNovo
-{
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    namespace AgendaNovo
     {
-        private GerenciarClientes _janelaClientes;
-        private Agendar _janelaAgenda;
-        public AgendaViewModel vm { get; }
-
-        public MainWindow(AgendaViewModel vm)
+        /// <summary>
+        /// Interaction logic for MainWindow.xaml
+        /// </summary>
+        public partial class MainWindow : Window
         {
-            InitializeComponent();
-            this.vm = vm;
-            DataContext = vm;
+            private GerenciarClientes _janelaClientes;
+            private Agendar _janelaAgenda;
+            public MainViewModel vm { get; }
+
+            public MainWindow(MainViewModel vm)
+            {
+                InitializeComponent();
+                this.vm = vm;
+                DataContext = vm;
 
     
-        }
-        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var vm = DataContext as AgendaViewModel;
-            if (vm is null) return;
-            if (sender is Border border && border.DataContext is Agendamento agendamento)
-            {
-                if (MessageBox.Show("Agendamento confirmado e pago?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    vm.AtualizarPago(agendamento);
-                }
-
             }
-        }
-
-        private void btnAgenda_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is AgendaViewModel vm)
+            private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
             {
-                if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
+                var vm = DataContext as AgendaViewModel;
+                if (vm is null) return;
+                if (sender is Border border && border.DataContext is Agendamento agendamento)
                 {
-                    _janelaAgenda = new Agendar(vm);
-                    _janelaAgenda.Show();
-                }
-                else
-                {
-                    _janelaClientes.Focus();
+                    if (MessageBox.Show("Agendamento confirmado e pago?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        vm.AtualizarPago(agendamento);
+                    }
+
                 }
             }
-        }
+
+            private void btnAgenda_Click(object sender, RoutedEventArgs e)
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    var AgendaVM = vm.AgendaVM;
+                    if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
+                    {
+                        _janelaAgenda = new Agendar(AgendaVM);
+                        _janelaAgenda.Show();
+                    }
+                    else
+                    {
+                        _janelaClientes.Focus();
+                    }
+                }
+            }
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is AgendaViewModel vm)
+            if (DataContext is MainViewModel vm)
             {
+                var ClientesVM = vm.AgendaVM;
                 if (_janelaClientes == null || !_janelaClientes.IsLoaded)
                 {
-                    _janelaClientes = new GerenciarClientes(vm);
+                    _janelaClientes = new GerenciarClientes(ClientesVM);
                     _janelaClientes.Show();
                 }
                 else

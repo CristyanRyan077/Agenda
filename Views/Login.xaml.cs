@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgendaNovo.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,7 +53,7 @@ namespace AgendaNovo
         }
         private bool AutenticacaoLogin(string senha)
         {
-            return (string.Equals(senha.Trim(), "cristyan653", StringComparison.OrdinalIgnoreCase));
+            return (string.Equals(senha.Trim(), "localhost", StringComparison.OrdinalIgnoreCase));
         }
         private async void LoginSucesso()
         {
@@ -64,11 +65,12 @@ namespace AgendaNovo
                 await Task.Delay(350);
 
                 var db = new AgendaContext();
-                var vm = new AgendaViewModel(db);
+                var vm = new MainViewModel(db);
+
 
                 await Task.Run(() =>
                 {
-                    vm.CarregarDadosDoBanco();
+                    vm.AgendaVM.CarregarDadosDoBanco();
                 });
 
                 var mainWindow = new MainWindow(vm)
