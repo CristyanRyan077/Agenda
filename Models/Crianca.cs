@@ -17,11 +17,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
             [ObservableProperty] private string? genero;
 
-            [ObservableProperty] private string idadeUnidade = "anos";
+            [ObservableProperty] private string? idadeUnidade = "anos";
             public int ClienteId { get; set; }
             public Cliente? Cliente { get; set; }
 
-            public string IdadeFormatada => $"{Idade} {IdadeUnidade}";
+            public string? IdadeFormatada => $"{Idade} {IdadeUnidade}";
             public List<Agendamento> Agendamentos { get; set; } = new();
             partial void OnIdadeUnidadeChanged(string value)
             {

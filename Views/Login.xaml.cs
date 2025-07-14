@@ -52,7 +52,7 @@ namespace AgendaNovo
         }
         private bool AutenticacaoLogin(string senha)
         {
-            return (string.Equals(senha.Trim(), "localhost", StringComparison.OrdinalIgnoreCase));
+            return (string.Equals(senha.Trim(), "cristyan653", StringComparison.OrdinalIgnoreCase));
         }
         private async void LoginSucesso()
         {
