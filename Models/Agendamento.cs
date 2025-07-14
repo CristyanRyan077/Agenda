@@ -1,10 +1,12 @@
-﻿using System;
+﻿using AgendaNovo.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AgendaNovo.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.IO;
 
 namespace AgendaNovo
 {
@@ -29,6 +31,10 @@ namespace AgendaNovo
 
         public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
+
+        [NotMapped]
+        public string TemaNome => string.IsNullOrEmpty(Tema) ? "" : Path.GetFileName(Tema);
+
 
         [ObservableProperty] private DateTime data = DateTime.Today;
         partial void OnValorChanged(decimal oldValue, decimal newValue)

@@ -12,19 +12,20 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AgendaNovo.Models;
+using Microsoft.Win32;
 
 namespace AgendaNovo
 {
     /// <summary>
     /// Lógica interna para Agendar.xaml
     /// </summary>
-        public partial class Agendar : Window
+    public partial class Agendar : Window
+    {
+        public Agendar(AgendaViewModel vm)
         {
-            public Agendar(AgendaViewModel vm)
-            {
-                InitializeComponent();
-                DataContext = vm;
-            }
+            InitializeComponent();
+            DataContext = vm;
+        }
 
 
 
@@ -64,5 +65,24 @@ namespace AgendaNovo
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }
 
+        private void btnTema_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecionar imagem do tema",
+                Filter = "Imagens (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg|Todos os arquivos (*.*)|*.*"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string caminho = dialog.FileName;
+
+                // Supondo que você tenha acesso à ViewModel pelo DataContext
+                if (DataContext is AgendaViewModel vm)
+                {
+                    vm.NovoAgendamento.Tema = caminho;
+                }
+            }
+        }
     }
 }

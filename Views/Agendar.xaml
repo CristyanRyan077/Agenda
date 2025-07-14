@@ -11,7 +11,7 @@
         Title="Agendar"
         MinWidth="600" MinHeight="400"
         WindowStartupLocation="CenterScreen"
-        WindowState="Normal">
+        WindowState="Maximized">
 
     <!-- BACKGROUND DE IMAGEM -->
     <Window.Background>
@@ -73,7 +73,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <hc:ComboBox Name="txtpacote" Width="400" Height="55" 
+                    <hc:ComboBox Name="txtpacote" Width="610" Height="55" 
                                  IsEditable="True" IsTextSearchEnabled="True"
                                  hc:InfoElement.Placeholder="Pacote" LostFocus="txtpacote_LostFocus"
                                  Text="{Binding NovoAgendamento.Pacote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ListaPacotes }"
@@ -82,19 +82,11 @@
 
                     </hc:ComboBox>
 
-                    <materialDesign:PackIcon Grid.Column="1" Kind="BoxAdd"
+                    <materialDesign:PackIcon Grid.Column="1" Kind="BoxAdd" HorizontalAlignment="Right"
                                          Width="34" Height="34" VerticalAlignment="Center"
-                                         Foreground="White" Margin="39,0,0,0"/>
+                                         Foreground="White" Margin="0,0,25,0"/>
 
-                    <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
-                             hc:InfoElement.Placeholder="Horário"
-                             ItemsSource="{Binding HorariosDisponiveis}"
-                             SelectedItem="{Binding NovoAgendamento.Horario}"
-                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Grid.Column="2" Kind="ClockOutline"
-                                         Width="31" Height="34" HorizontalAlignment="Right"
-                                         Foreground="White" VerticalAlignment="Center"/>
+
                 </Grid>
 
                 <!-- Linha 2: Tema e Valores -->
@@ -105,16 +97,14 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <hc:TextBox Grid.Column="0" Width="305" Height="50" Margin="0,0,0,0"
-                              hc:InfoElement.Placeholder="Tema"
-                              Text="{Binding NovoAgendamento.Tema}"
-                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                              BorderBrush="Black" SelectionTextBrush="Black">
-                    </hc:TextBox>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="Theatre"
-                                         Width="34" Height="34"
-                                         HorizontalAlignment="Right"
-                                         Foreground="White" VerticalAlignment="Center"/>
+                    <Button Name="btnTema" Grid.Column="0" Width="305" Height="50" Margin="0,0,0,0"
+                              
+                              Content="Selecionar Tema (Imagem)"
+                              Click="btnTema_Click"
+                              Background="#88D1D3D8" Foreground="#FFBDBDBD" FontFamily="#heveltica" FontSize="22" FontWeight="Bold"
+                              BorderBrush="Black">
+                    </Button>
+
 
                     <hc:TextBox Name="txtValor" Grid.Column="1" Width="140" Height="50"
                             hc:InfoElement.Placeholder="Valor"
@@ -194,6 +184,13 @@
                     </StackPanel>
 
                 </Grid>
+
+                <hc:ComboBox Grid.Column="0" Width="200" Height="55" HorizontalAlignment="Left"
+                             hc:InfoElement.Placeholder="Horário" Grid.Row="4"
+                             ItemsSource="{Binding HorariosDisponiveis}"
+                             SelectedItem="{Binding NovoAgendamento.Horario}"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
                 <Button Content="Limpar Campos"
                                 Background="LightGray"
                                 Command="{Binding LimparCamposCommand}"
@@ -201,7 +198,7 @@
                                 Margin="10"
                                 Width="110"
                                 Grid.Row="4"
-                                HorizontalAlignment="Left"
+                                HorizontalAlignment="Right"
                                 />
                 <Button Content="Copiar horários livres"
                           Command="{Binding CopiarHorariosLivresCommand}"
@@ -212,6 +209,13 @@
                 <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
                           Foreground="White" Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,10,210,0"
                           />
+                <Button Content="Limpar Agendamentos Anteriores"
+                         Command="{Binding LimparAnterioresCommand}"
+                         Width="245" Height="40" Grid.Row="4"
+                         Background="Orange" Foreground="White"
+                         FontWeight="Bold" FontSize="14"
+                         HorizontalAlignment="Center" Margin="70,0,0,0"
+                />
 
                 <!-- Calendário -->
                 <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Right">
@@ -223,16 +227,10 @@
                         </Calendar.LayoutTransform>
                     </Calendar>
                 </StackPanel>
-
+                
                 <!-- Linha 4: DataGrid e Botões -->
                 <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,0,10,0">
-                    <Button Content="Limpar Agendamentos Anteriores"
-                             Command="{Binding LimparAnterioresCommand}"
-                             Width="245" Height="40"
-                             Background="Orange" Foreground="White"
-                             FontWeight="Bold" FontSize="14"
-                             Margin="10,10,70,10"
-                            HorizontalAlignment="Right"/>
+                    
 
                     <DataGrid AutoGenerateColumns="False"
                           Height="200"
@@ -249,7 +247,7 @@
                             <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Crianca.IdadeFormatada}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
-                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding TemaNome}" />
                             <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                             <DataGridTemplateColumn Header="Pago">
                                 <DataGridTemplateColumn.CellTemplate>

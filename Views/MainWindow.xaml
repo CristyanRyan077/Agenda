@@ -153,7 +153,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -242,7 +242,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -329,7 +329,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -413,7 +413,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -495,7 +495,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -593,7 +593,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -692,7 +692,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
+                                                                    <TextBlock Text="{Binding TemaNome}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Horario}" FontSize="12"/>
                                                                 </StackPanel>
@@ -807,7 +807,7 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
-                                        <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                                        <DataGridTextColumn Header="TemaNome" Binding="{Binding TemaNome}" />
                                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                                         <DataGridTemplateColumn Header="Pago">
                                             <DataGridTemplateColumn.CellTemplate>
