@@ -8,6 +8,4 @@
 *.zip
 bin/
 obj/
-.vs/"bin/" 
-"obj/" 
-/AgendaContext.cs
+.vs/
