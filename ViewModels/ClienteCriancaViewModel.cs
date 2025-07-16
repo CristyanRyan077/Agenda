@@ -54,6 +54,7 @@ namespace AgendaNovo.ViewModels
 
         public ClienteCriancaViewModel(AgendaViewModel agenda)
         {
+            
             _agenda = agenda;
             _db = agenda.DbContext;
 
@@ -132,6 +133,7 @@ namespace AgendaNovo.ViewModels
             NovoCliente.Telefone = cliente.Telefone;
             NovoCliente.Email = cliente.Email;
 
+
             ListaCriancasDoCliente.Clear();
             foreach (var c in cliente.Criancas)
             {
@@ -174,6 +176,7 @@ namespace AgendaNovo.ViewModels
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
             OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(CriancaSelecionada));
             OnPropertyChanged(nameof(ClienteCriancaSelecionado));
             OnPropertyChanged(nameof(ListaClienteCrianca));
             OnPropertyChanged(nameof(ListaCriancasDoCliente));
@@ -257,6 +260,7 @@ namespace AgendaNovo.ViewModels
 
             _db.SaveChanges();
             _db.Entry(cliente).Collection(c => c.Criancas).Load();
+
             AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
         }
