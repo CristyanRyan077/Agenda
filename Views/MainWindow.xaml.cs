@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AgendaNovo.ViewModels;
 using MaterialDesignThemes.Wpf;
 
 namespace AgendaNovo
@@ -20,6 +21,8 @@ namespace AgendaNovo
         private GerenciarClientes _janelaClientes;
         private Agendar _janelaAgenda;
         public AgendaViewModel vm { get; }
+
+        public GerenciarClientes Clientevm { get; }
 
         public MainWindow(AgendaViewModel vm)
         {
@@ -61,11 +64,12 @@ namespace AgendaNovo
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is AgendaViewModel vm)
+            if (DataContext is AgendaViewModel agendaVm)
             {
                 if (_janelaClientes == null || !_janelaClientes.IsLoaded)
                 {
-                    _janelaClientes = new GerenciarClientes(vm);
+                    var clienteVm = new ClienteCriancaViewModel(agendaVm);
+                    _janelaClientes = new GerenciarClientes(clienteVm);
                     _janelaClientes.Show();
                 }
                 else

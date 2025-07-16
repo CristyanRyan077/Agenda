@@ -58,6 +58,7 @@ namespace AgendaNovo
                 CarregarDadosDoBanco();
                 CarregarPacotes();
                 AtualizarHorariosDisponiveis();
+                AtualizarListaClienteCrianca();
             });
         }
 
@@ -232,7 +233,7 @@ namespace AgendaNovo
             var clienteFoiEditado = ListaClientes.Any(c => c.Id == NovoCliente.Id);
 
             if (!clienteFoiEditado && ListaClientes.Any(c =>
-                .c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)))
+                c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show("Já existe um cliente com esse nome.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -516,7 +517,7 @@ namespace AgendaNovo
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
             ValorPacote = 0;
-
+            ClienteCriancaSelecionado = null;
             OnPropertyChanged(nameof(NovoAgendamento));
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ClienteSelecionado));
@@ -603,6 +604,7 @@ namespace AgendaNovo
         private readonly AgendaContext _db;
         public AgendaViewModel(AgendaContext db)
         {
+
             _db = db;
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
@@ -612,8 +614,9 @@ namespace AgendaNovo
                 Cliente = NovoCliente,
                 Crianca = new Crianca(),
             };
-            Inicializar();
+
         }
+        public AgendaContext DbContext => _db;
         public void PreencherCamposSeClienteExistir(string? nomeDigitado, Action<Cliente> preencher)
         {
             if (string.IsNullOrWhiteSpace(nomeDigitado))

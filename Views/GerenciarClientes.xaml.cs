@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using AgendaNovo.ViewModels;
 
 namespace AgendaNovo
 {
@@ -19,11 +20,10 @@ namespace AgendaNovo
     /// </summary>
     public partial class GerenciarClientes : Window
     {
-        public GerenciarClientes(AgendaViewModel vm)
+        public GerenciarClientes(ClienteCriancaViewModel vm)
         {
             InitializeComponent();
             DataContext = vm;
-            vm.Inicializar();
             txtCliente.Loaded += (s, e) =>
             {
                 if (txtCliente.Template.FindName("PART_EditableTextBox", txtCliente) is TextBox innerTextBox)
