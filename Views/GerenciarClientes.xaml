@@ -52,13 +52,13 @@
 
             <hc:ComboBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                 Grid.Row="0" LostFocus="txtCliente_LostFocus"
+                                 Grid.Row="0" 
                                 PreviewTextInput="txtCliente_PreviewTextInput"
                                 
                                 IsEditable="True" Margin="12,0,0,2"
                                 DisplayMemberPath="Nome"
                                 ItemsSource="{Binding ListaClientes}"
-                                Text="{Binding NovoCliente.Nome}"
+                                Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Width="410" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
             <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
                                          Width="40" Height="40" Grid.Row="0"                                

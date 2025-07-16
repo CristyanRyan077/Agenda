@@ -68,7 +68,7 @@ namespace AgendaNovo
 
                 await Task.Run(() =>
                 {
-                    vm.CarregarDadosDoBanco();
+                    vm.Inicializar();
                 });
 
                 var mainWindow = new MainWindow(vm)

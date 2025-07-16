@@ -55,23 +55,18 @@ namespace AgendaNovo
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ListaAgendamentos.Clear();
-                foreach (var item in _db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca))
-                    ListaAgendamentos.Add(item);
-
-                ListaClientes.Clear();
-                foreach (var cliente in _db.Clientes.Include(c => c.Criancas))
-                    ListaClientes.Add(cliente);
-
-                ListaPacotes.Clear();
-                foreach (var nome in _pacotesFixos.Keys.OrderBy(p => p))
-                    ListaPacotes.Add(nome);
-
-                FiltrarAgendamentos();
+                CarregarDadosDoBanco();
+                CarregarPacotes();
                 AtualizarHorariosDisponiveis();
             });
         }
 
+        public void CarregarPacotes()
+        {
+            ListaPacotes.Clear();
+            foreach (var nome in _pacotesFixos.Keys.OrderBy(p => p))
+                ListaPacotes.Add(nome);
+        }
         private void ResetarFormulario()
         {
             NovoAgendamento = new Agendamento
@@ -101,14 +96,6 @@ namespace AgendaNovo
         _pacotesFixos
         .OrderBy(p => p.Key)
         .Select(p => p.Key);
-
-        public class PacoteView
-        {
-            public string Nome { get; set; } = "";
-            public decimal Valor { get; set; }
-
-            public string Display => $"{Nome} - R$ {Valor:N2}";
-        }
 
 
         private readonly Dictionary<string, decimal> _pacotesFixos = new()
@@ -205,13 +192,10 @@ namespace AgendaNovo
             if (cliente is null)
                 return;
 
-            NovoCliente = new Cliente
-            {
-                Id = cliente.Id,
-                Nome = cliente.Nome,
-                Telefone = cliente.Telefone,
-                Email = cliente.Email
-            };
+            NovoCliente.Id = cliente.Id;
+            NovoCliente.Nome = cliente.Nome;
+            NovoCliente.Telefone = cliente.Telefone;
+            NovoCliente.Email = cliente.Email;
 
             ListaCriancasDoCliente.Clear();
             foreach (var c in cliente.Criancas)
@@ -224,14 +208,12 @@ namespace AgendaNovo
                 var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
                 if (crianca is not null)
                 {
-                    CriancaSelecionada = new Crianca
-                    {
-                        Id = crianca.Id,
-                        Nome = crianca.Nome,
-                        Idade = crianca.Idade,
-                        Genero = crianca.Genero,
-                        IdadeUnidade = crianca.IdadeUnidade
-                    };
+
+                    CriancaSelecionada.Id = crianca.Id;
+                    CriancaSelecionada.Nome = crianca.Nome;
+                    CriancaSelecionada.Idade = crianca.Idade;
+                    CriancaSelecionada.Genero = crianca.Genero;
+                    CriancaSelecionada.IdadeUnidade = crianca.IdadeUnidade;
                 }
             }
             else
@@ -245,24 +227,26 @@ namespace AgendaNovo
         {
             if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
-
-            // Verifica se cliente já existe (por ID ou nome)
-            var clienteExistente = ListaClientes.FirstOrDefault(c => c.Nome == NovoCliente.Nome);
-            var clienteFoiEditado = ListaClientes.Any(c => c.Id == NovoCliente.Id);
             Cliente cliente;
 
-            if (clienteExistente != null && !clienteFoiEditado)
+            var clienteFoiEditado = ListaClientes.Any(c => c.Id == NovoCliente.Id);
+
+            if (!clienteFoiEditado && ListaClientes.Any(c =>
+                .c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)))
             {
-                cliente = clienteExistente;
-                NovoCliente = cliente;
+                MessageBox.Show("Já existe um cliente com esse nome.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            else if (clienteFoiEditado)
+
+
+            if (clienteFoiEditado)
             {
                 // Atualiza cliente
                 cliente = ListaClientes.First(c => c.Id == NovoCliente.Id);
                 cliente.Nome = NovoCliente.Nome;
                 cliente.Telefone = NovoCliente.Telefone;
                 cliente.Email = NovoCliente.Email;
+                _db.Clientes.Update(cliente);
             }
             else
             {
@@ -275,7 +259,6 @@ namespace AgendaNovo
                 };
 
                 _db.Clientes.Add(cliente);
-                _db.SaveChanges();
                 ListaClientes.Add(cliente);
             }
 
@@ -283,7 +266,7 @@ namespace AgendaNovo
             if (CriancaSelecionada != null && !string.IsNullOrWhiteSpace(CriancaSelecionada.Nome))
             {
                 var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == CriancaSelecionada.Id)
-                ?? cliente.Criancas.FirstOrDefault(c => c.Nome == CriancaSelecionada.Nome);
+                           ?? cliente.Criancas.FirstOrDefault(c => c.Nome == CriancaSelecionada.Nome);
 
                 if (crianca == null)
                 {
