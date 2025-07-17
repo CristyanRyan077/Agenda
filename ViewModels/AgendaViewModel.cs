@@ -789,8 +789,16 @@ namespace AgendaNovo
 
             foreach (var c in clienteExistente.Criancas)
                 ListaCriancas.Add(c);
+            var clientes = _db.Clientes.Include(c => c.Criancas).ToList();
+            var agendamentos = _db.Agendamentos.Include(a => a.Cliente).Include(a => a.Crianca).ToList();
+                ListaAgendamentos.Clear();
+                foreach (var agendamento in agendamentos)
+                    ListaAgendamentos.Add(agendamento);
 
-            CarregarDadosDoBanco();
+                ListaClientes.Clear();
+                foreach (var cliente in clientes)
+                    ListaClientes.Add(cliente);
+
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
             FiltrarAgendamentos();
