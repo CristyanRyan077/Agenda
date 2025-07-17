@@ -57,7 +57,7 @@ namespace AgendaNovo
                 }
                 else
                 {
-                    _janelaClientes.Focus();
+                    _janelaAgenda.Focus();
                 }
             }
         }

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,6 +49,9 @@ namespace AgendaNovo.ViewModels
     {
         [ObservableProperty] private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
+        [ObservableProperty] private bool clienteExistenteDetectado;
+        [ObservableProperty] private bool isInEditMode;
+        [ObservableProperty] private string pesquisaText;
 
         private readonly AgendaViewModel _agenda;
         private readonly AgendaContext _db;
@@ -60,10 +64,97 @@ namespace AgendaNovo.ViewModels
 
             AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
+            _clienteCriancaView = CollectionViewSource
+                .GetDefaultView(ListaClienteCrianca);
+            _clienteCriancaView.Filter = FilterCliente;
+
+            this.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(PesquisaText))
+                    _clienteCriancaView.Refresh();
+            };
 
         }
+        private void NotifyAll()
+        {
+            OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(CriancaSelecionada));
+            OnPropertyChanged(nameof(ClienteCriancaSelecionado));
+            OnPropertyChanged(nameof(ListaClienteCrianca));
+            OnPropertyChanged(nameof(ListaCriancasDoCliente));
+            OnPropertyChanged(nameof(ListaCriancas));
+        }
 
-    
+        private bool FilterCliente(object item)
+        {
+            if (item is not ClienteCriancaView ccv)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(PesquisaText))
+                return true;
+
+            var termos = PesquisaText.Trim();
+            return ccv.NomeCliente?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0
+                || ccv.Telefone?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0
+                || ccv.Email?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public void DetectarClientePorCampos()
+        {
+            if (IsInEditMode)
+                return;
+
+            bool nomeVazio = string.IsNullOrWhiteSpace(NovoCliente.Nome);
+            bool telVazio = string.IsNullOrWhiteSpace(NovoCliente.Telefone);
+            bool emailVazio = string.IsNullOrWhiteSpace(NovoCliente.Email);
+            if (nomeVazio && telVazio && emailVazio)
+            {
+                ClienteExistenteDetectado = false;
+                NovoCliente.Id = 0;
+                ListaCriancasDoCliente.Clear();
+                return;
+            }
+
+
+            Cliente? clienteDetectado = null;
+
+            if (!nomeVazio)
+            {
+                clienteDetectado = ListaClientes
+                    .FirstOrDefault(c => c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase));
+            }
+            if (clienteDetectado is null && !telVazio)
+            {
+                clienteDetectado = ListaClientes
+                    .FirstOrDefault(c => c.Telefone?.Equals(NovoCliente.Telefone, StringComparison.OrdinalIgnoreCase) == true);
+            }
+            if (clienteDetectado is null && !emailVazio)
+            {
+                clienteDetectado = ListaClientes
+                    .FirstOrDefault(c => c.Email?.Equals(NovoCliente.Email, StringComparison.OrdinalIgnoreCase) == true);
+            }
+
+            if (clienteDetectado is not null)
+            {
+                // Preenche dados
+                NovoCliente.Id = clienteDetectado.Id;
+                NovoCliente.Nome = clienteDetectado.Nome;
+                NovoCliente.Telefone = clienteDetectado.Telefone;
+                NovoCliente.Email = clienteDetectado.Email;
+
+                ListaCriancasDoCliente.Clear();
+                foreach (var c in clienteDetectado.Criancas)
+                    ListaCriancasDoCliente.Add(c);
+
+                ClienteExistenteDetectado = true;
+            }
+            else
+            {
+                ClienteExistenteDetectado = false;
+            }
+        }
+
+
 
         // 🔁 Compartilhamento de propriedades da AgendaViewModel
         public Cliente NovoCliente => _agenda.NovoCliente;
@@ -77,6 +168,9 @@ namespace AgendaNovo.ViewModels
 
         public ObservableCollection<Crianca> ListaCriancas => _agenda.ListaCriancas;
         public ObservableCollection<Crianca> ListaCriancasDoCliente => _agenda.ListaCriancasDoCliente;
+
+        private readonly ICollectionView _clienteCriancaView;
+        public ICollectionView ClienteCriancaView => _clienteCriancaView;
 
 
         public void AtualizarListaClienteCrianca()
@@ -121,8 +215,10 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void EditarClienteCriancaSelecionado()
         {
+
             if (ClienteCriancaSelecionado is null)
                 return;
+            IsInEditMode = true;
 
             var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteCriancaSelecionado.ClienteId);
             if (cliente is null)
@@ -134,11 +230,7 @@ namespace AgendaNovo.ViewModels
             NovoCliente.Email = cliente.Email;
 
 
-            ListaCriancasDoCliente.Clear();
-            foreach (var c in cliente.Criancas)
-            {
-                ListaCriancasDoCliente.Add(c);
-            }
+            CarregarCriancasDoCliente(cliente);
 
             if (ClienteCriancaSelecionado.CriancaId is int criancaId)
             {
@@ -157,9 +249,15 @@ namespace AgendaNovo.ViewModels
             {
                 CriancaSelecionada = new Crianca();
             }
+            NotifyAll();
+        }
+        private void CarregarCriancasDoCliente(Cliente cliente)
+        {
+            ListaCriancasDoCliente.Clear();
+            foreach (var c in cliente.Criancas)
+                ListaCriancasDoCliente.Add(c);
         }
 
-        
         private void LimparCamposClienteCrianca()
         {
             if (NovoCliente is not null)
@@ -175,21 +273,17 @@ namespace AgendaNovo.ViewModels
             }
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
-            OnPropertyChanged(nameof(NovoCliente));
-            OnPropertyChanged(nameof(CriancaSelecionada));
-            OnPropertyChanged(nameof(ClienteCriancaSelecionado));
-            OnPropertyChanged(nameof(ListaClienteCrianca));
-            OnPropertyChanged(nameof(ListaCriancasDoCliente));
-            OnPropertyChanged(nameof(ListaCriancas));
+            NotifyAll();
         }
         [RelayCommand]
         private void SalvarClienteCrianca()
         {
             if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
-            Cliente cliente;
+
 
             var clienteFoiEditado = NovoCliente.Id != 0 && ListaClientes.Any(c => c.Id == NovoCliente.Id);
+            Cliente cliente;
 
             if (!clienteFoiEditado && ListaClientes.Any(c =>
                 c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)
@@ -220,9 +314,11 @@ namespace AgendaNovo.ViewModels
                     Criancas = new List<Crianca>()
                 };
 
+                
                 _db.Clientes.Add(cliente);
                 _db.SaveChanges();
                 ListaClientes.Add(cliente);
+                CriancaSelecionada = new Crianca();
 
 
 
@@ -262,12 +358,17 @@ namespace AgendaNovo.ViewModels
             _db.Entry(cliente).Collection(c => c.Criancas).Load();
 
             AtualizarListaClienteCrianca();
+            CarregarCriancasDoCliente(cliente);
             LimparCamposClienteCrianca();
+            IsInEditMode = false;
+            ClienteExistenteDetectado = false;
+            NotifyAll();
         }
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()
         {
-            if (ClienteCriancaSelecionado is null)
+            var selecionado = ClienteCriancaSelecionado; // salva local
+            if (selecionado is null)
                 return;
             var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteCriancaSelecionado.ClienteId);
 
@@ -290,8 +391,57 @@ namespace AgendaNovo.ViewModels
                         MessageBoxImage.Warning);
                     return;
                 }
+                // 1) Monta o objeto de backup
+                /*var backup = new
+                {
+                    Cliente = cliente,
+                    Criancas = cliente.Criancas.ToList()
+                };
 
-                if (ClienteCriancaSelecionado.CriancaId is int criancaId)
+                // 2) Serializa em JSON com identação e preservando referências
+                var json = JsonSerializer.Serialize(
+                    backup,
+                    new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        ReferenceHandler = ReferenceHandler.Preserve
+                    }
+                );
+
+                // 3) Garante que a pasta exista
+                string pastaBackup = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Backups"
+                );
+                Directory.CreateDirectory(pastaBackup);
+
+                // 4) Nomeia o arquivo incluindo o Id do cliente (e a data)
+                string fname = $"backup_cliente_{cliente.Id}_{DateTime.Today:yyyyMMdd}.json";
+                string caminhoArquivo = Path.Combine(pastaBackup, fname);
+
+                // 5) Grava no disco
+                File.WriteAllText(caminhoArquivo, json);
+
+                // 6) Informa o usuário
+                MessageBox.Show(
+                    $"Backup do cliente salvo em:\n{caminhoArquivo}",
+                    "Backup",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+
+                // 7) Remove do DbContext e da UI
+                //    (se quiser remover as crianças individualmente, descomente a linha abaixo)
+               // _db.Criancas.RemoveRange(cliente.Criancas);
+                */
+                _db.Clientes.Remove(cliente);
+                _db.SaveChanges();
+
+                // 8) Atualiza suas collections
+                ListaClientes.Remove(cliente);
+                ListaCriancasDoCliente.Clear();
+                AtualizarListaClienteCrianca();
+                if (selecionado.CriancaId is int criancaId)
                 {
                     var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
                     if (crianca is not null)
@@ -308,10 +458,11 @@ namespace AgendaNovo.ViewModels
                         CriancaSelecionada = null;
                     }
                 }
-                _db.Clientes.Remove(cliente);
-                ListaClientes.Remove(cliente);
                 _db.SaveChanges();
                 AtualizarListaClienteCrianca();
+                IsInEditMode = false;
+                ClienteExistenteDetectado = false;
+                NotifyAll();
                 return;
             }
         }
