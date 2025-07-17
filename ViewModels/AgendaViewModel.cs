@@ -36,11 +36,11 @@ namespace AgendaNovo
         [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
-
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
-        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
+
 
         //Data e horario
         [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
@@ -425,10 +425,10 @@ namespace AgendaNovo
             AgendamentosFiltrados.Clear();
 
             var filtrados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date)
-                .ToList();
-            foreach (var item in filtrados)
-                AgendamentosFiltrados.Add(item);
+            .Where(a => a != null && a.Data.Date == DataSelecionada.Date);
+
+            foreach (var ag in filtrados)
+                AgendamentosFiltrados.Add(ag);
         }
 
         [RelayCommand]
@@ -685,24 +685,7 @@ namespace AgendaNovo
             var clienteExistente = _db.Clientes
                 .Include(c => c.Criancas)
                 .FirstOrDefault(c => c.Nome == NovoCliente.Nome);
-            if (clienteExistente == null)
-            {
-                clienteExistente = new Cliente
-                {
-                    Nome = NovoCliente.Nome,
-                    Telefone = NovoCliente.Telefone,
-                    Criancas = new List<Crianca>()
-                };
-
-                _db.Clientes.Add(clienteExistente);
-                _db.SaveChanges();
-                ListaClientes.Add(clienteExistente);
-            }
-            else
-            {
-                clienteExistente.Telefone = NovoCliente.Telefone;
-                clienteExistente.Criancas ??= new List<Crianca>();
-            }
+          
 
             var criancaParaAgendar = clienteExistente.Criancas
             .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
@@ -739,8 +722,6 @@ namespace AgendaNovo
                 .FirstOrDefault(a => a.Id == NovoAgendamento.Id);
             if (agendamentoExistente != null)
             {
-                agendamentoExistente.Cliente.Nome = NovoCliente.Nome;
-                agendamentoExistente.Cliente.Telefone = NovoCliente.Telefone;
 
                 agendamentoExistente.Crianca ??= new Crianca();
                 agendamentoExistente.Crianca.Nome = NovoAgendamento.Crianca.Nome;

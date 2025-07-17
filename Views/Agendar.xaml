@@ -47,7 +47,10 @@
                              IsEditable="True" LostFocus="txtCliente_LostFocus"
                              DisplayMemberPath="Nome"
                              ItemsSource="{Binding ListaClientes}"
-                             Text="{Binding NovoCliente.Nome}"
+                             SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                                 
+                             TextSearch.TextPath="Nome"
+                             ToolTip="Selecione um cliente existente; não edite o texto diretamente."
                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Black" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Grid.Column="0" Kind="Account"
