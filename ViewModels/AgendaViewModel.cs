@@ -29,14 +29,12 @@ namespace AgendaNovo
         public ObservableCollection<string> ListaPacotes { get; } = new();
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
-        [ObservableProperty] private Cliente? clienteSelecionado;
-        [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
 
 
         //Cliente
+        [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
-        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
