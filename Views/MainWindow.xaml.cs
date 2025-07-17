@@ -50,6 +50,7 @@ namespace AgendaNovo
         {
             if (DataContext is AgendaViewModel vm)
             {
+                vm.LimparCamposCommand.Execute(null);
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
                     _janelaAgenda = new Agendar(vm);
@@ -57,7 +58,7 @@ namespace AgendaNovo
                 }
                 else
                 {
-                    _janelaClientes.Focus();
+                    _janelaAgenda.Focus();
                 }
             }
         }
