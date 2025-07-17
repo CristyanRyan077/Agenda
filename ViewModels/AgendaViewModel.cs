@@ -218,7 +218,7 @@ namespace AgendaNovo
             AgendamentosFiltrados.Clear();
 
             var filtrados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date)
+                .Where(a => a != null && a.Data.Date == DataSelecionada.Date)
                 .ToList();
             foreach (var item in filtrados)
                 AgendamentosFiltrados.Add(item);
@@ -293,6 +293,14 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(NovoAgendamento.Horario));
             OnPropertyChanged(nameof(NovoAgendamento.Crianca));
         }
+
+        public void CriarNovoCliente()
+        {
+            NovoCliente = new Cliente();
+            CriancaSelecionada = null;
+            OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(NovoCliente.Nome));
+        }
         [RelayCommand]
         private void LimparCampos()
         {
@@ -312,6 +320,12 @@ namespace AgendaNovo
             ValorPacote = 0;
             OnPropertyChanged(nameof(NovoAgendamento));
             OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(NovoCliente.Nome));
+            OnPropertyChanged(nameof(NovoCliente.Telefone));
+            OnPropertyChanged(nameof(NovoCliente.Email));
+            OnPropertyChanged(nameof(NovoCliente.Criancas));
+            OnPropertyChanged(nameof(CriancaSelecionada));
+            OnPropertyChanged(nameof(CriancaSelecionada.Nome));
             OnPropertyChanged(nameof(ClienteSelecionado));
             OnPropertyChanged(nameof(ListaCriancas));
         }

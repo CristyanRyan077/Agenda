@@ -239,6 +239,7 @@
                           Width="1000"
                           HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
+                                  IsReadOnly="True"
                           ItemsSource="{Binding ListaAgendamentos}"
                           SelectedItem="{Binding ItemSelecionado, Mode=TwoWay}">
                         <DataGrid.Columns>
