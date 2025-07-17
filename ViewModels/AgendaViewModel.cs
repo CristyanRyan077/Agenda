@@ -263,7 +263,7 @@ namespace AgendaNovo
                     Nome = value.Cliente?.Nome ?? string.Empty,
                     Telefone = value.Cliente?.Telefone ?? string.Empty
                 },
-                Crianca = value.Crianca is not null ? new Crianca
+                Crianca = value.Crianca != null ? new Crianca
                 {
                     Nome = value.Crianca.Nome,
                     Idade = value.Crianca.Idade,
@@ -283,7 +283,7 @@ namespace AgendaNovo
                 Nome = value.Cliente?.Nome ?? string.Empty,
                 Telefone = value.Cliente?.Telefone ?? string.Empty
             };
-
+            ListaCriancas.Clear();
             if (value.Cliente?.Criancas != null)
             {
                 foreach (var crianca in value.Cliente.Criancas)
@@ -338,7 +338,7 @@ namespace AgendaNovo
         public void AtualizarHorariosDisponiveis()
         {
             var ocupados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date)
+                .Where(a => a.Data.Date == DataSelecionada.Date && a.Id != NovoAgendamento.Id)
                 .Select(a => a.Horario)
                 .ToList();
 
@@ -485,7 +485,7 @@ namespace AgendaNovo
         {
             if (NovoAgendamento == null)
                 NovoAgendamento = new Agendamento();
-            if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
+            if (NovoCliente == null || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
             var clienteExistente = _db.Clientes
                 .Include(c => c.Criancas)
@@ -510,7 +510,7 @@ namespace AgendaNovo
             }
 
             var criancaParaAgendar = clienteExistente.Criancas
-            .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca.Nome);
+            .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca?.Nome);
 
             if (criancaParaAgendar == null)
             {
@@ -544,14 +544,6 @@ namespace AgendaNovo
                 .FirstOrDefault(a => a.Id == NovoAgendamento.Id);
             if (agendamentoExistente != null)
             {
-                agendamentoExistente.Cliente.Nome = NovoCliente.Nome;
-                agendamentoExistente.Cliente.Telefone = NovoCliente.Telefone;
-
-                agendamentoExistente.Crianca ??= new Crianca();
-                agendamentoExistente.Crianca.Nome = NovoAgendamento.Crianca.Nome;
-                agendamentoExistente.Crianca.Idade = NovoAgendamento.Crianca.Idade;
-                agendamentoExistente.Crianca.Genero = NovoAgendamento.Crianca.Genero;
-                agendamentoExistente.Crianca.IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade;
 
                 agendamentoExistente.Pacote = NovoAgendamento.Pacote;
                 agendamentoExistente.Tema = NovoAgendamento.Tema;

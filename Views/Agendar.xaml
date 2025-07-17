@@ -89,7 +89,8 @@
                     <hc:ComboBox Grid.Column="1" Width="200" Height="55" HorizontalAlignment="Right"
                              hc:InfoElement.Placeholder="Horário"
                              ItemsSource="{Binding HorariosDisponiveis}"
-                             SelectedItem="{Binding NovoAgendamento.Horario}"
+                             SelectedItem="{Binding NovoAgendamento.Horario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  IsSynchronizedWithCurrentItem="False"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                               BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Grid.Column="2" Kind="ClockOutline"
