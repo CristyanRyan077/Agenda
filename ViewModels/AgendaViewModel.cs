@@ -35,6 +35,7 @@ namespace AgendaNovo
         [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
@@ -309,7 +310,6 @@ namespace AgendaNovo
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
             ValorPacote = 0;
-            ClienteCriancaSelecionado = null;
             OnPropertyChanged(nameof(NovoAgendamento));
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ClienteSelecionado));
