@@ -53,6 +53,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private bool isInEditMode;
         [ObservableProperty] private string pesquisaText;
 
+
         private readonly AgendaViewModel _agenda;
         private readonly AgendaContext _db;
 
@@ -61,18 +62,9 @@ namespace AgendaNovo.ViewModels
             
             _agenda = agenda;
             _db = agenda.DbContext;
-
+            CarregarClientesDoBanco();
             AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
-            _clienteCriancaView = CollectionViewSource
-                .GetDefaultView(ListaClienteCrianca);
-            _clienteCriancaView.Filter = FilterCliente;
-
-            this.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName == nameof(PesquisaText))
-                    _clienteCriancaView.Refresh();
-            };
 
         }
         private void NotifyAll()
@@ -83,22 +75,47 @@ namespace AgendaNovo.ViewModels
             OnPropertyChanged(nameof(ListaClienteCrianca));
             OnPropertyChanged(nameof(ListaCriancasDoCliente));
             OnPropertyChanged(nameof(ListaCriancas));
+            OnPesquisaTextChanged(PesquisaText);
         }
-
-        private bool FilterCliente(object item)
+        private void CarregarClientesDoBanco()
         {
-            if (item is not ClienteCriancaView ccv)
-                return false;
+            _todosClientes = _db.Clientes
+         .Include(c => c.Criancas)
+         .ToList()
+         .SelectMany(cliente =>
+         {
+             if (cliente.Criancas != null && cliente.Criancas.Count > 0)
+             {
+                 return cliente.Criancas.Select(crianca => new ClienteCriancaView
+                 {
+                     ClienteId = cliente.Id,
+                     NomeCliente = cliente.Nome,
+                     Telefone = cliente.Telefone,
+                     Email = cliente.Email,
+                     CriancaId = crianca.Id,
+                     NomeCrianca = crianca.Nome,
+                     Genero = crianca.Genero,
+                     Idade = $"{crianca.Idade} {crianca.IdadeUnidade}"
+                 });
+             }
+             else
+             {
+                 return new List<ClienteCriancaView>
+                 {
+                    new ClienteCriancaView
+                    {
+                        ClienteId = cliente.Id,
+                        NomeCliente = cliente.Nome,
+                        Telefone = cliente.Telefone,
+                        Email = cliente.Email
+                    }
+                 };
+             }
+         })
+         .ToList();
 
-            if (string.IsNullOrWhiteSpace(PesquisaText))
-                return true;
-
-            var termos = PesquisaText.Trim();
-            return ccv.NomeCliente?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0
-                || ccv.Telefone?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0
-                || ccv.Email?.IndexOf(termos, StringComparison.OrdinalIgnoreCase) >= 0;
+            ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
         }
-
         public void DetectarClientePorCampos()
         {
             if (IsInEditMode)
@@ -160,6 +177,8 @@ namespace AgendaNovo.ViewModels
         public Cliente NovoCliente => _agenda.NovoCliente;
         public ObservableCollection<Cliente> ListaClientes => _agenda.ListaClientes;
 
+        private List<ClienteCriancaView> _todosClientes = new();
+
         public Crianca CriancaSelecionada
         {
             get => _agenda.CriancaSelecionada;
@@ -169,8 +188,7 @@ namespace AgendaNovo.ViewModels
         public ObservableCollection<Crianca> ListaCriancas => _agenda.ListaCriancas;
         public ObservableCollection<Crianca> ListaCriancasDoCliente => _agenda.ListaCriancasDoCliente;
 
-        private readonly ICollectionView _clienteCriancaView;
-        public ICollectionView ClienteCriancaView => _clienteCriancaView;
+
 
 
         public void AtualizarListaClienteCrianca()
@@ -363,6 +381,7 @@ namespace AgendaNovo.ViewModels
             IsInEditMode = false;
             ClienteExistenteDetectado = false;
             NotifyAll();
+            CarregarClientesDoBanco();
         }
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()
@@ -463,9 +482,30 @@ namespace AgendaNovo.ViewModels
                 IsInEditMode = false;
                 ClienteExistenteDetectado = false;
                 NotifyAll();
+                CarregarClientesDoBanco();
+                return;
+
+            }
+        }
+        partial void OnPesquisaTextChanged(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
                 return;
             }
+
+            var filtro = value.Trim().ToLower();
+
+            var filtrados = _todosClientes.Where(c =>
+                (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
+                (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
+                (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro))
+            );
+
+            ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(filtrados);
         }
 
     }
+
 }

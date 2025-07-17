@@ -34,7 +34,7 @@
                 <RowDefinition Height="4*"/>
 
             </Grid.RowDefinitions>
-            <DataGrid Grid.Column="2" ItemsSource="{Binding ClienteCriancaView}"
+            <DataGrid Grid.Column="2" ItemsSource="{Binding ListaClienteCrianca}"
                          SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
                          AutoGenerateColumns="False" Grid.RowSpan="9" Grid.ColumnSpan="3">
                 <DataGrid.Columns>
@@ -52,7 +52,7 @@
                     Width="300" Height="30"
                     Margin="0,0,0,10" VerticalAlignment="Top"
                     Grid.Column="1"
-                    hc:InfoElement.Placeholder="Pesquisar por nome, telefone ou e‑mail..."
+                    hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
                     Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
             <materialDesign:PackIcon Kind="Search" 
                                      Width="30" Height="25"
