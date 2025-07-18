@@ -338,8 +338,8 @@ namespace AgendaNovo.ViewModels
                 
                 _db.Clientes.Add(cliente);
                 _db.SaveChanges();
+                cliente = _db.Clientes.Include(c => c.Criancas).First(c => c.Id == cliente.Id);
                 ListaClientes.Add(cliente);
-                CriancaSelecionada = new Crianca();
 
 
 
@@ -359,14 +359,15 @@ namespace AgendaNovo.ViewModels
                         Idade = CriancaSelecionada.Idade,
                         Genero = CriancaSelecionada.Genero,
                         IdadeUnidade = CriancaSelecionada.IdadeUnidade,
-                        ClienteId = cliente.Id
+                        ClienteId = cliente.Id,
+                        Cliente = cliente
                     };
-                    cliente.Criancas.Add(crianca);
                     ListaCriancas.Add(crianca);
                     _db.Criancas.Add(crianca);
                 }
                 else
                 {
+                    crianca.Cliente = cliente;
                     crianca.Nome = CriancaSelecionada.Nome;
                     crianca.Idade = CriancaSelecionada.Idade;
                     crianca.Genero = CriancaSelecionada.Genero;
@@ -380,11 +381,11 @@ namespace AgendaNovo.ViewModels
 
             AtualizarListaClienteCrianca();
             CarregarCriancasDoCliente(cliente);
-            LimparCamposClienteCrianca();
             IsInEditMode = false;
             ClienteExistenteDetectado = false;
             NotifyAll();
             CarregarClientesDoBanco();
+            LimparCamposClienteCrianca();
         }
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()
