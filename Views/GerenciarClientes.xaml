@@ -34,31 +34,36 @@
                 <RowDefinition Height="4*"/>
 
             </Grid.RowDefinitions>
-            <DataGrid Grid.Column="2" ItemsSource="{Binding ListaClienteCrianca}"
+            <DataGrid Grid.Column="1"
+                      ItemsSource="{Binding ListaClienteCrianca}"
                          SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
-                         AutoGenerateColumns="False" Grid.RowSpan="9" Grid.ColumnSpan="3">
+                          Margin="40,40,0,0"
+                          Height="800" VerticalAlignment="Top"
+                          HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.CanContentScroll="True"
+                         AutoGenerateColumns="False" Grid.RowSpan="9" Grid.ColumnSpan="4">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding ClienteId}"/>
                     <DataGridTextColumn Header="Cliente" Binding="{Binding NomeCliente}" />
                     <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding Email }" />
                     <DataGridTextColumn Header="Crianca" Binding="{Binding NomeCrianca}"/>
-                    <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Idade}"/>
+                    <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding IdadeFormatada}"/>
                     <DataGridTextColumn Header="Genero" Binding="{Binding Genero}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
             <hc:TextBox Name="txtPesquisa"
-                    Width="300" Height="30"
-                    Margin="0,0,0,10" VerticalAlignment="Top"
+                    Width="1000" Height="40" Grid.ColumnSpan="4"
+                    Margin="40,0,0,10" VerticalAlignment="Top"
                     Grid.Column="1"
                     hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
                     Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
             <materialDesign:PackIcon Kind="Search" 
-                                     Width="30" Height="25"
-                                     Margin="0,2,0,0"
+                                     Width="50" Height="40"
+                                     Margin="0,0,30,0"
                                      HorizontalAlignment="Right"
-                                     Grid.Column="1"/>
+                                     Grid.Column="4"/>
 
             <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
@@ -139,11 +144,10 @@
                          Background="White" Foreground="Black" HorizontalAlignment="Right"
                          FontFamily="#heveltica" FontSize="18" FontWeight="Bold" VerticalAlignment="Bottom"
                          BorderBrush="Black" Grid.Row="2"
-                         ItemsSource="{Binding UnidadesIdade}"
+                         ItemsSource="{Binding IdadesUnidadeDisponiveis}"
                          SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,2,1" />
 
 
-            <TextBlock Text="BarreiraDagrid" Grid.Column="1" Visibility="Hidden"/>
 
             <Button x:Name="btnSalvar" Content="Salvar" 
                             Background="#FF37FF00" Command="{Binding SalvarClienteCriancaCommand}"

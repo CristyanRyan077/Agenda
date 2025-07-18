@@ -52,6 +52,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private bool clienteExistenteDetectado;
         [ObservableProperty] private bool isInEditMode;
         [ObservableProperty] private string pesquisaText;
+        public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
 
 
         private readonly AgendaViewModel _agenda;
@@ -94,8 +95,9 @@ namespace AgendaNovo.ViewModels
                      Email = cliente.Email,
                      CriancaId = crianca.Id,
                      NomeCrianca = crianca.Nome,
-                     Genero = crianca.Genero,
-                     Idade = $"{crianca.Idade} {crianca.IdadeUnidade}"
+                     Genero = Enum.TryParse<Genero>(crianca.Genero, out var genero) ? genero : Genero.M,
+                     Idade = crianca.Idade,
+                     IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var unidade) ? unidade : IdadeUnidade.Anos
                  });
              }
              else
@@ -209,8 +211,9 @@ namespace AgendaNovo.ViewModels
                             Email = cliente.Email,
                             CriancaId = crianca.Id,
                             NomeCrianca = crianca.Nome,
-                            Genero = crianca.Genero,
-                            Idade = $"{crianca.Idade} {crianca.IdadeUnidade}"
+                            Genero = Enum.TryParse<Genero>(crianca.Genero, out var genero) ? genero : Genero.M,
+                            Idade = crianca.Idade,
+                            IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var unidade) ? unidade : IdadeUnidade.Anos
                         });
                     }
                 }

@@ -16,7 +16,19 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? telefone;
         [ObservableProperty] private string? email;
         [ObservableProperty] private string? nomeCrianca;
-        [ObservableProperty] private string? genero;
-        [ObservableProperty] private string? idade;
+        [ObservableProperty] private Genero genero = Genero.M;
+        [ObservableProperty] private int? idade;
+        [ObservableProperty] private IdadeUnidade idadeUnidade = IdadeUnidade.Anos;
+        public string? IdadeFormatada =>
+                Idade.HasValue ? $"{Idade} {IdadeUnidade}" : null;
+
+        partial void OnIdadeUnidadeChanged(IdadeUnidade value)
+        {
+            OnPropertyChanged(nameof(IdadeFormatada));
+        }
+        partial void OnIdadeChanged(int? value)
+        {
+            OnPropertyChanged(nameof(IdadeFormatada));
+        }
     }
 }

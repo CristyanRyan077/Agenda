@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AgendaNovo.Models;
+using static Azure.Core.HttpHeader;
 
 namespace AgendaNovo
 {
@@ -35,9 +36,35 @@ namespace AgendaNovo
             var vm = DataContext as AgendaViewModel;
             if (vm == null)
                 return;
-            var nomeDigitado = (sender as ComboBox)?.Text?.Trim();
+
+            var comboBox = sender as ComboBox;
+            var nomeDigitado = comboBox?.Text?.Trim();
 
             if (string.IsNullOrEmpty(nomeDigitado)) return;
+            var clientesIguais = vm.ListaClientes
+            .Where(c => string.Equals(c.Nome?.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+            if (clientesIguais.Count > 1)
+            {
+                var texto = string.Join("\n\n", clientesIguais.Select(c =>
+                    $"ID: {c.Id}\nNome: {c.Nome}\n" +
+                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome}"))}\n" +
+                    $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
+
+                MessageBox.Show($"Existem vários clientes com esse nome:\n\n{texto}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Apaga o campo para evitar repetição
+                comboBox.Text = string.Empty;
+
+                // Opcional: também pode limpar o cliente selecionado
+                vm.ClienteSelecionado = null;
+
+                return;
+            }
+
+            // Se só um cliente foi encontrado, seleciona ele normalmente
+            vm.ClienteSelecionado = clientesIguais.FirstOrDefault();
 
             // Encontra o cliente (com comparação case insensitive)
             vm.ClienteSelecionado = vm.ListaClientes.FirstOrDefault(c =>
@@ -64,5 +91,37 @@ namespace AgendaNovo
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }
 
+        private void txtTelefone_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+
+
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
+
+
+            var comboBox = sender as ComboBox;
+            var Texto = comboBox?.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(Texto))
+                return;
+
+            var soDigitos = new string(Texto.Where(ch => char.IsDigit(ch)).ToArray());
+            if (soDigitos.Length >= 7)
+            {
+                var clientePorTel = vm.ListaClientes
+                    .FirstOrDefault(c =>
+                        (c.Telefone ?? "")
+                        .Where(ch => char.IsDigit(ch))
+                        .SequenceEqual(soDigitos));
+                if (clientePorTel != null)
+                {
+                    txtCliente.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
+                    txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
+                    txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
+                }
+            }
+        }
     }
 }

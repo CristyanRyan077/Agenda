@@ -36,6 +36,12 @@ namespace AgendaNovo
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
+        private bool _verificacaoJaFeita;
+        public bool VerificacaoJaFeita
+        {
+            get => _verificacaoJaFeita;
+            set => SetProperty(ref _verificacaoJaFeita, value);
+        }
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
@@ -212,8 +218,27 @@ namespace AgendaNovo
             }
         }
 
+        public void VerificarClientesComMesmoNome()
+        {
+            if (string.IsNullOrWhiteSpace(NovoCliente?.Nome))
+                return;
 
+            var nome = NovoCliente.Nome.Trim();
 
+            var clientesIguais = ListaClientes
+                .Where(c => c.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (clientesIguais.Count > 1 ||
+               (clientesIguais.Count == 1 && clientesIguais[0].Id != NovoCliente.Id))
+            {
+                var texto = string.Join("\n\n", clientesIguais.Select(c =>
+                    $"ID: {c.Id}\nNome: {c.Nome}\n" +
+                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome} ({cr.Idade} anos)"))}\n" +
+                    $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
+                MessageBox.Show($"⚠️ Já existe(m) cliente(s) com este nome:\n\n{texto}", "Aviso de duplicidade", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
         public void FiltrarAgendamentos()
         {
             AgendamentosFiltrados.Clear();
