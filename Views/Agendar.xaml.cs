@@ -30,12 +30,15 @@ namespace AgendaNovo
 
 
 
-
+        private bool _atualizandoCliente = false;
         private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
         {
             var vm = DataContext as AgendaViewModel;
             if (vm == null)
                 return;
+            if (_atualizandoCliente) return;
+
+            _atualizandoCliente = true;
 
             var comboBox = sender as ComboBox;
             var nomeDigitado = comboBox?.Text?.Trim();
@@ -66,14 +69,13 @@ namespace AgendaNovo
             // Se só um cliente foi encontrado, seleciona ele normalmente
             vm.ClienteSelecionado = clientesIguais.FirstOrDefault();
 
-            // Encontra o cliente (com comparação case insensitive)
-            vm.ClienteSelecionado = vm.ListaClientes.FirstOrDefault(c =>
-                c.Nome?.Equals(nomeDigitado, StringComparison.OrdinalIgnoreCase) ?? false);
+    
 
             // Atualiza os bindings
             txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
             txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
             txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
+            _atualizandoCliente = false;
         }
 
 
@@ -91,35 +93,22 @@ namespace AgendaNovo
             txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
         }
 
-        private void txtTelefone_LostFocus(object sender, RoutedEventArgs e)
+        private void txtIdBusca_LostFocus(object sender, RoutedEventArgs e)
         {
 
-
-
             var vm = DataContext as AgendaViewModel;
-            if (vm == null)
-                return;
+            if (vm == null) return;
 
-
-            var comboBox = sender as ComboBox;
-            var Texto = comboBox?.Text?.Trim();
-
-            if (string.IsNullOrWhiteSpace(Texto))
-                return;
-
-            var soDigitos = new string(Texto.Where(ch => char.IsDigit(ch)).ToArray());
-            if (soDigitos.Length >= 7)
+            if (int.TryParse(txtIdBusca.Text.Trim(), out int id))
             {
-                var clientePorTel = vm.ListaClientes
-                    .FirstOrDefault(c =>
-                        (c.Telefone ?? "")
-                        .Where(ch => char.IsDigit(ch))
-                        .SequenceEqual(soDigitos));
-                if (clientePorTel != null)
+                var cliente = vm.ListaClientes.FirstOrDefault(c => c.Id == id);
+                if (cliente != null)
                 {
-                    txtCliente.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
-                    txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
-                    txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
+                    vm.ClienteSelecionado = cliente;
+                }
+                else
+                {
+                    MessageBox.Show("Cliente com esse ID não encontrado.");
                 }
             }
         }

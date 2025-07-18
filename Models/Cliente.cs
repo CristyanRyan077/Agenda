@@ -14,6 +14,7 @@ namespace AgendaNovo.Models
         public int Id { get; set; }
 
         [ObservableProperty] private string? nome;
+        public string NomeComId => $"{Nome} (ID: {Id})";
         [ObservableProperty] private string? telefone;
         [ObservableProperty] private string? email;
         public List<Agendamento> Agendamentos { get; set; } = new();
