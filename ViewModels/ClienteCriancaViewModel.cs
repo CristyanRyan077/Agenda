@@ -53,6 +53,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private bool isInEditMode;
         [ObservableProperty] private string pesquisaText;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
+        public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
 
 
         private readonly AgendaViewModel _agenda;
@@ -123,10 +124,9 @@ namespace AgendaNovo.ViewModels
             if (IsInEditMode)
                 return;
 
-            bool nomeVazio = string.IsNullOrWhiteSpace(NovoCliente.Nome);
             bool telVazio = string.IsNullOrWhiteSpace(NovoCliente.Telefone);
             bool emailVazio = string.IsNullOrWhiteSpace(NovoCliente.Email);
-            if (nomeVazio && telVazio && emailVazio)
+            if (telVazio && emailVazio)
             {
                 ClienteExistenteDetectado = false;
                 NovoCliente.Id = 0;
@@ -137,11 +137,7 @@ namespace AgendaNovo.ViewModels
 
             Cliente? clienteDetectado = null;
 
-            if (!nomeVazio)
-            {
-                clienteDetectado = ListaClientes
-                    .FirstOrDefault(c => c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase));
-            }
+
             if (clienteDetectado is null && !telVazio)
             {
                 clienteDetectado = ListaClientes
@@ -306,13 +302,13 @@ namespace AgendaNovo.ViewModels
             var clienteFoiEditado = NovoCliente.Id != 0 && ListaClientes.Any(c => c.Id == NovoCliente.Id);
             Cliente cliente;
 
-            if (!clienteFoiEditado && ListaClientes.Any(c =>
+            /*if (!clienteFoiEditado && ListaClientes.Any(c =>
                 c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)
                 && c.Id != NovoCliente.Id))
             {
                 MessageBox.Show("Já existe um cliente com esse nome.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
-            }
+            } */
 
 
             if (clienteFoiEditado)

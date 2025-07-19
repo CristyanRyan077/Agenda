@@ -52,12 +52,25 @@ namespace AgendaNovo
 
             if (string.IsNullOrEmpty(nomeDigitado))
             {
+                vm.ClienteSelecionado = null;
                 _atualizandoCliente = false;
                 return;
             }
+            var clienteExato = vm.ListaClientes
+             .FirstOrDefault(c =>
+            string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase));
+
+            if (clienteExato == null)
+            {
+                vm.ClienteSelecionado = null;
+                _atualizandoCliente = false;
+                return;
+            }
+
             var clientesIguais = vm.ListaClientes
-            .Where(c => string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+                .Where(c => string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
 
             if (clientesIguais.Count > 1)
             {
@@ -67,20 +80,18 @@ namespace AgendaNovo
                     $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
 
                 MessageBox.Show($"Existem vários clientes com esse nome:\n\n{texto}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                // Apaga o campo para evitar repetição
                 comboBox.Text = string.Empty;
-
-                // Opcional: também pode limpar o cliente selecionado
                 vm.ClienteSelecionado = null;
-
+                _atualizandoCliente = false;
                 return;
             }
+            vm.ClienteSelecionado = clienteExato;
+            _preenchendoViaId = true;
 
-            // Se só um cliente foi encontrado, seleciona ele normalmente
-            vm.ClienteSelecionado = clientesIguais.FirstOrDefault();
-
-    
+            vm.NovoCliente.Id = clienteExato.Id;
+            vm.NovoCliente.Nome = clienteExato.Nome;
+            vm.NovoCliente.Telefone = clienteExato.Telefone;
+            vm.NovoCliente.Email = clienteExato.Email;
 
             // Atualiza os bindings
             txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
