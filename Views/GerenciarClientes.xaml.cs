@@ -95,12 +95,6 @@ namespace AgendaNovo
             }
         }
 
-        private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is ClienteCriancaViewModel vm)
-                vm.DetectarClientePorCampos();
-        }
-
         private void txtTel_LostFocus(object sender, RoutedEventArgs e)
         {
             if (DataContext is ClienteCriancaViewModel vm)

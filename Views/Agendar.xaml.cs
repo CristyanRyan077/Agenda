@@ -31,21 +31,32 @@ namespace AgendaNovo
 
 
         private bool _atualizandoCliente = false;
+        private bool _preenchendoViaId = false;
         private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
         {
             var vm = DataContext as AgendaViewModel;
+
             if (vm == null)
                 return;
+            if (_preenchendoViaId)
+            {
+                _preenchendoViaId = false;
+                return;
+            }
             if (_atualizandoCliente) return;
-
             _atualizandoCliente = true;
 
             var comboBox = sender as ComboBox;
             var nomeDigitado = comboBox?.Text?.Trim();
+            var nomeLimpo = nomeDigitado?.Split(" (ID:")[0].Trim();
 
-            if (string.IsNullOrEmpty(nomeDigitado)) return;
+            if (string.IsNullOrEmpty(nomeDigitado))
+            {
+                _atualizandoCliente = false;
+                return;
+            }
             var clientesIguais = vm.ListaClientes
-            .Where(c => string.Equals(c.Nome?.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase))
+            .Where(c => string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
             if (clientesIguais.Count > 1)
@@ -104,6 +115,7 @@ namespace AgendaNovo
                 var cliente = vm.ListaClientes.FirstOrDefault(c => c.Id == id);
                 if (cliente != null)
                 {
+                    _preenchendoViaId = true;
                     vm.ClienteSelecionado = cliente;
                 }
                 else

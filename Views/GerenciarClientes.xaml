@@ -10,7 +10,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="AgendaNovo.GerenciarClientes"
         mc:Ignorable="d"
         WindowState="Maximized" MinWidth="600" MinHeight="900"
-        Title="GerenciarClientes" Height="auto" Width="auto">
+        Title="GerenciarClientes">
     <Grid>
         <Grid>
             <Grid.Background>
@@ -27,13 +27,26 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="4*"/>
-
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                
             </Grid.RowDefinitions>
+
+            <hc:TextBox Name="txtPesquisa"
+                        Width="1000" Height="40" Grid.ColumnSpan="4"
+                           Margin="40,0,0,10" VerticalAlignment="Top"
+                           Grid.Column="1"
+                           hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
+                           Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
+            <materialDesign:PackIcon Kind="Search" 
+                        Width="50" Height="40"
+                        Margin="0,0,30,0"
+                        HorizontalAlignment="Right"
+                        Grid.Column="4"/>
+
             <DataGrid Grid.Column="1"
                       ItemsSource="{Binding ListaClienteCrianca}"
                          SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
@@ -52,42 +65,55 @@
                     <DataGridTextColumn Header="Genero" Binding="{Binding Genero}"/>
                 </DataGrid.Columns>
             </DataGrid>
+            <Grid Grid.Row="0" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
 
-            <hc:TextBox Name="txtPesquisa"
-                    Width="1000" Height="40" Grid.ColumnSpan="4"
-                    Margin="40,0,0,10" VerticalAlignment="Top"
-                    Grid.Column="1"
-                    hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
-                    Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
-            <materialDesign:PackIcon Kind="Search" 
-                                     Width="50" Height="40"
-                                     Margin="0,0,30,0"
-                                     HorizontalAlignment="Right"
-                                     Grid.Column="4"/>
+                <hc:TextBox x:Name="txtId" hc:InfoElement.Placeholder="ID"
+                        Text="{Binding NovoCliente.Id}"   
+                        IsReadOnly="True" 
+                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                Margin="12,10,0,40"
+                        Width="117" BorderBrush="Black" Height="30"/>
 
-            <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
+             
+                <TextBlock Text="⚠️ Cliente já existente detectado &#10;Uma nova criança será adicionada."
+                         Foreground="Orange" FontSize="12" HorizontalAlignment="Right" Margin="0,5,70,0"
+                         FontWeight="Bold" Background="Black" Height="35" VerticalAlignment="Top"
+                        Visibility="{Binding ClienteExistenteDetectado, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                 Grid.Row="0" LostFocus="txtCliente_LostFocus"
+                                 Grid.Row="0"
                                 PreviewTextInput="txtCliente_PreviewTextInput"
                                  Margin="12,0,0,2"
                                 Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Width="410" Height="42" BorderBrush="Black" Grid.ColumnSpan="2"/>
-            <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
+                <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
                                          Width="40" Height="40" Grid.Row="0"                                
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                          Foreground="Black" Margin="0,0,9,0" />
 
 
 
-            <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone" LostFocus="txtTel_LostFocus"
+                <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone" LostFocus="txtTel_LostFocus"
                         HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
                          Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="410" Height="42" BorderBrush="Black" Margin="12,0,0,0" Grid.Row="1"/>
 
-            <materialDesign:PackIcon Grid.Column="0" Kind="Phone"
+                <materialDesign:PackIcon Grid.Column="0" Kind="Phone"
                                          Width="34" Height="34"
                                          HorizontalAlignment="Right"
                                          Foreground="Black" Margin="0,5,1,0" Grid.Row="1"/>
+            </Grid>
 
             <hc:TextBox x:Name="txtEmail" hc:InfoElement.Placeholder="Email" LostFocus="txtEmail_LostFocus"
                         HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.ColumnSpan="2"
@@ -99,17 +125,8 @@
                                          Width="34" Height="34" VerticalAlignment="Bottom"
                                          HorizontalAlignment="Right"
                                          Foreground="Black" Margin="0,0,0,3" Grid.Row="1"/>
-            <TextBlock Text="⚠️ Cliente já existente detectado &#10;Uma nova criança será adicionada."
-           Foreground="Orange" FontSize="12" HorizontalAlignment="Right" Margin="0,5,70,0"
-           FontWeight="Bold" Background="Black" Height="35" VerticalAlignment="Top"
-           Visibility="{Binding ClienteExistenteDetectado, Converter={StaticResource BoolToVisibilityConverter}}" />
+          
 
-            <hc:TextBox x:Name="txtId" hc:InfoElement.Placeholder="ID"
-                        Text="{Binding NovoCliente.Id}"   
-                        IsReadOnly="True"
-                        HorizontalAlignment="Left" VerticalAlignment="Center"
-                                Margin="12,0,0,40"
-                        Width="117" BorderBrush="Black" Height="30"/>
 
             <hc:ComboBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"
              HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
