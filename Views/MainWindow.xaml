@@ -68,12 +68,39 @@
                             <FrameworkElement x:Name="SexProxy" Tag="{Binding DiaChkSex}" Visibility="Collapsed"/>
                             <FrameworkElement x:Name="SabProxy" Tag="{Binding DiaChkSab}" Visibility="Collapsed"/>
                             <FrameworkElement x:Name="DomProxy" Tag="{Binding DiaChkDom}" Visibility="Collapsed"/>
-                            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" Margin="0,8">
-                                <Button Content="← Semana Anterior" Command="{Binding SemanaAnteriorCommand}" Margin="10,0"/>
-                                <TextBlock Text="{Binding DataReferencia, StringFormat='Semana de {0:dd/MM}'}"
-               VerticalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="10"/>
-                                <Button Content="Próxima Semana →" Command="{Binding ProximaSemanaCommand}" Margin="10,0"/>
-                            </StackPanel>
+                            <Grid Margin="0,8" Background="#55FFFFFF" Grid.Column="1" Effect="{StaticResource DropShadow}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button Content="← Semana Anterior"
+                            Command="{Binding SemanaAnteriorCommand}"
+                            FontWeight="Bold"
+                                        Grid.Column="0"
+                            FontSize="12"
+                            Background="#FFDDDD"
+                            BorderBrush="Black"
+                            Margin="0,0"
+                            Padding="2,4"/>
+
+                            <TextBlock Text="{Binding SemanaExibida, StringFormat='Semana {0}'}"
+                               VerticalAlignment="Center"
+                               FontSize="16" Grid.Column="1"
+                               FontWeight="Bold"
+                               Margin="10,0"
+                               Foreground="Black"
+                               FontFamily="Segoe UI Black"/>
+
+                                                <Button Content="Próxima Semana →"
+                            Command="{Binding ProximaSemanaCommand}"
+                            FontWeight="Bold"
+                            FontSize="14" Grid.Column="2"
+                            Background="#DDFFDD"
+                            BorderBrush="Black"
+                            Margin="0,0"
+                            Padding="8,4"/>
+                            </Grid>
                             <!-- SEGUNDA -->
                             <Grid Grid.Row="1" Grid.Column="0">
                                 <TextBlock Text="Segunda"

@@ -18,6 +18,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
             [ObservableProperty] private string? genero;
 
             [ObservableProperty] private string? idadeUnidade = "anos";
+
+            
             public int ClienteId { get; set; }
             public Cliente? Cliente { get; set; }
 

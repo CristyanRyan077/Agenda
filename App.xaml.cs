@@ -2,6 +2,7 @@
 using System.Data;
 using System.Globalization;
 using System.Windows;
+using HandyControl.Tools;
 
 namespace AgendaNovo
 {
@@ -12,11 +13,7 @@ namespace AgendaNovo
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-BR");
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("pt-BR");
-            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
-            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
-            HandyControl.Properties.Langs.Lang.Culture = new CultureInfo("pt-BR");
+            ConfigHelper.Instance.SetLang("pt-br");
             base.OnStartup(e);
 
 

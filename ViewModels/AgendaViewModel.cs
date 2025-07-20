@@ -16,6 +16,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace AgendaNovo
 {
@@ -46,6 +47,8 @@ namespace AgendaNovo
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
+        [ObservableProperty]
+        private int? criancaId;
 
 
         //Data e horario
@@ -300,29 +303,34 @@ namespace AgendaNovo
             });
         }
 
-
         partial void OnItemSelecionadoChanged(Agendamento? value)
         {
             try
             {
                 if (value == null) return;
+                // 1) Atualiza a data e recalcula horários
+                DataSelecionada = value.Data;
+                AtualizarHorariosDisponiveis();
+                if (!string.IsNullOrEmpty(value.Horario)
+                && !HorariosDisponiveis.Contains(value.Horario))
+                {
+                    HorariosDisponiveis.Insert(0, value.Horario);
+                }
+
+                // 2) Localiza instância exata do cliente e da criança
+                var cliente = ListaClientes.First(c => c.Id == value.ClienteId);
+                ClienteSelecionado = cliente;
+                NovoCliente = cliente;
+
+                Crianca? crianca = null;
+                if (value.Crianca != null)
+                    crianca = cliente.Criancas.First(c => c.Id == value.Crianca.Id);
 
                 NovoAgendamento = new Agendamento
                 {
                     Id = value.Id,
-                    Cliente = new Cliente
-
-                    {
-                        Nome = value.Cliente?.Nome ?? string.Empty,
-                        Telefone = value.Cliente?.Telefone ?? string.Empty
-                    },
-                    Crianca = value.Crianca != null ? new Crianca
-                    {
-                        Nome = value.Crianca.Nome,
-                        Idade = value.Crianca.Idade,
-                        Genero = value.Crianca.Genero,
-                        IdadeUnidade = value.Crianca.IdadeUnidade
-                    } : new Crianca(),
+                    Cliente = cliente,
+                    Crianca = crianca ?? new Crianca(),
                     Data = value.Data,
                     Horario = value.Horario,
                     Pacote = value.Pacote,
@@ -330,21 +338,17 @@ namespace AgendaNovo
                     Valor = value.Valor,
                     ValorPago = value.ValorPago
                 };
-                DataSelecionada = value.Data;
-                NovoCliente = new Cliente
-                {
-                    Nome = value.Cliente?.Nome ?? string.Empty,
-                    Telefone = value.Cliente?.Telefone ?? string.Empty
-                };
+
+
                 ListaCriancas.Clear();
-                if (value.Cliente?.Criancas != null)
-                {
-                    foreach (var crianca in value.Cliente.Criancas)
-                        ListaCriancas.Add(crianca);
-                }
-                OnPropertyChanged(nameof(NovoAgendamento.Tema));
+                foreach (var cr in cliente.Criancas)
+                    ListaCriancas.Add(cr);
+                CriancaSelecionada = crianca;
+                OnPropertyChanged(nameof(HorariosDisponiveis));
+                OnPropertyChanged(nameof(NovoAgendamento));
                 OnPropertyChanged(nameof(NovoAgendamento.Horario));
-                OnPropertyChanged(nameof(NovoAgendamento.Crianca));
+                OnPropertyChanged(nameof(NovoAgendamento.Tema));
+                OnPropertyChanged(nameof(CriancaSelecionada));
             }
             catch (Exception ex)
             {
@@ -399,6 +403,9 @@ namespace AgendaNovo
         }
         public void AtualizarHorariosDisponiveis()
         {
+            if (NovoAgendamento.Horario != null && !HorariosDisponiveis.Contains(NovoAgendamento.Horario))
+                NovoAgendamento.Horario = null;
+
             var ocupados = ListaAgendamentos
                 .Where(a => a.Data.Date == DataSelecionada.Date && a.Id != NovoAgendamento.Id)
                 .Select(a => a.Horario)
@@ -416,34 +423,13 @@ namespace AgendaNovo
                 NovoAgendamento.Horario = null;
         }
 
-        partial void OnNovoAgendamentoChanged(Agendamento value)
-        {
-            if (value?.Cliente != null)
-            {
-                NovoCliente = new Cliente
-                {
-                    Nome = value.Cliente.Nome,
-                    Telefone = value.Cliente.Telefone
-                };
-
-                ClienteSelecionado = ListaClientes
-                    .FirstOrDefault(c => c.Nome == NovoCliente.Nome);
-            }
-            else
-            {
-                NovoCliente = new Cliente();
-                ClienteSelecionado = null;
-            }
-            
-        }
+       
 
         partial void OnClienteSelecionadoChanged(Cliente value)
         {
             if (value != null)
             {
-                NovoCliente.Nome = value.Nome;
-                NovoCliente.Telefone = value.Telefone;
-                NovoCliente.Email = value.Email;
+                NovoCliente = value;
 
                 var criancas = value.Criancas ?? new List<Crianca>();
                 foreach (var crianca in criancas)
@@ -625,13 +611,18 @@ namespace AgendaNovo
                     textoCrianca = $" {novo.Crianca.Nome} ({novo.Crianca.Idade} {novo.Crianca.IdadeUnidade})\n";
                 }
 
-                var texto = Uri.EscapeDataString($"Agendamento Confirmado\n\n" +
+                var texto = Uri.EscapeDataString($"✅ Agendado: {novo.Data:dd/MM/yyyy} às {novo.Horario} ({novo.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
                             $"Cliente: {novo.Cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {novo.Cliente.Telefone}\n" +
                             $"Tema: {novo.Tema}\n" +
                             $"Pacote: {novo.Pacote}\n" +
-                            $"Data: {novo.Data:dd/MM/yyyy} às {novo.Horario}\n" +
-                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}");
+                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}\n" +
+
+                            $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
+                            $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
+                            $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
+                            $"  (A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
+                            $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
                 Clipboard.SetText(texto);
                 MessageBox.Show("Agendamento copiado para a área de transferência!");
 
@@ -755,16 +746,26 @@ namespace AgendaNovo
             AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
         }
         private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia)
-{
-            var inicioSemana = DataReferencia.AddDays(-(int)DataReferencia.DayOfWeek);
-            var dataDoDia = inicioSemana.AddDays((int)dia);
+        {
+            int diasDesdeSegunda = ((int)DataReferencia.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            var inicioSemana = DataReferencia.AddDays(-diasDesdeSegunda);
+            var dataDoDia = inicioSemana.AddDays((int)dia - 1);
 
             return ListaAgendamentos
                 .Where(a => a.Data.Date == dataDoDia.Date)
                 .OrderBy(a => a.Horario);
-}
+        }
 
-        private DateTime FimDaSemana => DateTime.Today.AddDays(6);
+        private DateTime InicioDaSemana
+        {
+            get
+            {
+                int diasDesdeSegunda = ((int)DataReferencia.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+                return DataReferencia.AddDays(-diasDesdeSegunda);
+            }
+        }
+
+        private DateTime FimDaSemana => InicioDaSemana.AddDays(6);
 
         public IEnumerable<Agendamento> AgendamentosDomingo => FiltrarPorDia(DayOfWeek.Sunday);
 
@@ -801,10 +802,12 @@ namespace AgendaNovo
                 {
                     _dataReferencia = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(SemanaExibida)); 
                     AtualizarAgendamentos();
                 }
             }
         }
+        public string SemanaExibida => $"{InicioDaSemana:dd/MM} - {FimDaSemana:dd/MM}";
 
         [RelayCommand]
         private void SemanaAnterior() => DataReferencia = DataReferencia.AddDays(-7);

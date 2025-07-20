@@ -67,6 +67,7 @@
                                      Margin="0,2,0,0" VerticalAlignment="Center"
                                      HorizontalAlignment="Right"
                                      Grid.Column="4"/>
+            <DatePicker/>
 
             <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
