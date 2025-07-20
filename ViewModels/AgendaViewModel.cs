@@ -253,6 +253,20 @@ namespace AgendaNovo
         [RelayCommand]
         private void CopiarHorariosLivres()
         {
+            // Verifica se a data foi selecionada
+            if (DataSelecionada == default)
+            {
+                MessageBox.Show("Selecione uma data para verificar os horários.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Verifica se o telefone foi digitado
+            if (string.IsNullOrWhiteSpace(NovoCliente.Telefone))
+            {
+                MessageBox.Show("Digite um número de telefone.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var ocupados = ListaAgendamentos
                 .Where(a => a.Data.Date == DataSelecionada.Date)
                 .Select(a => a.Horario)
@@ -268,57 +282,77 @@ namespace AgendaNovo
                 return;
             }
 
-            string texto = $"Horários livres em {DataSelecionada:dd/MM/yyyy}:\n\n" + string.Join(", ", livres);
-            Clipboard.SetText(texto);
+            string texto = $"Olá! Estes são os horários livres para o dia {DataSelecionada:dd/MM/yyyy}:\n\n" +
+                           string.Join(", ", livres);
 
+            Clipboard.SetText(texto);
             MessageBox.Show("Horários livres copiados para a área de transferência!", "Copiado", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Enviar no WhatsApp
+            string telefoneFormatado = $"55859{Regex.Replace(NovoCliente.Telefone, @"\D", "")}";
+            string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={Uri.EscapeDataString(texto)}";
+
+            Thread.Sleep(1000); // Espera opcional
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         }
 
 
         partial void OnItemSelecionadoChanged(Agendamento? value)
         {
-            if (value?.Cliente == null)
-                return;
-
-            NovoAgendamento = new Agendamento
+            try
             {
-                Id = value.Id,
-                Cliente = new Cliente
-                
+                if (value == null) return;
+
+                NovoAgendamento = new Agendamento
+                {
+                    Id = value.Id,
+                    Cliente = new Cliente
+
+                    {
+                        Nome = value.Cliente?.Nome ?? string.Empty,
+                        Telefone = value.Cliente?.Telefone ?? string.Empty
+                    },
+                    Crianca = value.Crianca != null ? new Crianca
+                    {
+                        Nome = value.Crianca.Nome,
+                        Idade = value.Crianca.Idade,
+                        Genero = value.Crianca.Genero,
+                        IdadeUnidade = value.Crianca.IdadeUnidade
+                    } : new Crianca(),
+                    Data = value.Data,
+                    Horario = value.Horario,
+                    Pacote = value.Pacote,
+                    Tema = value.Tema,
+                    Valor = value.Valor,
+                    ValorPago = value.ValorPago
+                };
+                DataSelecionada = value.Data;
+                NovoCliente = new Cliente
                 {
                     Nome = value.Cliente?.Nome ?? string.Empty,
                     Telefone = value.Cliente?.Telefone ?? string.Empty
-                },
-                Crianca = value.Crianca != null ? new Crianca
+                };
+                ListaCriancas.Clear();
+                if (value.Cliente?.Criancas != null)
                 {
-                    Nome = value.Crianca.Nome,
-                    Idade = value.Crianca.Idade,
-                    Genero = value.Crianca.Genero,
-                    IdadeUnidade = value.Crianca.IdadeUnidade
-                } : new Crianca(),
-                Data = value.Data,
-                Horario = value.Horario,
-                Pacote = value.Pacote,
-                Tema = value.Tema,
-                Valor = value.Valor,
-                ValorPago = value.ValorPago
-            };
-            DataSelecionada = value.Data;
-            NovoCliente = new Cliente
-            {
-                Nome = value.Cliente?.Nome ?? string.Empty,
-                Telefone = value.Cliente?.Telefone ?? string.Empty
-            };
-            ListaCriancas.Clear();
-            if (value.Cliente?.Criancas != null)
-            {
-                foreach (var crianca in value.Cliente.Criancas)
-                    ListaCriancas.Add(crianca);
+                    foreach (var crianca in value.Cliente.Criancas)
+                        ListaCriancas.Add(crianca);
+                }
+                OnPropertyChanged(nameof(NovoAgendamento.Tema));
+                OnPropertyChanged(nameof(NovoAgendamento.Horario));
+                OnPropertyChanged(nameof(NovoAgendamento.Crianca));
             }
-            OnPropertyChanged(nameof(NovoAgendamento.Tema));
-            OnPropertyChanged(nameof(NovoAgendamento.Horario));
-            OnPropertyChanged(nameof(NovoAgendamento.Crianca));
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao selecionar item: " + ex.Message);
+            }
         }
+
+
 
         public void CriarNovoCliente()
         {
@@ -355,6 +389,8 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ClienteSelecionado));
             OnPropertyChanged(nameof(ListaCriancas));
         }
+            
+        
 
         partial void OnDataSelecionadaChanged(DateTime value)
         {
@@ -375,6 +411,9 @@ namespace AgendaNovo
             HorariosDisponiveis.Clear();
             foreach (var h in livres)
                 HorariosDisponiveis.Add(h);
+
+            if (!HorariosDisponiveis.Contains(NovoAgendamento.Horario))
+                NovoAgendamento.Horario = null;
         }
 
         partial void OnNovoAgendamentoChanged(Agendamento value)
@@ -627,8 +666,8 @@ namespace AgendaNovo
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
             FiltrarAgendamentos();
-            ItemSelecionado = null;
             LimparCampos();
+            ItemSelecionado = null;
 
         }
         public void AtualizarPago(Agendamento agendamento)
@@ -715,11 +754,15 @@ namespace AgendaNovo
             TextoPesquisa = string.Empty;
             AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
         }
-        private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia) =>
-        ListaAgendamentos.Where(a =>
-        a.Data.DayOfWeek == dia &&
-        a.Data.Date >= DateTime.Today &&
-        a.Data.Date <= FimDaSemana);
+        private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia)
+{
+            var inicioSemana = DataReferencia.AddDays(-(int)DataReferencia.DayOfWeek);
+            var dataDoDia = inicioSemana.AddDays((int)dia);
+
+            return ListaAgendamentos
+                .Where(a => a.Data.Date == dataDoDia.Date)
+                .OrderBy(a => a.Horario);
+}
 
         private DateTime FimDaSemana => DateTime.Today.AddDays(6);
 
@@ -748,6 +791,26 @@ namespace AgendaNovo
         public bool DiaChkSex => DiaAtual == DayOfWeek.Friday;
         public bool DiaChkSab => DiaAtual == DayOfWeek.Saturday;
         public bool DiaChkDom => DiaAtual == DayOfWeek.Sunday;
+        private DateTime _dataReferencia = DateTime.Today;
+        public DateTime DataReferencia
+        {
+            get => _dataReferencia;
+            set
+            {
+                if (_dataReferencia != value)
+                {
+                    _dataReferencia = value;
+                    OnPropertyChanged();
+                    AtualizarAgendamentos();
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void SemanaAnterior() => DataReferencia = DataReferencia.AddDays(-7);
+
+        [RelayCommand]
+        private void ProximaSemana() => DataReferencia = DataReferencia.AddDays(7);
     }
 
 

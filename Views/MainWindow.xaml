@@ -68,6 +68,12 @@
                             <FrameworkElement x:Name="SexProxy" Tag="{Binding DiaChkSex}" Visibility="Collapsed"/>
                             <FrameworkElement x:Name="SabProxy" Tag="{Binding DiaChkSab}" Visibility="Collapsed"/>
                             <FrameworkElement x:Name="DomProxy" Tag="{Binding DiaChkDom}" Visibility="Collapsed"/>
+                            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" Margin="0,8">
+                                <Button Content="← Semana Anterior" Command="{Binding SemanaAnteriorCommand}" Margin="10,0"/>
+                                <TextBlock Text="{Binding DataReferencia, StringFormat='Semana de {0:dd/MM}'}"
+               VerticalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="10"/>
+                                <Button Content="Próxima Semana →" Command="{Binding ProximaSemanaCommand}" Margin="10,0"/>
+                            </StackPanel>
                             <!-- SEGUNDA -->
                             <Grid Grid.Row="1" Grid.Column="0">
                                 <TextBlock Text="Segunda"

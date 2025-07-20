@@ -38,7 +38,7 @@ namespace AgendaNovo
 
             if (vm == null)
                 return;
-            if (_preenchendoViaId)
+            if (_preenchendoViaId || string.Equals(txtIdBusca.IsFocused, true))
             {
                 _preenchendoViaId = false;
                 return;
@@ -128,6 +128,10 @@ namespace AgendaNovo
                 {
                     _preenchendoViaId = true;
                     vm.ClienteSelecionado = cliente;
+                    txtCliente.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
+                    txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+                    txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
+                    txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
                 }
                 else
                 {
