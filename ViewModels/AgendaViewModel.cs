@@ -307,6 +307,7 @@ namespace AgendaNovo
         {
             try
             {
+                LimparCampos();
                 if (value == null) return;
                 // 1) Atualiza a data e recalcula horários
                 DataSelecionada = value.Data;
@@ -318,13 +319,20 @@ namespace AgendaNovo
                 }
 
                 // 2) Localiza instância exata do cliente e da criança
-                var cliente = ListaClientes.First(c => c.Id == value.ClienteId);
+                var cliente = ListaClientes.FirstOrDefault(c => c.Id == value.ClienteId);
+                if (cliente == null)
+                    return;
                 ClienteSelecionado = cliente;
                 NovoCliente = cliente;
 
-                Crianca? crianca = null;
-                if (value.Crianca != null)
-                    crianca = cliente.Criancas.First(c => c.Id == value.Crianca.Id);
+                ListaCriancas.Clear();
+                foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
+                    ListaCriancas.Add(cr);
+
+                var crianca = value.Crianca != null
+                    ? cliente.Criancas.FirstOrDefault(c => c.Id == value.Crianca.Id)
+                    : null;
+                CriancaSelecionada = crianca;
 
                 NovoAgendamento = new Agendamento
                 {
@@ -338,12 +346,6 @@ namespace AgendaNovo
                     Valor = value.Valor,
                     ValorPago = value.ValorPago
                 };
-
-
-                ListaCriancas.Clear();
-                foreach (var cr in cliente.Criancas)
-                    ListaCriancas.Add(cr);
-                CriancaSelecionada = crianca;
                 OnPropertyChanged(nameof(HorariosDisponiveis));
                 OnPropertyChanged(nameof(NovoAgendamento));
                 OnPropertyChanged(nameof(NovoAgendamento.Horario));
@@ -423,39 +425,37 @@ namespace AgendaNovo
                 NovoAgendamento.Horario = null;
         }
 
-       
+
 
         partial void OnClienteSelecionadoChanged(Cliente value)
         {
-            if (value != null)
-            {
-                NovoCliente = value;
-
-                var criancas = value.Criancas ?? new List<Crianca>();
-                foreach (var crianca in criancas)
-                    ListaCriancas.Add(crianca);
-
-                if (criancas.Count == 1)
-                {
-                    var unica = criancas.First();
-                    NovoAgendamento.Crianca = new Crianca
-                    {
-                        Nome = unica.Nome,
-                        Idade = unica.Idade,
-                        Genero = unica.Genero,
-                        IdadeUnidade = unica.IdadeUnidade
-                    };
-                }
-            }
-            else
+            // Se desmarcou, limpa tudo
+            if (value == null)
             {
                 NovoCliente = new Cliente();
                 ListaCriancas.Clear();
+                CriancaSelecionada = null;
+                return;
             }
 
-            // Força a atualização dos bindings
-            OnPropertyChanged(nameof(NovoAgendamento));
-            OnPropertyChanged(nameof(NovoAgendamento.Crianca));
+            // 1) Usa a instância exata
+            NovoCliente = value;
+            ClienteSelecionado = value;
+
+            // 2) Repopula a lista de crianças
+            ListaCriancas.Clear();
+            foreach (var cr in value.Criancas ?? Enumerable.Empty<Crianca>())
+                ListaCriancas.Add(cr);
+
+            // 3) Se só tem 1 criança, já a seleciona
+            CriancaSelecionada = value.Criancas != null && value.Criancas.Count == 1
+            ? value.Criancas[0]
+            : null;  
+
+            // dispara atualização de bindings
+            OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(ListaCriancas));
+            OnPropertyChanged(nameof(CriancaSelecionada));
         }
 
         private readonly AgendaContext _db;

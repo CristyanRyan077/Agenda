@@ -62,11 +62,11 @@
                     </Grid.ColumnDefinitions>
 
                     <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="60"
-                             hc:InfoElement.Placeholder="Cliente"
+                             hc:InfoElement.Placeholder="Cliente" 
                              IsEditable="True" LostFocus="txtCliente_LostFocus"                           
-                             ItemsSource="{Binding ListaClientes}"
-                             SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
-                                 
+                             ItemsSource="{Binding ListaClientes}" IsTextSearchEnabled="False"
+                             StaysOpenOnEdit="True" 
+                             SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"                             
                              TextSearch.TextPath="Nome"
                              ToolTip="Obs: Nessa janela, cliente não pode ser editado nem criado um novo"
                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
