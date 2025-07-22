@@ -163,7 +163,7 @@ namespace AgendaNovo
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning);
             var fantasmas = _db.Agendamentos
-            .Where(a => a.Crianca == null)
+            .Where(a => a.CriancaId == 0)
             .ToList();
 
             if (fantasmas.Any())
@@ -557,15 +557,14 @@ namespace AgendaNovo
             var clienteExistente = _db.Clientes
                 .Include(c => c.Criancas)
                 .FirstOrDefault(c => c.Id == NovoCliente.Id);
-
             if (clienteExistente == null)
                 return;
 
 
             var criancaParaAgendar = clienteExistente.Criancas
-            .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca?.Nome);
+            .FirstOrDefault(c => c.Id == NovoAgendamento.Crianca?.Id);
 
-            if (criancaParaAgendar == null)
+            if (criancaParaAgendar == null && NovoAgendamento.Crianca != null)
             {
                 criancaParaAgendar = new Crianca
                 {
@@ -576,12 +575,13 @@ namespace AgendaNovo
                     ClienteId = clienteExistente.Id
                 };
                 var jaRastreada = _db.Criancas.Local
-                    .FirstOrDefault(c => c.Nome == criancaParaAgendar.Nome
+                    .FirstOrDefault(c => c.Id == criancaParaAgendar.Id
                      && c.ClienteId == criancaParaAgendar.ClienteId);
 
                 if (jaRastreada == null)
                 {
                     _db.Criancas.Add(criancaParaAgendar);
+                        _db.SaveChanges();
                 }
             }
             else
