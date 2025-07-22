@@ -49,7 +49,7 @@
                     <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding Email }" />
                     <DataGridTextColumn Header="Crianca" Binding="{Binding NomeCrianca}"/>
-                    <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Idade}"/>
+                    <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding IdadeFormatada}"/>
                     <DataGridTextColumn Header="Genero" Binding="{Binding Genero}"/>
                 </DataGrid.Columns>
             </DataGrid>

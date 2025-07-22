@@ -67,6 +67,7 @@ namespace AgendaNovo
         {
             if (DataContext is AgendaViewModel agendaVm)
             {
+                vm.LimparCamposCommand.Execute(null);
                 if (_janelaClientes == null || !_janelaClientes.IsLoaded)
                 {
                     var clienteVm = new ClienteCriancaViewModel(agendaVm);

@@ -62,7 +62,7 @@
                     </Grid.ColumnDefinitions>
 
                     <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="60"
-                             hc:InfoElement.Placeholder="Cliente" 
+                             hc:InfoElement.Placeholder="Cliente" DropDownClosed="txtCliente_DropDownClosed"
                              IsEditable="True" LostFocus="txtCliente_LostFocus"                           
                              ItemsSource="{Binding ListaClientes}" IsTextSearchEnabled="False"
                              StaysOpenOnEdit="True" 

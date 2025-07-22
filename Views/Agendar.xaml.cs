@@ -70,6 +70,7 @@ namespace AgendaNovo
                     _viewClientes.Refresh();
                     txtCliente.IsDropDownOpen = !string.IsNullOrEmpty(editor.Text);
                 };
+
                 editor.PreviewKeyDown += (s2, e2) =>
                 {
                     if (editor.SelectionLength > 0 &&
@@ -81,6 +82,16 @@ namespace AgendaNovo
                     }
                 };
             };
+        }
+        private void txtCliente_DropDownClosed(object sender, EventArgs e)
+        {
+            if (txtCliente.SelectedItem is Cliente clienteSel)
+            {
+                PreencherCliente(clienteSel);
+                // evita rodar o LostFocus duplicado
+                _atualizandoCliente = false;
+                _preenchendoViaId = true;
+            }
         }
         private void Tb_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

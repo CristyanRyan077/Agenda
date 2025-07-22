@@ -192,6 +192,9 @@ namespace AgendaNovo.ViewModels
         public void AtualizarListaClienteCrianca()
         {
             ListaClienteCrianca.Clear();
+            _agenda.ListaClientes.Clear();
+            foreach (var cli in _db.Clientes.Include(c => c.Criancas))
+                _agenda.ListaClientes.Add(cli);
 
             foreach (var cliente in ListaClientes)
             {
@@ -225,6 +228,7 @@ namespace AgendaNovo.ViewModels
                     });
 
                 }
+  
 
             }
         }
@@ -299,9 +303,9 @@ namespace AgendaNovo.ViewModels
                 return;
 
 
-            var clienteFoiEditado = NovoCliente.Id != 0 && ListaClientes.Any(c => c.Id == NovoCliente.Id);
-            Cliente cliente;
 
+            bool clienteEditado = NovoCliente.Id != 0;
+            Cliente cliente;
             /*if (!clienteFoiEditado && ListaClientes.Any(c =>
                 c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)
                 && c.Id != NovoCliente.Id))
@@ -311,14 +315,13 @@ namespace AgendaNovo.ViewModels
             } */
 
 
-            if (clienteFoiEditado)
+            if (clienteEditado)
             {
                 // Atualiza cliente
                 cliente = ListaClientes.First(c => c.Id == NovoCliente.Id);
                 cliente.Nome = NovoCliente.Nome;
                 cliente.Telefone = NovoCliente.Telefone;
                 cliente.Email = NovoCliente.Email;
-                _db.Clientes.Update(cliente);
                 _db.SaveChanges();
             }
             else
@@ -334,54 +337,58 @@ namespace AgendaNovo.ViewModels
                 
                 _db.Clientes.Add(cliente);
                 _db.SaveChanges();
-                cliente = _db.Clientes.Include(c => c.Criancas).First(c => c.Id == cliente.Id);
-                ListaClientes.Add(cliente);
 
 
 
             }
 
             // Verifica se há criança para salvar
-            if (CriancaSelecionada != null && !string.IsNullOrWhiteSpace(CriancaSelecionada.Nome))
-            {
-                var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == CriancaSelecionada.Id)
-                           ?? cliente.Criancas.FirstOrDefault(c => c.Nome == CriancaSelecionada.Nome);
-
-                if (crianca == null)
-                {
-                    crianca = new Crianca
+            Crianca? savedCrianca = null;
+            if (!string.IsNullOrWhiteSpace(CriancaSelecionada?.Nome))
                     {
-                        Nome = CriancaSelecionada.Nome,
-                        Idade = CriancaSelecionada.Idade,
-                        Genero = CriancaSelecionada.Genero,
-                        IdadeUnidade = CriancaSelecionada.IdadeUnidade,
-                        ClienteId = cliente.Id,
-                        Cliente = cliente
-                    };
-                    ListaCriancas.Add(crianca);
+                    var crianca = cliente.Criancas
+                    .FirstOrDefault(c => c.Id == CriancaSelecionada.Id)
+                        ?? new Crianca
+                           {
+                               Nome = CriancaSelecionada.Nome,
+                               Idade = CriancaSelecionada.Idade,
+                               Genero = CriancaSelecionada.Genero,
+                               IdadeUnidade = CriancaSelecionada.IdadeUnidade,
+                               ClienteId = cliente.Id
+                           };
+                crianca.Nome = CriancaSelecionada.Nome;
+                crianca.Idade = CriancaSelecionada.Idade;
+                crianca.Genero = CriancaSelecionada.Genero;
+                crianca.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
+                if (crianca.Id == 0)
+                {
                     _db.Criancas.Add(crianca);
                 }
                 else
                 {
-                    crianca.Cliente = cliente;
-                    crianca.Nome = CriancaSelecionada.Nome;
-                    crianca.Idade = CriancaSelecionada.Idade;
-                    crianca.Genero = CriancaSelecionada.Genero;
-                    crianca.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
-
+                    _db.Criancas.Update(crianca);
                 }
+                _db.SaveChanges();
+                savedCrianca = crianca;
             }
-
-            _db.SaveChanges();
             _db.Entry(cliente).Collection(c => c.Criancas).Load();
-
-            AtualizarListaClienteCrianca();
-            CarregarCriancasDoCliente(cliente);
-            IsInEditMode = false;
-            ClienteExistenteDetectado = false;
-            NotifyAll();
             CarregarClientesDoBanco();
-            LimparCamposClienteCrianca();
+            CarregarCriancasDoCliente(cliente);
+            AtualizarListaClienteCrianca();
+
+            LimparInputsClienteCrianca();
+            NotifyAll();
+
+
+        }
+        private void LimparInputsClienteCrianca()
+        {
+            NovoCliente.Reset();
+            CriancaSelecionada.Reset();
+            ClienteExistenteDetectado = false;
+            IsInEditMode = false;
+            // NÃO limpa ListaCriancas nem ListaCriancasDoCliente
+            NotifyAll();
         }
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()

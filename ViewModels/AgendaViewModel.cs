@@ -162,6 +162,15 @@ namespace AgendaNovo
                 "Remover Agendamentos Antigos",
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning);
+            var fantasmas = _db.Agendamentos
+            .Where(a => a.Crianca == null)
+            .ToList();
+
+            if (fantasmas.Any())
+            {
+                _db.Agendamentos.RemoveRange(fantasmas);
+                _db.SaveChanges();
+            }
 
             var anteriores = ListaAgendamentos
                 .Where(a => a.Data.Date < DateTime.Today)
@@ -534,14 +543,24 @@ namespace AgendaNovo
         [RelayCommand]
         private void Agendar()
         {
-            if (NovoAgendamento == null)
-                NovoAgendamento = new Agendamento();
-            if (NovoCliente == null || string.IsNullOrWhiteSpace(NovoCliente.Nome))
+            if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
+            if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario))
+            {
+                MessageBox.Show(
+                    "Por favor, selecione um horário antes de agendar.",
+                    "Horário obrigatório",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
             var clienteExistente = _db.Clientes
                 .Include(c => c.Criancas)
-                .FirstOrDefault(c => c.Nome == NovoCliente.Nome);
-          
+                .FirstOrDefault(c => c.Id == NovoCliente.Id);
+
+            if (clienteExistente == null)
+                return;
+
 
             var criancaParaAgendar = clienteExistente.Criancas
             .FirstOrDefault(c => c.Nome == NovoAgendamento.Crianca?.Nome);
@@ -572,13 +591,12 @@ namespace AgendaNovo
                 criancaParaAgendar.IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade;
             }
 
-            var agendamentoExistente = _db.Agendamentos
-                .Include(a => a.Cliente)
-                .Include(a => a.Crianca)
-                .FirstOrDefault(a => a.Id == NovoAgendamento.Id);
-            if (agendamentoExistente != null)
-            {
 
+            if (NovoAgendamento.Id > 0)
+            {
+                var agendamentoExistente = _db.Agendamentos.Find(NovoAgendamento.Id);
+                agendamentoExistente.ClienteId = clienteExistente.Id;
+                agendamentoExistente.CriancaId = criancaParaAgendar.Id;
                 agendamentoExistente.Pacote = NovoAgendamento.Pacote;
                 agendamentoExistente.Tema = NovoAgendamento.Tema;
                 agendamentoExistente.Horario = NovoAgendamento.Horario;
@@ -593,8 +611,8 @@ namespace AgendaNovo
                 // Cria um novo agendamento
                 var novo = new Agendamento
                 {
-                    Cliente = clienteExistente,
-                    Crianca = criancaParaAgendar,
+                    ClienteId = clienteExistente.Id,
+                    CriancaId = criancaParaAgendar.Id,
                     Pacote = NovoAgendamento.Pacote,
                     Horario = NovoAgendamento.Horario,
                     Data = DataSelecionada.Date,
@@ -653,7 +671,7 @@ namespace AgendaNovo
                 ListaClientes.Clear();
                 foreach (var cliente in clientes)
                     ListaClientes.Add(cliente);
-
+            CarregarDadosDoBanco();
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
             FiltrarAgendamentos();
