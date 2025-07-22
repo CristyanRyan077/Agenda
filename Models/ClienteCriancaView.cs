@@ -9,7 +9,7 @@ namespace AgendaNovo.Models
 {
     public partial class ClienteCriancaView : ObservableObject
     {
-        public int ClienteId { get; set; }
+        public int? ClienteId { get; set; }
         public int? CriancaId { get; set; }
 
         [ObservableProperty] private string? nomeCliente;

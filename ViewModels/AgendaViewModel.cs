@@ -22,6 +22,7 @@ namespace AgendaNovo
 {
     public partial class AgendaViewModel : ObservableObject
     {
+
         //Agendamento
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
@@ -34,7 +35,7 @@ namespace AgendaNovo
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
-        [ObservableProperty] private Cliente novoCliente = new();
+        [ObservableProperty] private Cliente? novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
         private bool _verificacaoJaFeita;
@@ -80,13 +81,12 @@ namespace AgendaNovo
         {
             NovoAgendamento = new Agendamento
             {
-                Cliente = new Cliente(),
-                Crianca = new Crianca(),
                 Data = DateTime.Today
             };
-            NovoCliente = new Cliente();
+            
             ClienteSelecionado = null;
-            CriancaSelecionada = new Crianca();
+            NovoCliente = null;
+            CriancaSelecionada = null;
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
             ValorPacote = 0;
@@ -233,7 +233,7 @@ namespace AgendaNovo
         public void VerificarClientesComMesmoNome()
         {
             if (string.IsNullOrWhiteSpace(NovoCliente?.Nome))
-                return;
+                return; //adicionar validacao de telefone/email
 
             var nome = NovoCliente.Nome.Trim();
 
@@ -260,6 +260,13 @@ namespace AgendaNovo
                 .ToList();
             foreach (var item in filtrados)
                 AgendamentosFiltrados.Add(item);
+        }
+        partial void OnCriancaSelecionadaChanged(Crianca? value)
+        {
+            if (value != null && value.Id > 0)
+            {
+                NovoAgendamento.Crianca = value;
+            }
         }
 
         [RelayCommand]
@@ -343,11 +350,18 @@ namespace AgendaNovo
                     : null;
                 CriancaSelecionada = crianca;
 
+                if (crianca == null)
+                {
+                    MessageBox.Show("A criança vinculada a este agendamento não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+
                 NovoAgendamento = new Agendamento
                 {
                     Id = value.Id,
                     Cliente = cliente,
-                    Crianca = crianca ?? new Crianca(),
+                    Crianca = crianca,
                     Data = value.Data,
                     Horario = value.Horario,
                     Pacote = value.Pacote,
@@ -371,7 +385,7 @@ namespace AgendaNovo
 
         public void CriarNovoCliente()
         {
-            NovoCliente = new Cliente();
+            NovoCliente = null;
             CriancaSelecionada = null;
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(NovoCliente.Nome));
@@ -381,14 +395,11 @@ namespace AgendaNovo
         {
             NovoAgendamento = new Agendamento
             {
-                Cliente = new Cliente(),
-                Crianca = new Crianca(),
                 Data = DateTime.Today
             };
 
-            NovoCliente = new Cliente();
-            NovoCliente.Id = 0;
-            CriancaSelecionada = new Crianca();
+            NovoCliente = null;
+            CriancaSelecionada = null;
             ClienteSelecionado = null;
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
@@ -441,8 +452,9 @@ namespace AgendaNovo
             // Se desmarcou, limpa tudo
             if (value == null)
             {
-                NovoCliente = new Cliente();
+                
                 ListaCriancas.Clear();
+                NovoCliente = null;
                 CriancaSelecionada = null;
                 return;
             }
@@ -474,11 +486,11 @@ namespace AgendaNovo
             _db = db;
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
-            NovoCliente = new Cliente();
+            NovoCliente = null;
+            CriancaSelecionada = null;
             NovoAgendamento = new Agendamento
             {
-                Cliente = NovoCliente,
-                Crianca = new Crianca(),
+                Data = DateTime.Today
             };
 
         }
@@ -564,31 +576,10 @@ namespace AgendaNovo
             var criancaParaAgendar = clienteExistente.Criancas
             .FirstOrDefault(c => c.Id == NovoAgendamento.Crianca?.Id);
 
-            if (criancaParaAgendar == null && NovoAgendamento.Crianca != null)
+            if (criancaParaAgendar == null)
             {
-                criancaParaAgendar = new Crianca
-                {
-                    Nome = NovoAgendamento.Crianca.Nome,
-                    Idade = NovoAgendamento.Crianca.Idade,
-                    Genero = NovoAgendamento.Crianca.Genero,
-                    IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
-                    ClienteId = clienteExistente.Id
-                };
-                var jaRastreada = _db.Criancas.Local
-                    .FirstOrDefault(c => c.Id == criancaParaAgendar.Id
-                     && c.ClienteId == criancaParaAgendar.ClienteId);
-
-                if (jaRastreada == null)
-                {
-                    _db.Criancas.Add(criancaParaAgendar);
-                        _db.SaveChanges();
-                }
-            }
-            else
-            {
-                criancaParaAgendar.Idade = NovoAgendamento.Crianca.Idade;
-                criancaParaAgendar.Genero = NovoAgendamento.Crianca.Genero;
-                criancaParaAgendar.IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade;
+                MessageBox.Show("A criança selecionada não pertence ao cliente.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
 
