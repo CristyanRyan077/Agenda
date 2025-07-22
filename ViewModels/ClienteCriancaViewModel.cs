@@ -58,7 +58,7 @@ namespace AgendaNovo.ViewModels
 
         private readonly AgendaViewModel _agenda;
         private readonly AgendaContext _db;
-
+        //teste
         public ClienteCriancaViewModel(AgendaViewModel agenda)
         {
             
