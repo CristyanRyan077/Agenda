@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using AgendaNovo.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,11 +40,31 @@ namespace AgendaNovo.Services
             _db.SaveChanges();
             return agendamento;
         }
+        private void CopiarDados(Agendamento origem, Agendamento destino)
+        {
+            destino.Data = origem.Data;
+            destino.Horario = origem.Horario;
+            destino.Tema = origem.Tema;
+            destino.Valor = origem.Valor;
+            destino.ValorPago = origem.ValorPago;
+            destino.Pacote = origem.Pacote;
+            destino.ClienteId = origem.ClienteId;
+            destino.CriancaId = origem.CriancaId;
+        }
 
         public void Update(Agendamento agendamento)
         {
-            _db.Agendamentos.Update(agendamento);
-            _db.SaveChanges();
+            var existente = _db.Agendamentos
+            .Include(a => a.Cliente)
+            .Include(a => a.Crianca)
+            .FirstOrDefault(a => a.Id == agendamento.Id);
+            if (existente != null)
+            {
+                CopiarDados(agendamento, existente);
+                _db.SaveChanges();
+            }
+            else
+                MessageBox.Show("agendamento inexistente");
         }
 
         public void Delete(int id)

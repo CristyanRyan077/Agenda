@@ -566,6 +566,7 @@ namespace AgendaNovo
         {
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
+
             if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario))
             {
                 MessageBox.Show(
@@ -601,37 +602,39 @@ namespace AgendaNovo
                 };
                 _criancaService.AddOrUpdate(criancaParaAgendar);
             }
-            int? criancaId = criancaParaAgendar?.Id;
 
             // 4) Prepara o objeto a salvar
             NovoAgendamento.ClienteId = clienteExistente.Id;
-            NovoAgendamento.CriancaId = criancaId;
-            Agendamento novo;
-            if (NovoAgendamento.Id > 0)
+            NovoAgendamento.CriancaId = criancaParaAgendar?.Id;
+
+            bool agendamentoNovo = NovoAgendamento.Id == 0;
+
+            if (agendamentoNovo)
             {
-                // Atualiza -> não retorna nada, mas podemos usar o próprio NovoAgendamento
-                _agendamentoService.Update(NovoAgendamento);
-                novo = NovoAgendamento;
+                _agendamentoService.Add(NovoAgendamento);
             }
             else
             {
-                // Adiciona e captura o retorno com o Id gerado
-                novo = _agendamentoService.Add(NovoAgendamento);
+                _agendamentoService.Update(NovoAgendamento);
             }
+            var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
+            var crianca = NovoAgendamento.CriancaId.HasValue
+                ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
+                : null;
 
-            string textoCrianca = "";
+            NovoAgendamento.Cliente = cliente;
+            NovoAgendamento.Crianca = crianca;
+            var textoCrianca = crianca != null
+            ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
+            : "";
 
-                if (novo.Crianca != null && !string.IsNullOrWhiteSpace(novo.Crianca.Nome))
-                {
-                    textoCrianca = $" {novo.Crianca.Nome} ({novo.Crianca.Idade} {novo.Crianca.IdadeUnidade})\n";
-                }
 
-                var texto = Uri.EscapeDataString($"✅ Agendado: {novo.Data:dd/MM/yyyy} às {novo.Horario} ({novo.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
-                            $"Cliente: {novo.Cliente.Nome} - {textoCrianca}" +
-                            $"Telefone: {novo.Cliente.Telefone}\n" +
-                            $"Tema: {novo.Tema}\n" +
-                            $"Pacote: {novo.Pacote}\n" +
-                            $"Valor: R$ {novo.Valor:N2} | Pago: R$ {novo.ValorPago:N2}\n" +
+            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
+                            $"Cliente: {cliente.Nome} - {textoCrianca}" +
+                            $"Telefone: {cliente.Telefone}\n" +
+                            $"Tema: {NovoAgendamento.Tema}\n" +
+                            $"Pacote: {NovoAgendamento.Pacote}\n" +
+                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
 
                             $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                             $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
@@ -641,8 +644,7 @@ namespace AgendaNovo
                 Clipboard.SetText(texto);
                 MessageBox.Show("Agendamento copiado para a área de transferência!");
 
-
-                var telefone = novo.Cliente.Telefone;
+                var telefone = cliente.Telefone;
                 string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
                 string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
                 Thread.Sleep(500);
