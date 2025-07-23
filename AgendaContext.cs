@@ -10,6 +10,10 @@ namespace AgendaNovo
 {
     public class AgendaContext : DbContext
     {
+        public AgendaContext(DbContextOptions<AgendaContext> options)
+    : base(options)
+        {
+        }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Crianca> Criancas { get; set; }
         public DbSet<Agendamento> Agendamentos { get; set; }

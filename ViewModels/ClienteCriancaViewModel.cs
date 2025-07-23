@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Migrations;
+﻿using AgendaNovo.Interfaces;
+using AgendaNovo.Migrations;
 using AgendaNovo.Models;
 using AgendaNovo.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -47,23 +48,33 @@ namespace AgendaNovo.ViewModels
     }
     public partial class ClienteCriancaViewModel : ObservableObject
     {
-        [ObservableProperty] private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
+        [ObservableProperty]
+        private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
+
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
         [ObservableProperty] private bool clienteExistenteDetectado;
         [ObservableProperty] private bool isInEditMode;
         [ObservableProperty] private string pesquisaText;
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
+        [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+        [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
+        [ObservableProperty] private Cliente novoCliente = new();
+                [ObservableProperty] private Crianca? criancaSelecionada = new();
+        private List<ClienteCriancaView> _todosClientes = new();
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
 
 
         private readonly AgendaViewModel _agenda;
-        private readonly AgendaContext _db;
+        private readonly IClienteService _clienteService;
+        private readonly ICriancaService _criancaService;
 
-        public ClienteCriancaViewModel(AgendaViewModel agenda)
+
+        public ClienteCriancaViewModel(IClienteService clienteService,
+        ICriancaService criancaService)
         {
-            
-            _agenda = agenda;
-            _db = agenda.DbContext;
+            _clienteService = clienteService;
+            _criancaService = criancaService;
             CarregarClientesDoBanco();
             AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
@@ -81,41 +92,41 @@ namespace AgendaNovo.ViewModels
         }
         private void CarregarClientesDoBanco()
         {
-            _todosClientes = _db.Clientes
-         .Include(c => c.Criancas)
-         .ToList()
-         .SelectMany(cliente =>
-         {
-             if (cliente.Criancas != null && cliente.Criancas.Count > 0)
-             {
-                 return cliente.Criancas.Select(crianca => new ClienteCriancaView
-                 {
-                     ClienteId = cliente.Id,
-                     NomeCliente = cliente.Nome,
-                     Telefone = cliente.Telefone,
-                     Email = cliente.Email,
-                     CriancaId = crianca.Id,
-                     NomeCrianca = crianca.Nome,
-                     Genero = Enum.TryParse<Genero>(crianca.Genero, out var genero) ? genero : Genero.M,
-                     Idade = crianca.Idade,
-                     IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var unidade) ? unidade : IdadeUnidade.Anos
-                 });
-             }
-             else
-             {
-                 return new List<ClienteCriancaView>
-                 {
-                    new ClienteCriancaView
+            var todos = _clienteService?.GetAllWithChildren()
+           ?? new List<Cliente>();
+            _todosClientes = todos.SelectMany(cliente =>
+            {
+                var filhos = cliente.Criancas ?? new List<Crianca>();
+                if (filhos.Any())
+                {
+                    return filhos.Select(crianca => new ClienteCriancaView
                     {
+                        ClienteId = cliente.Id,
+                        NomeCliente = cliente.Nome,
+                        Telefone = cliente.Telefone,
+                        Email = cliente.Email,
+                        CriancaId = crianca.Id,
+                        NomeCrianca = crianca.Nome,
+                        Genero = Enum.TryParse<Genero>(crianca.Genero, out var g) ? g : Genero.M,
+                        Idade = crianca.Idade,
+                        IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var u) ? u : IdadeUnidade.Anos
+                    });
+                }
+                else
+                {
+                    return new[] {
+                    new ClienteCriancaView {
                         ClienteId = cliente.Id,
                         NomeCliente = cliente.Nome,
                         Telefone = cliente.Telefone,
                         Email = cliente.Email
                     }
-                 };
-             }
-         })
-         .ToList();
+                };
+                }
+            }).ToList();
+            ListaClientes.Clear();
+            foreach (var cli in todos)
+                ListaClientes.Add(cli);
 
             ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
         }
@@ -124,9 +135,9 @@ namespace AgendaNovo.ViewModels
             if (IsInEditMode)
                 return;
 
-            bool telVazio = string.IsNullOrWhiteSpace(NovoCliente.Telefone);
-            bool emailVazio = string.IsNullOrWhiteSpace(NovoCliente.Email);
-            if (telVazio && emailVazio)
+            var tel = NovoCliente.Telefone?.Trim();
+            var email = NovoCliente.Email?.Trim();
+            if (string.IsNullOrEmpty(tel) && string.IsNullOrEmpty(email))
             {
                 ClienteExistenteDetectado = false;
                 NovoCliente.Id = 0;
@@ -135,30 +146,17 @@ namespace AgendaNovo.ViewModels
             }
 
 
-            Cliente? clienteDetectado = null;
-
-
-            if (clienteDetectado is null && !telVazio)
+            var encontrado = _clienteService.DetectExisting(tel, email);
+            if (encontrado != null)
             {
-                clienteDetectado = ListaClientes
-                    .FirstOrDefault(c => c.Telefone?.Equals(NovoCliente.Telefone, StringComparison.OrdinalIgnoreCase) == true);
-            }
-            if (clienteDetectado is null && !emailVazio)
-            {
-                clienteDetectado = ListaClientes
-                    .FirstOrDefault(c => c.Email?.Equals(NovoCliente.Email, StringComparison.OrdinalIgnoreCase) == true);
-            }
-
-            if (clienteDetectado is not null)
-            {
-                // Preenche dados
-                NovoCliente.Id = clienteDetectado.Id;
-                NovoCliente.Nome = clienteDetectado.Nome;
-                NovoCliente.Telefone = clienteDetectado.Telefone;
-                NovoCliente.Email = clienteDetectado.Email;
+                // preenche campos
+                NovoCliente.Id = encontrado.Id;
+                NovoCliente.Nome = encontrado.Nome;
+                NovoCliente.Telefone = encontrado.Telefone;
+                NovoCliente.Email = encontrado.Email;
 
                 ListaCriancasDoCliente.Clear();
-                foreach (var c in clienteDetectado.Criancas)
+                foreach (var c in _criancaService.GetByClienteId(encontrado.Id))
                     ListaCriancasDoCliente.Add(c);
 
                 ClienteExistenteDetectado = true;
@@ -171,66 +169,17 @@ namespace AgendaNovo.ViewModels
 
 
 
-        // 🔁 Compartilhamento de propriedades da AgendaViewModel
-        public Cliente NovoCliente => _agenda.NovoCliente;
-        public ObservableCollection<Cliente> ListaClientes => _agenda.ListaClientes;
-
-        private List<ClienteCriancaView> _todosClientes = new();
-
-        public Crianca CriancaSelecionada
-        {
-            get => _agenda.CriancaSelecionada;
-            set => _agenda.CriancaSelecionada = value;
-        }
-
-        public ObservableCollection<Crianca> ListaCriancas => _agenda.ListaCriancas;
-        public ObservableCollection<Crianca> ListaCriancasDoCliente => _agenda.ListaCriancasDoCliente;
+     
 
 
 
 
         public void AtualizarListaClienteCrianca()
         {
-            ListaClienteCrianca.Clear();
-            _agenda.ListaClientes.Clear();
-            foreach (var cli in _db.Clientes.Include(c => c.Criancas))
-                _agenda.ListaClientes.Add(cli);
+            listaClienteCrianca.Clear();
 
-            foreach (var cliente in ListaClientes)
-            {
-                if (cliente.Criancas != null && cliente.Criancas.Count > 0)
-                {
-                    foreach (var crianca in cliente.Criancas)
-                    {
-                        ListaClienteCrianca.Add(new ClienteCriancaView
-                        {
-                            ClienteId = cliente.Id,
-                            NomeCliente = cliente.Nome,
-                            Telefone = cliente.Telefone,
-                            Email = cliente.Email,
-                            CriancaId = crianca.Id,
-                            NomeCrianca = crianca.Nome,
-                            Genero = Enum.TryParse<Genero>(crianca.Genero, out var genero) ? genero : Genero.M,
-                            Idade = crianca.Idade,
-                            IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var unidade) ? unidade : IdadeUnidade.Anos
-                        });
-                    }
-                }
-                else
-                {
-                    // Cliente sem crianças
-                    ListaClienteCrianca.Add(new ClienteCriancaView
-                    {
-                        ClienteId = cliente.Id,
-                        NomeCliente = cliente.Nome,
-                        Telefone = cliente.Telefone,
-                        Email = cliente.Email,
-                    });
-
-                }
-  
-
-            }
+            foreach (var item in _todosClientes)
+                listaClienteCrianca.Add(item);
         }
 
         [RelayCommand]
@@ -304,7 +253,6 @@ namespace AgendaNovo.ViewModels
 
 
 
-            bool clienteEditado = NovoCliente.Id != 0;
             Cliente cliente;
             /*if (!clienteFoiEditado && ListaClientes.Any(c =>
                 c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)
@@ -315,14 +263,13 @@ namespace AgendaNovo.ViewModels
             } */
 
 
-            if (clienteEditado)
+            if (NovoCliente.Id != 0)
             {
-                // Atualiza cliente
-                cliente = ListaClientes.First(c => c.Id == NovoCliente.Id);
+                cliente = _clienteService.GetById(NovoCliente.Id)!;
                 cliente.Nome = NovoCliente.Nome;
                 cliente.Telefone = NovoCliente.Telefone;
                 cliente.Email = NovoCliente.Email;
-                _db.SaveChanges();
+                _clienteService.Update(cliente);
             }
             else
             {
@@ -333,47 +280,28 @@ namespace AgendaNovo.ViewModels
                     Email = NovoCliente.Email,
                     Criancas = new List<Crianca>()
                 };
-
-                
-                _db.Clientes.Add(cliente);
-                _db.SaveChanges();
+                cliente = _clienteService.Add(cliente);
 
 
 
             }
 
             // Verifica se há criança para salvar
-            Crianca? savedCrianca = null;
-            if (!string.IsNullOrWhiteSpace(CriancaSelecionada?.Nome))
-                    {
-                    var crianca = cliente.Criancas
-                    .FirstOrDefault(c => c.Id == CriancaSelecionada.Id)
-                        ?? new Crianca
-                           {
-                               Nome = CriancaSelecionada.Nome,
-                               Idade = CriancaSelecionada.Idade,
-                               Genero = CriancaSelecionada.Genero,
-                               IdadeUnidade = CriancaSelecionada.IdadeUnidade,
-                               ClienteId = cliente.Id
-                           };
+            if (!string.IsNullOrWhiteSpace(CriancaSelecionada.Nome))
+            {
+                var crianca = CriancaSelecionada.Id != 0
+                ? _criancaService.GetById(CriancaSelecionada.Id)!
+                : new Crianca { ClienteId = cliente.Id };
+
                 crianca.Nome = CriancaSelecionada.Nome;
                 crianca.Idade = CriancaSelecionada.Idade;
                 crianca.Genero = CriancaSelecionada.Genero;
                 crianca.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
-                if (crianca.Id == 0)
-                {
-                    _db.Criancas.Add(crianca);
-                }
-                else
-                {
-                    _db.Criancas.Update(crianca);
-                }
-                _db.SaveChanges();
-                savedCrianca = crianca;
+
+                _criancaService.AddOrUpdate(crianca);
             }
-            _db.Entry(cliente).Collection(c => c.Criancas).Load();
+           
             CarregarClientesDoBanco();
-            CarregarCriancasDoCliente(cliente);
             AtualizarListaClienteCrianca();
 
             LimparInputsClienteCrianca();
@@ -393,106 +321,78 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()
         {
-            var selecionado = ClienteCriancaSelecionado; // salva local
-            if (selecionado is null)
-                return;
-            var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteCriancaSelecionado.ClienteId);
+            if (clienteCriancaSelecionado == null) return;
 
-            if (cliente is null)
-                return;
+            var cliId = ClienteCriancaSelecionado.ClienteId;
+            var criId = ClienteCriancaSelecionado.CriancaId;
 
 
-            if (MessageBox.Show($"Deseja excluir o cliente '{cliente.Nome}' e todas as crianças vinculadas?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (criId != null)
             {
-                var agendamentosDoCliente = _db.Agendamentos
-                    .Where(a => a.ClienteId == cliente.Id)
-                    .ToList();
-                if (agendamentosDoCliente.Any())
-                {
-                    MessageBox.Show(
-                        $"O cliente '{cliente.Nome}' possui agendamentos vinculados.\n" +
-                        "Remova os agendamentos antes de excluir o cliente.",
-                        "Não é possível excluir",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                _criancaService.Delete(criId.Value);
+            }
+            else
+            {
+                // confirme antes de apagar tudo
+                if (MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
+                                    "Confirma", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                     return;
-                }
-                // 1) Monta o objeto de backup
-                /*var backup = new
+
+                _clienteService.Delete(cliId);
+            }
+
+            // 1) Monta o objeto de backup
+            /*var backup = new
+            {
+                Cliente = cliente,
+                Criancas = cliente.Criancas.ToList()
+            };
+
+            // 2) Serializa em JSON com identação e preservando referências
+            var json = JsonSerializer.Serialize(
+                backup,
+                new JsonSerializerOptions
                 {
-                    Cliente = cliente,
-                    Criancas = cliente.Criancas.ToList()
-                };
-
-                // 2) Serializa em JSON com identação e preservando referências
-                var json = JsonSerializer.Serialize(
-                    backup,
-                    new JsonSerializerOptions
-                    {
-                        WriteIndented = true,
-                        ReferenceHandler = ReferenceHandler.Preserve
-                    }
-                );
-
-                // 3) Garante que a pasta exista
-                string pastaBackup = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "Backups"
-                );
-                Directory.CreateDirectory(pastaBackup);
-
-                // 4) Nomeia o arquivo incluindo o Id do cliente (e a data)
-                string fname = $"backup_cliente_{cliente.Id}_{DateTime.Today:yyyyMMdd}.json";
-                string caminhoArquivo = Path.Combine(pastaBackup, fname);
-
-                // 5) Grava no disco
-                File.WriteAllText(caminhoArquivo, json);
-
-                // 6) Informa o usuário
-                MessageBox.Show(
-                    $"Backup do cliente salvo em:\n{caminhoArquivo}",
-                    "Backup",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
-
-                // 7) Remove do DbContext e da UI
-                //    (se quiser remover as crianças individualmente, descomente a linha abaixo)
-               // _db.Criancas.RemoveRange(cliente.Criancas);
-                */
-                _db.Clientes.Remove(cliente);
-                _db.SaveChanges();
-
-                // 8) Atualiza suas collections
-                ListaClientes.Remove(cliente);
-                ListaCriancasDoCliente.Clear();
-                AtualizarListaClienteCrianca();
-                if (selecionado.CriancaId is int criancaId)
-                {
-                    var crianca = cliente.Criancas.FirstOrDefault(c => c.Id == criancaId);
-                    if (crianca is not null)
-                    {
-                        cliente.Criancas.Remove(crianca);
-
-                        var criancaDb = _db.Criancas.FirstOrDefault(c => c.Id == criancaId);
-                        if (criancaDb is not null)
-                            _db.Criancas.Remove(criancaDb);
-
-                        var itemRemover = ListaClienteCrianca.FirstOrDefault(x => x.CriancaId == criancaId);
-                        if (itemRemover is not null)
-                            ListaClienteCrianca.Remove(itemRemover);
-                        CriancaSelecionada = null;
-                    }
+                    WriteIndented = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
                 }
-                _db.SaveChanges();
+            );
+
+            // 3) Garante que a pasta exista
+            string pastaBackup = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Backups"
+            );
+            Directory.CreateDirectory(pastaBackup);
+
+            // 4) Nomeia o arquivo incluindo o Id do cliente (e a data)
+            string fname = $"backup_cliente_{cliente.Id}_{DateTime.Today:yyyyMMdd}.json";
+            string caminhoArquivo = Path.Combine(pastaBackup, fname);
+
+            // 5) Grava no disco
+            File.WriteAllText(caminhoArquivo, json);
+
+            // 6) Informa o usuário
+            MessageBox.Show(
+                $"Backup do cliente salvo em:\n{caminhoArquivo}",
+                "Backup",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+
+            // 7) Remove do DbContext e da UI
+            //    (se quiser remover as crianças individualmente, descomente a linha abaixo)
+           // _db.Criancas.RemoveRange(cliente.Criancas);
+            */
+               
                 AtualizarListaClienteCrianca();
                 IsInEditMode = false;
                 ClienteExistenteDetectado = false;
                 NotifyAll();
                 CarregarClientesDoBanco();
+                LimparCamposClienteCrianca();
                 return;
 
-            }
         }
         partial void OnPesquisaTextChanged(string value)
         {

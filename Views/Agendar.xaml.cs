@@ -27,7 +27,8 @@ namespace AgendaNovo
             {
                 InitializeComponent();
                 DataContext = vm;
-                _viewClientes = CollectionViewSource.GetDefaultView(((AgendaViewModel)DataContext).ListaClientes);
+                vm.CarregarDadosDoBanco();
+            _viewClientes = CollectionViewSource.GetDefaultView(((AgendaViewModel)DataContext).ListaClientes);
                 _viewClientes.Filter = ClienteFilter;
             txtCliente.ItemsSource = _viewClientes;
             txtCliente.Loaded += (s, e) =>

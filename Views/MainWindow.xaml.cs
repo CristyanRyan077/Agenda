@@ -8,8 +8,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AgendaNovo.Interfaces;
 using AgendaNovo.ViewModels;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgendaNovo
 {
@@ -18,19 +20,27 @@ namespace AgendaNovo
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly IClienteService _clienteService;
+        private readonly ICriancaService _criancaService;
+        private readonly IAgendamentoService _agendamentoService;
+
+        private readonly IServiceProvider _sp;
+
         private GerenciarClientes _janelaClientes;
         private Agendar _janelaAgenda;
         public AgendaViewModel vm { get; }
 
         public GerenciarClientes Clientevm { get; }
 
-        public MainWindow(AgendaViewModel vm)
+        public MainWindow(AgendaViewModel agendaVm, IServiceProvider sp)
         {
             InitializeComponent();
-            this.vm = vm;
+            vm = agendaVm;
             DataContext = vm;
+            _sp = sp;
+            this.Closed += (s, e) => Application.Current.Shutdown();
 
-    
+
         }
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -53,8 +63,8 @@ namespace AgendaNovo
                 vm.LimparCamposCommand.Execute(null);
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
-                    _janelaAgenda = new Agendar(vm);
-                    _janelaAgenda.Show();
+                    var main = _sp.GetRequiredService<Agendar>();
+                    main.Show();
                 }
                 else
                 {
@@ -65,19 +75,20 @@ namespace AgendaNovo
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is AgendaViewModel agendaVm)
+            (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
+
+            if (_janelaClientes == null || !_janelaClientes.IsLoaded)
             {
-                vm.LimparCamposCommand.Execute(null);
-                if (_janelaClientes == null || !_janelaClientes.IsLoaded)
-                {
-                    var clienteVm = new ClienteCriancaViewModel(agendaVm);
-                    _janelaClientes = new GerenciarClientes(clienteVm);
-                    _janelaClientes.Show();
-                }
-                else
-                {
-                    _janelaClientes.Focus();
-                }
+                // em vez de new, resolve via DI
+                _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
+                _janelaClientes.Owner = this;
+                _janelaClientes.Show();
+
+
+            }
+            else
+            {
+                _janelaClientes.Focus();
             }
         }
     }

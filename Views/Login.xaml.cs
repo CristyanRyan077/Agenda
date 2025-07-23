@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Extensions.DependencyInjection;
 using SplashScreen = AgendaNovo.Views.SplashScreen;
 
 namespace AgendaNovo
@@ -20,9 +21,11 @@ namespace AgendaNovo
     /// </summary>
     public partial class Login : Window
     {
-        public Login()
+        private readonly IServiceProvider _serviceProvider;
+        public Login(IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            _serviceProvider = serviceProvider;
         }
 
         private void txtNome_GotFocus(object sender, RoutedEventArgs e)
@@ -63,18 +66,16 @@ namespace AgendaNovo
                 await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 await Task.Delay(350);
 
-                var db = new AgendaContext();
-                var vm = new AgendaViewModel(db);
+                var main = _serviceProvider.GetRequiredService<MainWindow>();
+                var vm = ActivatorUtilities.CreateInstance<AgendaViewModel>(_serviceProvider);
 
                 await Task.Run(() =>
                 {
                     vm.Inicializar();
                 });
 
-                var mainWindow = new MainWindow(vm)
-                {
-                    Visibility = Visibility.Hidden
-                };
+                var mainWindow = ActivatorUtilities.CreateInstance<MainWindow>(_serviceProvider, vm);
+                mainWindow.Visibility = Visibility.Hidden;
                 await Dispatcher.InvokeAsync(() =>
                 {
                     mainWindow.Visibility = Visibility.Visible;
