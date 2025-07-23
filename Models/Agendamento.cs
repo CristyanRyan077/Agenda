@@ -14,7 +14,7 @@ namespace AgendaNovo
 
         public int ClienteId { get; set; }
         public Cliente ?Cliente { get; set; }
-        public int CriancaId { get; set; }
+        public int? CriancaId { get; set; }
         public Crianca? Crianca { get; set; }
 
         [ObservableProperty] private string? pacote;

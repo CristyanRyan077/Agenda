@@ -57,6 +57,8 @@ namespace AgendaNovo
 
         //Outros
         [ObservableProperty] private string textoPesquisa = string.Empty;
+        public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
+        public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
@@ -189,11 +191,6 @@ namespace AgendaNovo
             {"Book Niver Fest - Aniversário + Sessão Infantil",700m}
         };
 
-        public ObservableCollection<string> UnidadesIdade { get; } = new()
-        {
-            "meses",
-            "anos"
-        };
 
         [RelayCommand]
         private void LimparAnteriores()
@@ -396,6 +393,8 @@ namespace AgendaNovo
                     Valor = value.Valor,
                     ValorPago = value.ValorPago
                 };
+                CriancaSelecionada = NovoAgendamento.Crianca;
+                OnPropertyChanged(nameof(NovoAgendamento.Pacote));
                 OnPropertyChanged(nameof(HorariosDisponiveis));
                 OnPropertyChanged(nameof(NovoAgendamento));
                 OnPropertyChanged(nameof(NovoAgendamento.Horario));
@@ -474,11 +473,29 @@ namespace AgendaNovo
                 NovoAgendamento.Horario = null;
         }
 
-
+        partial void OnCriancaSelecionadaChanged(Crianca? value)
+        {
+            // Garante que qualquer binding que dependa de CriancaSelecionada seja notificado:
+            OnPropertyChanged(nameof(CriancaSelecionada));
+            // Se precisar expor algo derivado:
+            OnPropertyChanged(nameof(CriancaSelecionada.Genero));
+            OnPropertyChanged(nameof(CriancaSelecionada.IdadeUnidade));
+        }
+        public void RefreshCriancaBindings()
+        {
+            OnPropertyChanged(nameof(CriancaSelecionada));
+            OnPropertyChanged(nameof(CriancaSelecionada.Genero));
+            OnPropertyChanged(nameof(CriancaSelecionada.IdadeUnidade));
+        }
 
         partial void OnClienteSelecionadoChanged(Cliente value)
         {
             // Se desmarcou, limpa tudo
+            if (CriancaSelecionada == null)
+            {
+                CriancaSelecionada = new Crianca();
+                OnPropertyChanged(nameof(CriancaSelecionada));
+            }
             if (value == null)
             {
                 NovoCliente = new Cliente();
@@ -496,12 +513,10 @@ namespace AgendaNovo
             foreach (var cr in value.Criancas ?? Enumerable.Empty<Crianca>())
                 ListaCriancas.Add(cr);
 
-            // 3) Se só tem 1 criança, já a seleciona
-            CriancaSelecionada = value.Criancas != null && value.Criancas.Count == 1
-            ? value.Criancas[0]
-            : null;  
+            if (value.Criancas?.Count == 1)
+                CriancaSelecionada = value.Criancas[0];
 
-            // dispara atualização de bindings
+            // Dispara notificação geral:
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ListaCriancas));
             OnPropertyChanged(nameof(CriancaSelecionada));
@@ -565,9 +580,16 @@ namespace AgendaNovo
                 return;
 
 
-            var criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
+            Crianca criancaParaAgendar = null;
+            if (CriancaSelecionada != null)
+            {
+                // tenta buscar no serviço
+                criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
+            }
 
-            if (criancaParaAgendar == null && NovoAgendamento.Crianca != null)
+            if (criancaParaAgendar == null
+               && NovoAgendamento.Crianca != null
+               && !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
             {
                 criancaParaAgendar = new Crianca
                 {
@@ -577,19 +599,13 @@ namespace AgendaNovo
                     IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
                     ClienteId = clienteExistente.Id
                 };
-                var jaRastreada = _criancaService.GetByClienteId(clienteExistente.Id);
+                _criancaService.AddOrUpdate(criancaParaAgendar);
+            }
+            int? criancaId = criancaParaAgendar?.Id;
 
-                if (jaRastreada == null)
-                {
-                    _criancaService.AddOrUpdate(criancaParaAgendar);
-                }
-            }
-            else
-            {
-                criancaParaAgendar.Idade = NovoAgendamento.Crianca.Idade;
-                criancaParaAgendar.Genero = NovoAgendamento.Crianca.Genero;
-                criancaParaAgendar.IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade;
-            }
+            // 4) Prepara o objeto a salvar
+            NovoAgendamento.ClienteId = clienteExistente.Id;
+            NovoAgendamento.CriancaId = criancaId;
             Agendamento novo;
             if (NovoAgendamento.Id > 0)
             {

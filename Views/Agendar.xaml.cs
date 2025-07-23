@@ -28,6 +28,7 @@ namespace AgendaNovo
                 InitializeComponent();
                 DataContext = vm;
                 vm.CarregarDadosDoBanco();
+                vm.CarregarPacotes();
             _viewClientes = CollectionViewSource.GetDefaultView(((AgendaViewModel)DataContext).ListaClientes);
                 _viewClientes.Filter = ClienteFilter;
             txtCliente.ItemsSource = _viewClientes;
@@ -244,10 +245,23 @@ namespace AgendaNovo
             vm.NovoCliente.Nome = c.Nome;
             vm.NovoCliente.Telefone = c.Telefone;
             vm.NovoCliente.Email = c.Email;
+            vm.ListaCriancas.Clear();
+            foreach (var cr in c.Criancas ?? Enumerable.Empty<Crianca>())
+                vm.ListaCriancas.Add(cr);
+
+            // 2) Se existir pelo menos 1 criança, seleciona a primeira:
+            if (c.Criancas?.Count > 0)
+                vm.CriancaSelecionada = c.Criancas[0];
+            else
+                vm.CriancaSelecionada = new Crianca();  // ou null, se preferir tratar sem criança
+
+            // 3) Dispara a notificação para toda a CriancaSelecionada
+            vm.RefreshCriancaBindings();
             _preenchendoViaId = true;
             txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
             txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
             txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
+            
         }
 
 
