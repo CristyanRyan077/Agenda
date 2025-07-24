@@ -17,14 +17,21 @@ using System.Windows.Data;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Globalization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Services;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace AgendaNovo
 {
     public partial class AgendaViewModel : ObservableObject
     {
         //Agendamento
+        private bool _suspendendoDataChanged = false;
+        private bool _selecionandoDaGrid = false;
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
@@ -43,6 +50,7 @@ namespace AgendaNovo
             get => _verificacaoJaFeita;
             set => SetProperty(ref _verificacaoJaFeita, value);
         }
+        public ICollectionView FilteredClientes { get; }
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
@@ -75,11 +83,8 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
-            NovoAgendamento = new Agendamento
-            {
-                Data = DateTime.Today
-            };
-
+            NovoAgendamento = new Agendamento();
+           
         }
 
         public void Inicializar()
@@ -110,7 +115,7 @@ namespace AgendaNovo
                         ListaCriancas.Add(cr);
             });
 
-            FiltrarAgendamentos();
+
             AtualizarHorariosDisponiveis();
         }
 
@@ -122,12 +127,7 @@ namespace AgendaNovo
         }
         private void ResetarFormulario()
         {
-            NovoAgendamento = new Agendamento
-            {
-                Cliente = new Cliente(),
-                Crianca = new Crianca(),
-                Data = DateTime.Today
-            };
+            NovoAgendamento = new Agendamento();
             NovoCliente = new Cliente();
             ClienteSelecionado = null;
             CriancaSelecionada = new Crianca();
@@ -200,23 +200,55 @@ namespace AgendaNovo
                 "Remover Agendamentos Antigos",
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning);
-          /*  var fantasmas = _db.Agendamentos
-            .Where(a => a.CriancaId == 0)
-            .ToList();
 
-            if (fantasmas.Any())
+            // 2) Lista para guardar quais foram "fantasmas"
+            var todos = _agendamentoService.GetAll().ToList();
+
+            // 2) Lista para armazenar (Id, lista de campos nulos)
+            var fantasmas = new List<(int Id, List<string> CamposNulos)>();
+
+            // 3) Percorre cada agendamento e verifica campos null/empty
+            foreach (var ag in todos)
             {
-                _agendamentoService.Delete Agendamentos.RemoveRange(fantasmas);
-                _db.SaveChanges();
-            } */
+                var nulos = new List<string>();
 
-            var anteriores = ListaAgendamentos
-                .Where(a => a.Data.Date < DateTime.Today)
-                .ToList(); // Evita CollectionChanged erro
+                // Exemplo: cheque Horario
+                if (string.IsNullOrWhiteSpace(ag.Horario))
+                    nulos.Add(nameof(ag.Horario));
+
+                // Exemplo: cheque ClienteId
+                if (ag.ClienteId == 0)
+                    nulos.Add(nameof(ag.ClienteId));
+
+                // Adicione aqui outras propriedades que quer validar…
+
+                if (nulos.Any())
+                    fantasmas.Add((ag.Id, nulos));
+            }
+
+            // 4) Se não achou nenhum, avisa e sai
+            if (!fantasmas.Any())
+            {
+                MessageBox.Show("Nenhum agendamento com campos nulos encontrado.", "Tudo certo",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 5) Exibe relatório dos que serão removidos
+            var sb = new StringBuilder("Serão removidos estes agendamentos:\n\n");
+            foreach (var (id, campos) in fantasmas)
+                sb.AppendLine($"• Id={id} → campos nulos: {string.Join(", ", campos)}");
+            MessageBox.Show(sb.ToString(), "Confirme remoção",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            // 6) Remove via serviço
+            foreach (var (id, _) in fantasmas)
+                _agendamentoService.Delete(id);
 
 
 
-            if (resultado == MessageBoxResult.Yes)
+
+           /* if (resultado == MessageBoxResult.Yes)
             {
                 var json = JsonSerializer.Serialize(anteriores, new JsonSerializerOptions 
                 {
@@ -244,7 +276,7 @@ namespace AgendaNovo
             {
                 foreach (var item in anteriores)
                     ListaAgendamentos.Remove(item);
-            }
+            } */
 
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
@@ -291,14 +323,14 @@ namespace AgendaNovo
         }
         public void FiltrarAgendamentos()
         {
-            AgendamentosFiltrados.Clear();
+           /* AgendamentosFiltrados.Clear();
 
             var filtrados = ListaAgendamentos
                 .Where(a => a != null && a.Data.Date == DataSelecionada.Date)
                 .ToList();
             foreach (var item in filtrados)
-                AgendamentosFiltrados.Add(item);
-        }
+                AgendamentosFiltrados.Add(item);*/
+        } 
 
         [RelayCommand]
         private void CopiarHorariosLivres()
@@ -352,59 +384,70 @@ namespace AgendaNovo
 
         partial void OnItemSelecionadoChanged(Agendamento? value)
         {
+
+            var ag = value;
+            if (ag == null) return;
             try
             {
-                LimparCampos();
-                if (value == null) return;
-                // 1) Atualiza a data e recalcula horários
-                DataSelecionada = value.Data;
-                AtualizarHorariosDisponiveis();
-                if (!string.IsNullOrEmpty(value.Horario)
-                && !HorariosDisponiveis.Contains(value.Horario))
-                {
-                    HorariosDisponiveis.Insert(0, value.Horario);
-                }
+                _selecionandoDaGrid = true;
 
-                // 2) Localiza instância exata do cliente e da criança
-                var cliente = ListaClientes.FirstOrDefault(c => c.Id == value.ClienteId);
+
+                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ag.ClienteId);
                 if (cliente == null)
+                {
+                    MessageBox.Show("Cliente não encontrado ou inválido.");
                     return;
+                }
                 ClienteSelecionado = cliente;
                 NovoCliente = cliente;
+                OnPropertyChanged(nameof(ClienteSelecionado));
+                OnPropertyChanged(nameof(NovoCliente));
+
+
 
                 ListaCriancas.Clear();
                 foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
                     ListaCriancas.Add(cr);
 
-                var crianca = value.Crianca != null
-                    ? cliente.Criancas.FirstOrDefault(c => c.Id == value.Crianca.Id)
-                    : null;
-                CriancaSelecionada = crianca;
+                var cri = ag.Crianca != null
+                  ? cliente.Criancas.FirstOrDefault(c => c.Id == ag.Crianca.Id)
+                  : null;
+                CriancaSelecionada = cri;
+                OnPropertyChanged(nameof(CriancaSelecionada));
 
                 NovoAgendamento = new Agendamento
                 {
-                    Id = value.Id,
+                    Id = ag.Id,
+                    ClienteId = cliente.Id,
                     Cliente = cliente,
-                    Crianca = crianca ?? new Crianca(),
-                    Data = value.Data,
-                    Horario = value.Horario,
-                    Pacote = value.Pacote,
-                    Tema = value.Tema,
-                    Valor = value.Valor,
-                    ValorPago = value.ValorPago
+                    Crianca = cri ?? new Crianca(),
+                    Data = ag.Data,
+                    Horario = ag.Horario,
+                    Pacote = ag.Pacote,
+                    Tema = ag.Tema,
+                    Valor = ag.Valor,
+                    ValorPago = ag.ValorPago
                 };
-                CriancaSelecionada = NovoAgendamento.Crianca;
+                OnPropertyChanged(nameof(ClienteSelecionado));
+                OnPropertyChanged(nameof(NovoCliente));
                 OnPropertyChanged(nameof(NovoAgendamento.Pacote));
                 OnPropertyChanged(nameof(HorariosDisponiveis));
                 OnPropertyChanged(nameof(NovoAgendamento));
                 OnPropertyChanged(nameof(NovoAgendamento.Horario));
                 OnPropertyChanged(nameof(NovoAgendamento.Tema));
                 OnPropertyChanged(nameof(CriancaSelecionada));
+                _suspendendoDataChanged = true;
+                DataSelecionada = ag.Data;
+                AtualizarHorariosDisponiveis();
+                _suspendendoDataChanged = false;
+                OnPropertyChanged(nameof(HorariosDisponiveis));
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Erro ao selecionar item: " + ex.Message);
             }
+            _selecionandoDaGrid = false;
         }
 
 
@@ -419,17 +462,12 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
-            NovoAgendamento = new Agendamento
-            {
-                Cliente = new Cliente(),
-                Crianca = new Crianca(),
-                Data = DateTime.Today
-            };
-
+            NovoAgendamento = new Agendamento();
+            ItemSelecionado = null;
             NovoCliente = new Cliente();
             NovoCliente.Id = 0;
             CriancaSelecionada = new Crianca();
-            ClienteSelecionado = null;
+            
             ListaCriancas.Clear();
             ValorPacote = 0;
             OnPropertyChanged(nameof(NovoAgendamento));
@@ -448,6 +486,7 @@ namespace AgendaNovo
 
         partial void OnDataSelecionadaChanged(DateTime value)
         {
+            if (_suspendendoDataChanged) return;
             FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
         }
@@ -488,33 +527,38 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(CriancaSelecionada.IdadeUnidade));
         }
 
-        partial void OnClienteSelecionadoChanged(Cliente value)
+        partial void OnClienteSelecionadoChanged(Cliente? cliente)
         {
+            if (_selecionandoDaGrid) return;
+            if (cliente == null)
+            {
+                NovoCliente = new Cliente();
+                ListaCriancas.Clear();
+                CriancaSelecionada = null;
+                OnPropertyChanged(nameof(NovoCliente));
+                OnPropertyChanged(nameof(ListaCriancas));
+                OnPropertyChanged(nameof(CriancaSelecionada));
+                return;
+            }
             // Se desmarcou, limpa tudo
             if (CriancaSelecionada == null)
             {
                 CriancaSelecionada = new Crianca();
                 OnPropertyChanged(nameof(CriancaSelecionada));
             }
-            if (value == null)
-            {
-                NovoCliente = new Cliente();
-                ListaCriancas.Clear();
-                CriancaSelecionada = null;
-                return;
-            }
-
-            // 1) Usa a instância exata
-            NovoCliente = value;
-            ClienteSelecionado = value;
-
-            // 2) Repopula a lista de crianças
+            NovoCliente = cliente;
             ListaCriancas.Clear();
-            foreach (var cr in value.Criancas ?? Enumerable.Empty<Crianca>())
+            foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
                 ListaCriancas.Add(cr);
 
-            if (value.Criancas?.Count == 1)
-                CriancaSelecionada = value.Criancas[0];
+      
+            // 2) Repopula a lista de crianças
+            ListaCriancas.Clear();
+            foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
+                ListaCriancas.Add(cr);
+
+            if (cliente.Criancas?.Count == 1)
+                CriancaSelecionada = cliente.Criancas[0];
 
             // Dispara notificação geral:
             OnPropertyChanged(nameof(NovoCliente));
@@ -527,8 +571,7 @@ namespace AgendaNovo
             if (string.IsNullOrWhiteSpace(nomeDigitado))
                 return;
 
-            var cliente = ListaClientes.FirstOrDefault(c =>
-                string.Equals(c.Nome.Trim(), nomeDigitado.Trim(), StringComparison.OrdinalIgnoreCase));
+            var cliente = _clienteService.GetById(NovoCliente.Id);
 
             if (cliente is not null)
             {
@@ -658,12 +701,14 @@ namespace AgendaNovo
 
 
             CarregarDadosDoBanco();
-            FiltrarAgendamentos();
             AtualizarAgendamentos();
             AtualizarHorariosDisponiveis();
             LimparCampos();
-            ItemSelecionado = null;
-            
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ItemSelecionado = null;
+            }), System.Windows.Threading.DispatcherPriority.Background);
+
         }
         public void AtualizarPago(Agendamento agendamento)
         {
@@ -714,9 +759,9 @@ namespace AgendaNovo
 
             if (!clienteAindaTemAgendamentos && ClienteSelecionado != null)
             {
-                var clienteNaLista = ListaClientes.FirstOrDefault(c => c.Nome == ClienteSelecionado.Nome);
-                if (clienteNaLista != null)
-                    ListaClientes.Remove(clienteNaLista);
+                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteSelecionado.Id);
+                if (cliente != null)
+                    ListaClientes.Remove(cliente);
             }
 
             ResetarFormulario();

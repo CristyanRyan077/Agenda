@@ -12,7 +12,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using AgendaNovo.Models;
+using ControlzEx.Standard;
 using static Azure.Core.HttpHeader;
 
 namespace AgendaNovo
@@ -20,17 +22,21 @@ namespace AgendaNovo
     /// <summary>
     /// Lógica interna para Agendar.xaml
     /// </summary>
-        public partial class Agendar : Window
-        {
+    public partial class Agendar : Window
+    {
         private ICollectionView _viewClientes;
         public Agendar(AgendaViewModel vm)
-            {
-                InitializeComponent();
-                DataContext = vm;
-                vm.CarregarDadosDoBanco();
-                vm.CarregarPacotes();
+        {
+            InitializeComponent();
+            DataContext = vm;
+            vm.PropertyChanged += Vm_PropertyChanged;
+            var cv = CollectionViewSource.GetDefaultView(vm.ListaAgendamentos);
+            cv.Filter = null;
+            cv.Refresh();
+            vm.Inicializar();
+
             _viewClientes = CollectionViewSource.GetDefaultView(((AgendaViewModel)DataContext).ListaClientes);
-                _viewClientes.Filter = ClienteFilter;
+            _viewClientes.Filter = ClienteFilter;
             txtCliente.ItemsSource = _viewClientes;
             txtCliente.Loaded += (s, e) =>
             {
@@ -68,7 +74,6 @@ namespace AgendaNovo
                 editor.TextChanged += (s2, e2) =>
                 {
                     if (_preenchendoViaId) return;
-                    txtCliente.SelectedItem = null;
                     _viewClientes.Refresh();
                     txtCliente.IsDropDownOpen = !string.IsNullOrEmpty(editor.Text);
                 };
@@ -85,14 +90,18 @@ namespace AgendaNovo
                 };
             };
         }
-        private void txtCliente_DropDownClosed(object sender, EventArgs e)
+        private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (txtCliente.SelectedItem is Cliente clienteSel)
+            if (e.PropertyName == nameof(AgendaViewModel.ClienteSelecionado))
             {
-                PreencherCliente(clienteSel);
-                // evita rodar o LostFocus duplicado
-                _atualizandoCliente = false;
-                _preenchendoViaId = true;
+                var vm = (AgendaViewModel)sender;
+                // Force a atualização do Combo:
+                txtCliente.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    txtCliente.SelectedItem = vm.ClienteSelecionado;
+                    // 2) “reinicia” o Text para o nome EXATO do cliente
+                    txtCliente.Text = vm.ClienteSelecionado?.Nome ?? "";
+                }), DispatcherPriority.ContextIdle);
             }
         }
         private void Tb_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -104,19 +113,8 @@ namespace AgendaNovo
                 tb.Focus();
             }
         }
-        private void Tb_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (_preenchendoViaId) return;
-
-            txtCliente.SelectedItem = null;   // garanta que não haja seleção prévia
-            _viewClientes.Refresh();
-
-            if (!string.IsNullOrEmpty(txtCliente.Text))
-                txtCliente.IsDropDownOpen = true;
-        }
         private void txtCliente_KeyUp(object sender, KeyEventArgs e)
         {
-            txtCliente.SelectedItem = null;
             _viewClientes.Refresh();
             if (!string.IsNullOrEmpty(txtCliente.Text))
                 txtCliente.IsDropDownOpen = true;
@@ -148,121 +146,14 @@ namespace AgendaNovo
 
         private void EditableTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Sempre que o usuário digitar, limpamos a seleção
-            if (!_preenchendoViaId)
-            {
-                txtCliente.SelectedItem = null;
-            }
+            
         }
 
 
 
         private bool _atualizandoCliente = false;
         private bool _preenchendoViaId = false;
-        private void txtCliente_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var vm = DataContext as AgendaViewModel;
-
-            if (vm == null)
-                return;
-            if (_preenchendoViaId || string.Equals(txtIdBusca.IsFocused, true))
-            {
-                _preenchendoViaId = false;
-                return;
-            }
-            if (_atualizandoCliente) return;
-            _atualizandoCliente = true;
-
-            var comboBox = sender as ComboBox;
-            var nomeDigitado = comboBox?.Text?.Trim();
-            var nomeLimpo = nomeDigitado?.Split(" (ID:")[0].Trim();
-            if (comboBox.SelectedItem is Cliente clienteSel)
-            {
-                PreencherCliente(clienteSel);
-                _atualizandoCliente = false;
-                return;
-            }
-            var texto = comboBox.Text?.Trim();
-            if (string.IsNullOrEmpty(texto))
-            {
-                vm.ClienteSelecionado = null;
-                _atualizandoCliente = false;
-                return;
-            }
-
-
-            if (string.IsNullOrEmpty(nomeDigitado))
-            {
-                vm.ClienteSelecionado = null;
-                _atualizandoCliente = false;
-                return;
-            }
-            var clienteExato = vm.ListaClientes
-             .FirstOrDefault(c =>
-            string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase));
-
-            if (clienteExato == null)
-            {
-                vm.ClienteSelecionado = null;
-                _atualizandoCliente = false;
-                return;
-            }
-            PreencherCliente(clienteExato);
-            _atualizandoCliente = false;
-
-            var clientesIguais = vm.ListaClientes
-                .Where(c => string.Equals(c.Nome?.Trim(), nomeLimpo, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-
-            if (clientesIguais.Count > 1)
-            {
-                var textodup = string.Join("\n\n", clientesIguais.Select(c =>
-                    $"ID: {c.Id}\nNome: {c.Nome}\n" +
-                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome}"))}\n" +
-                    $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
-
-                MessageBox.Show($"Existem vários clientes com esse nome:\n\n{textodup}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                comboBox.Text = string.Empty;
-                vm.ClienteSelecionado = null;
-                _atualizandoCliente = false;
-                return;
-            }
-            vm.ClienteSelecionado = clienteExato;
-            _preenchendoViaId = true;
-
-            // Atualiza os bindings
-            txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-            txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
-            txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
-            _atualizandoCliente = false;
-        }
-        private void PreencherCliente(Cliente c)
-        {
-            var vm = (AgendaViewModel)DataContext;
-            vm.ClienteSelecionado = c;
-            vm.NovoCliente.Id = c.Id;
-            vm.NovoCliente.Nome = c.Nome;
-            vm.NovoCliente.Telefone = c.Telefone;
-            vm.NovoCliente.Email = c.Email;
-            vm.ListaCriancas.Clear();
-            foreach (var cr in c.Criancas ?? Enumerable.Empty<Crianca>())
-                vm.ListaCriancas.Add(cr);
-
-            // 2) Se existir pelo menos 1 criança, seleciona a primeira:
-            if (c.Criancas?.Count > 0)
-                vm.CriancaSelecionada = c.Criancas[0];
-            else
-                vm.CriancaSelecionada = new Crianca();  // ou null, se preferir tratar sem criança
-
-            // 3) Dispara a notificação para toda a CriancaSelecionada
-            vm.RefreshCriancaBindings();
-            _preenchendoViaId = true;
-            txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-            txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
-            txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
-            
-        }
+       
 
 
         private void txtpacote_LostFocus(object sender, RoutedEventArgs e)
@@ -302,6 +193,12 @@ namespace AgendaNovo
                     MessageBox.Show("Cliente com esse ID não encontrado.");
                 }
             }
+        }
+        private void dgAgendamentos_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Assim que trocar o registro, limpamos o Text do Combo
+            txtCliente.Text = string.Empty;
+            txtCliente.IsDropDownOpen = false;
         }
 
         private void txtCliente_KeyDown(object sender, KeyEventArgs e)

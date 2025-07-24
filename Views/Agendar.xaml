@@ -60,23 +60,21 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="60"
-                             hc:InfoElement.Placeholder="Cliente" DropDownClosed="txtCliente_DropDownClosed"
-                             IsEditable="True" LostFocus="txtCliente_LostFocus"                           
+                             hc:InfoElement.Placeholder="Cliente"
+                             IsEditable="True"                    
                              ItemsSource="{Binding ListaClientes}" IsTextSearchEnabled="False"
                              StaysOpenOnEdit="True" 
-                             SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"                             
+                             DisplayMemberPath="Nome"
+                                           SelectionChanged="dgAgendamentos_SelectionChanged"
+                              
+                                        SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
                              TextSearch.TextPath="Nome"
                              ToolTip="Obs: Nessa janela, cliente não pode ser editado nem criado um novo"
                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Black" SelectionTextBrush="Black">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding NomeComId}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
                     </hc:ComboBox>
+
                     <materialDesign:PackIcon Grid.Column="0" Kind="Account"
                                          Width="46" Height="46" VerticalAlignment="Center"
                                          Foreground="White" Margin="248,0,0,0"/>
@@ -256,8 +254,7 @@
                 <!-- Linha 4: DataGrid e Botões -->
                 <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="0,0,10,0">
                    <!-- <Button Content="Limpar Agendamentos Anteriores"
-                             Command="{Binding LimparAnterioresCommand}"
-                             Width="245" Height="40"
+                             Width="245" Height="40" co
                              Background="Orange" Foreground="White"
                              FontWeight="Bold" FontSize="14"
                              Margin="10,10,70,10"
