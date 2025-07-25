@@ -370,6 +370,7 @@ namespace AgendaNovo
                     Valor = ag.Valor,
                     ValorPago = ag.ValorPago
                 };
+                Debug.WriteLine("Horario preenchido: " + ag.Horario);
                 OnPropertyChanged(nameof(ClienteSelecionado));
                 OnPropertyChanged(nameof(NovoCliente));
                 OnPropertyChanged(nameof(NovoAgendamento.Pacote));
@@ -726,7 +727,9 @@ namespace AgendaNovo
         {
             int diasDesdeSegunda = ((int)DataReferencia.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
             var inicioSemana = DataReferencia.AddDays(-diasDesdeSegunda);
-            var dataDoDia = inicioSemana.AddDays((int)dia - 1);
+            int indiceDiaSemana = ((int)dia - 1 + 7) % 7;
+
+            var dataDoDia = inicioSemana.AddDays(indiceDiaSemana);
 
             return ListaAgendamentos
                 .Where(a => a.Data.Date == dataDoDia.Date)
