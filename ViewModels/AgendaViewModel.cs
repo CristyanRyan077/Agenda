@@ -50,7 +50,7 @@ namespace AgendaNovo
             get => _verificacaoJaFeita;
             set => SetProperty(ref _verificacaoJaFeita, value);
         }
-        public ICollectionView FilteredClientes { get; }
+        public ObservableCollection<Cliente> ClientesFiltrados { get; set; } = new();
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
@@ -65,6 +65,12 @@ namespace AgendaNovo
 
         //Outros
         [ObservableProperty] private string textoPesquisa = string.Empty;
+        [ObservableProperty]
+        private string nomeDigitado = string.Empty;
+
+        [ObservableProperty]
+        private bool mostrarSugestoes = false;
+
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
 
@@ -85,6 +91,19 @@ namespace AgendaNovo
             NovoCliente = new Cliente();
             NovoAgendamento = new Agendamento();
            
+        }
+        partial void OnNomeDigitadoChanged(string value)
+        {
+            var termo = value?.ToLower() ?? "";
+            var filtrados = ListaClientes
+                .Where(c => c.Nome.ToLower().Contains(termo))
+                .ToList();
+
+            ClientesFiltrados.Clear();
+            foreach (var cliente in filtrados)
+                ClientesFiltrados.Add(cliente);
+
+            MostrarSugestoes = ClientesFiltrados.Count > 0 && !string.IsNullOrWhiteSpace(termo);
         }
 
         public void Inicializar()
@@ -115,8 +134,14 @@ namespace AgendaNovo
                         ListaCriancas.Add(cr);
             });
 
+            OnPropertyChanged(nameof(ListaAgendamentos));
 
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                AtualizarAgendamentos(); // dispara OnPropertyChanged em todos os dias
+            }), DispatcherPriority.Background);
             AtualizarHorariosDisponiveis();
+
         }
 
         public void CarregarPacotes()
@@ -195,92 +220,7 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparAnteriores()
         {
-            var resultado = MessageBox.Show(
-                "Deseja apagar:\n\nSim - Apenas agendamentos pagos\nNão - Todos os anteriores\nCancelar - Nenhum",
-                "Remover Agendamentos Antigos",
-                MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Warning);
-
-            // 2) Lista para guardar quais foram "fantasmas"
-            var todos = _agendamentoService.GetAll().ToList();
-
-            // 2) Lista para armazenar (Id, lista de campos nulos)
-            var fantasmas = new List<(int Id, List<string> CamposNulos)>();
-
-            // 3) Percorre cada agendamento e verifica campos null/empty
-            foreach (var ag in todos)
-            {
-                var nulos = new List<string>();
-
-                // Exemplo: cheque Horario
-                if (string.IsNullOrWhiteSpace(ag.Horario))
-                    nulos.Add(nameof(ag.Horario));
-
-                // Exemplo: cheque ClienteId
-                if (ag.ClienteId == 0)
-                    nulos.Add(nameof(ag.ClienteId));
-
-                // Adicione aqui outras propriedades que quer validar…
-
-                if (nulos.Any())
-                    fantasmas.Add((ag.Id, nulos));
-            }
-
-            // 4) Se não achou nenhum, avisa e sai
-            if (!fantasmas.Any())
-            {
-                MessageBox.Show("Nenhum agendamento com campos nulos encontrado.", "Tudo certo",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // 5) Exibe relatório dos que serão removidos
-            var sb = new StringBuilder("Serão removidos estes agendamentos:\n\n");
-            foreach (var (id, campos) in fantasmas)
-                sb.AppendLine($"• Id={id} → campos nulos: {string.Join(", ", campos)}");
-            MessageBox.Show(sb.ToString(), "Confirme remoção",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-
-            // 6) Remove via serviço
-            foreach (var (id, _) in fantasmas)
-                _agendamentoService.Delete(id);
-
-
-
-
-           /* if (resultado == MessageBoxResult.Yes)
-            {
-                var json = JsonSerializer.Serialize(anteriores, new JsonSerializerOptions 
-                {
-                    WriteIndented = true,
-                    ReferenceHandler = ReferenceHandler.Preserve
-                });
-
-                string pastaBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
-                Directory.CreateDirectory(pastaBackup);
-
-                string caminhoArquivo = Path.Combine(pastaBackup, $"backup_agendamentos_{DateTime.Today:yyyyMMdd}.json");
-
-                File.WriteAllText(caminhoArquivo, json);
-
-                MessageBox.Show($"Backup salvo com sucesso em:\n{caminhoArquivo}", "Backup", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                var pagosAnteriores = anteriores
-                    .Where(a => a.EstaPago)
-                    .ToList();
-
-                foreach (var item in pagosAnteriores)
-                    ListaAgendamentos.Remove(item);
-            }
-            else if (resultado == MessageBoxResult.No)
-            {
-                foreach (var item in anteriores)
-                    ListaAgendamentos.Remove(item);
-            } */
-
-            AtualizarAgendamentos();
-            AtualizarHorariosDisponiveis();
-            FiltrarAgendamentos();
+            
         }
 
         private DayOfWeek _diaAtual;
@@ -323,13 +263,13 @@ namespace AgendaNovo
         }
         public void FiltrarAgendamentos()
         {
-           /* AgendamentosFiltrados.Clear();
+           AgendamentosFiltrados.Clear();
 
             var filtrados = ListaAgendamentos
                 .Where(a => a != null && a.Data.Date == DataSelecionada.Date)
                 .ToList();
             foreach (var item in filtrados)
-                AgendamentosFiltrados.Add(item);*/
+                AgendamentosFiltrados.Add(item);
         } 
 
         [RelayCommand]
@@ -398,8 +338,10 @@ namespace AgendaNovo
                     MessageBox.Show("Cliente não encontrado ou inválido.");
                     return;
                 }
-                ClienteSelecionado = cliente;
+                ClienteSelecionado = null; // força reset e evita disparo intermediário
                 NovoCliente = cliente;
+                ClienteSelecionado = cliente;
+                NomeDigitado = cliente.Nome;
                 OnPropertyChanged(nameof(ClienteSelecionado));
                 OnPropertyChanged(nameof(NovoCliente));
 
@@ -514,9 +456,10 @@ namespace AgendaNovo
 
         partial void OnCriancaSelecionadaChanged(Crianca? value)
         {
-            // Garante que qualquer binding que dependa de CriancaSelecionada seja notificado:
+            if (value == null) return;
+
+            // Notifica todos os bindings dependentes
             OnPropertyChanged(nameof(CriancaSelecionada));
-            // Se precisar expor algo derivado:
             OnPropertyChanged(nameof(CriancaSelecionada.Genero));
             OnPropertyChanged(nameof(CriancaSelecionada.IdadeUnidade));
         }
@@ -529,43 +472,38 @@ namespace AgendaNovo
 
         partial void OnClienteSelecionadoChanged(Cliente? cliente)
         {
-            if (_selecionandoDaGrid) return;
-            if (cliente == null)
-            {
-                NovoCliente = new Cliente();
-                ListaCriancas.Clear();
-                CriancaSelecionada = null;
-                OnPropertyChanged(nameof(NovoCliente));
-                OnPropertyChanged(nameof(ListaCriancas));
-                OnPropertyChanged(nameof(CriancaSelecionada));
-                return;
-            }
-            // Se desmarcou, limpa tudo
-            if (CriancaSelecionada == null)
-            {
-                CriancaSelecionada = new Crianca();
-                OnPropertyChanged(nameof(CriancaSelecionada));
-            }
-            NovoCliente = cliente;
+            if (_selecionandoDaGrid || cliente == null) return;
+
+
+            NomeDigitado = cliente.Nome;
+
+            // Atualiza telefone e email também
+            NovoCliente.Id = cliente.Id;
+            NovoCliente.Nome = cliente.Nome;
+            NovoCliente.Telefone = cliente.Telefone;
+            NovoCliente.Email = cliente.Email;
+
             ListaCriancas.Clear();
             foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
                 ListaCriancas.Add(cr);
 
-      
-            // 2) Repopula a lista de crianças
-            ListaCriancas.Clear();
-            foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
-                ListaCriancas.Add(cr);
-
-            if (cliente.Criancas?.Count == 1)
+            if (cliente.Criancas?.Count > 0)
+            {
                 CriancaSelecionada = cliente.Criancas[0];
+
+                // *** Garante que os enums são atualizados e notificados ***
+                OnPropertyChanged(nameof(CriancaSelecionada));
+                OnPropertyChanged(nameof(CriancaSelecionada.Genero));
+                OnPropertyChanged(nameof(CriancaSelecionada.IdadeUnidade));
+            }
 
             // Dispara notificação geral:
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ListaCriancas));
             OnPropertyChanged(nameof(CriancaSelecionada));
         }
-       
+
+
         public void PreencherCamposSeClienteExistir(string? nomeDigitado, Action<Cliente> preencher)
         {
             if (string.IsNullOrWhiteSpace(nomeDigitado))
@@ -581,16 +519,6 @@ namespace AgendaNovo
             }
         }
 
-        public void PreencherCampoCrianca(string? nomeDigitado, Action<Crianca> preencher)
-        {
-            if (string.IsNullOrWhiteSpace(nomeDigitado))
-                return;
-
-            var crianca = ListaCriancas.FirstOrDefault(c =>
-                string.Equals(c.Nome.Trim(), nomeDigitado.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (crianca is not null)
-                preencher(crianca);
-        }
 
         public void PreencherPacote(string? pacoteDigitado, Action<decimal> preencher)
         {
@@ -602,7 +530,7 @@ namespace AgendaNovo
                 preencher(valor);
             }
         }
-      
+
 
         [RelayCommand]
         private void Agendar()
@@ -670,6 +598,7 @@ namespace AgendaNovo
             var textoCrianca = crianca != null
             ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
             : "";
+            DataReferencia = NovoAgendamento.Data;
 
 
             var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
@@ -701,9 +630,12 @@ namespace AgendaNovo
 
 
             CarregarDadosDoBanco();
+            OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
+            FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
             LimparCampos();
+            OnPropertyChanged(nameof(ListaAgendamentos));
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 ItemSelecionado = null;
@@ -729,13 +661,14 @@ namespace AgendaNovo
 
         public void AtualizarAgendamentos()
         {
-            OnPropertyChanged(nameof(AgendamentosDomingo));
-            OnPropertyChanged(nameof(AgendamentosSegunda));
-            OnPropertyChanged(nameof(AgendamentosTerca));
-            OnPropertyChanged(nameof(AgendamentosQuarta));
-            OnPropertyChanged(nameof(AgendamentosQuinta));
-            OnPropertyChanged(nameof(AgendamentosSexta));
-            OnPropertyChanged(nameof(AgendamentosSabado));
+            PreencherColecao(AgendamentosDomingo, DayOfWeek.Sunday);
+            PreencherColecao(AgendamentosSegunda, DayOfWeek.Monday);
+            PreencherColecao(AgendamentosTerca, DayOfWeek.Tuesday);
+            PreencherColecao(AgendamentosQuarta, DayOfWeek.Wednesday);
+            PreencherColecao(AgendamentosQuinta, DayOfWeek.Thursday);
+            PreencherColecao(AgendamentosSexta, DayOfWeek.Friday);
+            PreencherColecao(AgendamentosSabado, DayOfWeek.Saturday);
+            OnPropertyChanged(nameof(SemanaExibida));
         }
         [RelayCommand]
         private void Excluir()
@@ -810,25 +743,33 @@ namespace AgendaNovo
         }
 
         private DateTime FimDaSemana => InicioDaSemana.AddDays(6);
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosDomingo = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosSegunda = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosTerca = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosQuarta = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosQuinta = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosSexta = new();
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosSabado = new();
+        private void PreencherColecao(ObservableCollection<Agendamento> colecao, DayOfWeek dia)
+        {
+            colecao.Clear();
 
-        public IEnumerable<Agendamento> AgendamentosDomingo => FiltrarPorDia(DayOfWeek.Sunday);
-
-
-        public IEnumerable<Agendamento> AgendamentosSegunda => FiltrarPorDia(DayOfWeek.Monday);
-
-
-        public IEnumerable<Agendamento> AgendamentosTerca => FiltrarPorDia(DayOfWeek.Tuesday);
-
-        public IEnumerable<Agendamento> AgendamentosQuarta => FiltrarPorDia(DayOfWeek.Wednesday);
-
-
-        public IEnumerable<Agendamento> AgendamentosQuinta => FiltrarPorDia(DayOfWeek.Thursday);
-
-        public IEnumerable<Agendamento> AgendamentosSexta => FiltrarPorDia(DayOfWeek.Friday);
-
-
-        public IEnumerable<Agendamento> AgendamentosSabado => FiltrarPorDia(DayOfWeek.Saturday);
-
+            var itens = FiltrarPorDia(dia);
+            foreach (var item in itens)
+                colecao.Add(item);
+            OnPropertyChanged(GetNomePropriedadeDia(dia));
+        }
+        private string GetNomePropriedadeDia(DayOfWeek dia) => dia switch
+        {
+            DayOfWeek.Sunday => nameof(AgendamentosDomingo),
+            DayOfWeek.Monday => nameof(AgendamentosSegunda),
+            DayOfWeek.Tuesday => nameof(AgendamentosTerca),
+            DayOfWeek.Wednesday => nameof(AgendamentosQuarta),
+            DayOfWeek.Thursday => nameof(AgendamentosQuinta),
+            DayOfWeek.Friday => nameof(AgendamentosSexta),
+            DayOfWeek.Saturday => nameof(AgendamentosSabado),
+            _ => string.Empty
+        };
         public bool DiaChkSeg => DiaAtual == DayOfWeek.Monday;
         public bool DiaChkTer => DiaAtual == DayOfWeek.Tuesday;
         public bool DiaChkQua => DiaAtual == DayOfWeek.Wednesday;

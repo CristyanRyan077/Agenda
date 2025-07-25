@@ -7,6 +7,7 @@
         xmlns:vm="clr-namespace:AgendaNovo"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
+        xmlns:controles="clr-namespace:AgendaNovo.Views.Controles"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="Agendar"
         MinWidth="600" MinHeight="600"
@@ -60,29 +61,16 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <hc:ComboBox Name="txtCliente" Grid.Column="0" Width="305" Height="60"
-                             hc:InfoElement.Placeholder="Cliente"
-                             IsEditable="True"                    
-                             ItemsSource="{Binding ListaClientes}" IsTextSearchEnabled="False"
-                             StaysOpenOnEdit="True" 
-                             DisplayMemberPath="Nome"
-                                           SelectionChanged="dgAgendamentos_SelectionChanged"
-                              
-                                        SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
-                             TextSearch.TextPath="Nome"
-                             ToolTip="Obs: Nessa janela, cliente não pode ser editado nem criado um novo"
-                             Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                             BorderBrush="Black" SelectionTextBrush="Black">
-                    </hc:ComboBox>
+                    <controles:ClienteAutoComplete VerticalAlignment="Center"></controles:ClienteAutoComplete>
 
                     <materialDesign:PackIcon Grid.Column="0" Kind="Account"
                                          Width="46" Height="46" VerticalAlignment="Center"
                                          Foreground="White" Margin="248,0,0,0"/>
 
-                    <hc:ComboBox Name="txtTelefone" Grid.Column="1" Width="305" Height="60"
+                    <hc:TextBox Name="txtTelefone" Grid.Column="1" Width="305" Height="60"
                              hc:InfoElement.Placeholder="Telefone"
                              Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             IsEditable="True" ToolTip="obs: busque cliente por nome ou ID"
+                             ToolTip="obs: busque cliente por nome ou ID"
                              Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Grid.Column="  1" Kind="Phone"
@@ -188,7 +176,7 @@
                     <hc:ComboBox Grid.Column="1" Height="60"
                  hc:InfoElement.Placeholder="Gênero" Width="150"
                  ItemsSource="{Binding GenerosLista}"
-                 SelectedItem="{Binding CriancaSelecionada.Genero, Mode=TwoWay}"
+                 SelectedItem="{Binding CriancaSelecionada.Genero, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
                  FontFamily="#heveltica" FontSize="20" FontWeight="Bold"
                  BorderBrush="Transparent" SelectionTextBrush="Black"
@@ -208,7 +196,7 @@
                                           FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
                                           BorderBrush="Transparent"
                                           ItemsSource="{Binding IdadesUnidadeDisponiveis}"
-                                          SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, Mode=TwoWay}" />
+                                          SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
 
                 </Grid>
@@ -243,7 +231,7 @@
                 <!-- Calendário -->
                 <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Right">
                     <Calendar Width="350" Height="300"
-                          SelectedDate="{Binding DataSelecionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedDate="{Binding NovoAgendamento.Data, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           Language="pt-br">
                         <Calendar.LayoutTransform>
                             <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>

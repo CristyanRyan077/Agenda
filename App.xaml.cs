@@ -39,7 +39,7 @@ namespace AgendaNovo
 
             services.AddScoped<ClienteCriancaViewModel>();
 
-            services.AddScoped<AgendaViewModel>();
+            services.AddSingleton<AgendaViewModel>();
             ServiceProvider = services.BuildServiceProvider();
 
 

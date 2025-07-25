@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -37,6 +38,7 @@ namespace AgendaNovo
             InitializeComponent();
             vm = agendaVm;
             DataContext = vm;
+            Debug.WriteLine($"MainWindow ViewModel ID: {vm.GetHashCode()}");
             _sp = sp;
             this.Closed += (s, e) => Application.Current.Shutdown();
 
@@ -63,7 +65,7 @@ namespace AgendaNovo
                 vm.LimparCamposCommand.Execute(null);
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
-                    var main = _sp.GetRequiredService<Agendar>();
+                    var main = new Agendar(vm); // reuse o mesmo vm da MainWindow
                     main.Show();
                 }
                 else

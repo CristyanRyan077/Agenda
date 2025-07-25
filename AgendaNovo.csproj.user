@@ -4,6 +4,9 @@
     <_LastSelectedProfileId>C:\Users\Foco na Arte\Source\Repos\Agenda\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Update="Views\Controles\ClienteAutoComplete.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\SplashScreen.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
