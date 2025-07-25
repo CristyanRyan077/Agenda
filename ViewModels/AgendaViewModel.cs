@@ -291,7 +291,8 @@ namespace AgendaNovo
 
             var ocupados = ListaAgendamentos
                 .Where(a => a.Data.Date == DataSelecionada.Date)
-                .Select(a => a.Horario)
+                .Select(a => a.Horario?.ToString(@"hh\:mm"))
+                .Where(h => !string.IsNullOrEmpty(h)) // remove nulos
                 .ToList();
 
             var livres = _horariosFixos
@@ -407,8 +408,12 @@ namespace AgendaNovo
         {
             NovoAgendamento = new Agendamento();
             ItemSelecionado = null;
+            NomeDigitado = string.Empty;
             NovoCliente = new Cliente();
             NovoCliente.Id = 0;
+            HorarioTexto = string.Empty;
+            
+
             CriancaSelecionada = new Crianca();
             
             ListaCriancas.Clear();
@@ -435,12 +440,12 @@ namespace AgendaNovo
         }
         public void AtualizarHorariosDisponiveis()
         {
-            if (NovoAgendamento.Horario != null && !HorariosDisponiveis.Contains(NovoAgendamento.Horario))
-                NovoAgendamento.Horario = null;
+            var horarioStr = NovoAgendamento?.Horario?.ToString(@"hh\:mm");
 
             var ocupados = ListaAgendamentos
                 .Where(a => a.Data.Date == DataSelecionada.Date && a.Id != NovoAgendamento.Id)
-                .Select(a => a.Horario)
+                .Select(a => a.Horario?.ToString(@"hh\:mm"))
+                .Where(h => !string.IsNullOrEmpty(h))
                 .ToList();
 
             var livres = _horariosFixos
@@ -451,8 +456,9 @@ namespace AgendaNovo
             foreach (var h in livres)
                 HorariosDisponiveis.Add(h);
 
-            if (!HorariosDisponiveis.Contains(NovoAgendamento.Horario))
+            if (!string.IsNullOrEmpty(horarioStr) && !HorariosDisponiveis.Contains(horarioStr))
                 NovoAgendamento.Horario = null;
+            OnPropertyChanged(nameof(HorarioTexto));
         }
 
         partial void OnCriancaSelecionadaChanged(Crianca? value)
@@ -539,7 +545,7 @@ namespace AgendaNovo
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
 
-            if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario))
+            if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario?.ToString(@"hh\:mm")))
             {
                 MessageBox.Show(
                     "Por favor, selecione um horário antes de agendar.",
@@ -616,7 +622,8 @@ namespace AgendaNovo
                             $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
                 Clipboard.SetText(texto);
                 MessageBox.Show("Agendamento copiado para a área de transferência!");
-
+            if (agendamentoNovo)
+            {
                 var telefone = cliente.Telefone;
                 string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
                 string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
@@ -626,9 +633,7 @@ namespace AgendaNovo
                     FileName = url,
                     UseShellExecute = true
                 });
-
-           
-
+            }
 
             CarregarDadosDoBanco();
             OnPropertyChanged(nameof(DataReferencia));
@@ -802,6 +807,18 @@ namespace AgendaNovo
 
         [RelayCommand]
         private void ProximaSemana() => DataReferencia = DataReferencia.AddDays(7);
+        public string HorarioTexto
+{
+    get => NovoAgendamento?.Horario?.ToString(@"hh\:mm") ?? "";
+    set
+    {
+        if (TimeSpan.TryParse(value, out var parsed) && NovoAgendamento != null)
+        {
+            NovoAgendamento.Horario = parsed;
+            OnPropertyChanged(nameof(HorarioTexto));
+        }
+    }
+}
     }
 
 

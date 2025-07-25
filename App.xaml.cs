@@ -1,13 +1,14 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Globalization;
-using System.Windows;
-using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Interfaces;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
 using HandyControl.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.Configuration;
+using System.Data;
+using System.Globalization;
+using System.Windows;
 
 namespace AgendaNovo
 {
@@ -23,9 +24,9 @@ namespace AgendaNovo
             base.OnStartup(e);
             var services = new ServiceCollection();
             services.AddDbContext<AgendaContext>(options =>
-            options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
-            services.AddScoped<IClienteService, ClienteService>();
+            options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;"));
             services.AddScoped<ICriancaService, CriancaService>();
+            services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IAgendamentoService, AgendamentoService>();
 
             services.AddTransient<ClienteService>();

@@ -19,7 +19,7 @@ namespace AgendaNovo
 
         [ObservableProperty] private string? pacote;
 
-        [ObservableProperty] private string? horario;
+        [ObservableProperty] private TimeSpan? horario;
 
         [ObservableProperty] private string? tema;
 

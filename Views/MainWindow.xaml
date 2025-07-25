@@ -188,7 +188,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -277,7 +277,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -364,7 +364,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -448,7 +448,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -530,7 +530,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -628,7 +628,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -727,7 +727,7 @@
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Tema}" FontSize="12" Margin="0 0 6 0"/>
                                                                     <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
-                                                                    <TextBlock Text="{Binding Horario}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Border>
@@ -780,18 +780,11 @@
                                 <materialDesign:PackIcon Kind="Search" Height="50" Width="50"
                                  Margin="-45,0,0,0" VerticalAlignment="Center" />
                                 <hc:TextBox Text="{Binding NovoAgendamento.ValorPago, UpdateSourceTrigger=PropertyChanged }"
-                                Width="170" Height="60" Margin="10,0,0,0"
+                                Width="250" Height="60" Margin="10,0,0,0"
                                 hc:InfoElement.Placeholder="Pago"
                                 Background="White" Foreground="Black" FontFamily="Helvetica" FontSize="24" FontWeight="Bold"
                                 BorderBrush="Transparent" SelectionTextBrush="Black" />
-                                <Button Content="Copiar horários livres"
-                                         Command="{Binding CopiarHorariosLivresCommand}"
-                                         FontSize="15" FontFamily="Arial" 
-                                         Width="170" Height="50"
-                                         Margin="10" Background="#FF00FFE2"   />
-                                <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
-                                                         Foreground="White"
-                                                         VerticalAlignment="Center"/>
+                                
                             </StackPanel>
 
                             <!-- Linha de botões -->
@@ -809,11 +802,14 @@
                                         Width="120" Height="60" Margin="5,0,0,0"
                                         Foreground="White" FontSize="14" FontWeight="Bold"
                                         Command="{Binding MostrarTodosCommand}" />
-
-                                <Button Content="Limpar" Width="150" Height="60" Margin="10,0"
-                            FontWeight="Bold" FontSize="18"
-                            Background="Orange" Foreground="White"
-                            Command="{Binding LimparAnterioresCommand}" />
+                                <Button Content="Copiar horários livres"
+                                     Command="{Binding CopiarHorariosLivresCommand}"
+                                     FontSize="15" FontFamily="Arial" 
+                                     Width="170" Height="50"
+                                     Margin="10" Background="#FF00FFE2"   />
+                                 <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
+                                 Foreground="White"
+                                 VerticalAlignment="Center"/>
                             </StackPanel>
 
                             <!-- DataGrid -->
@@ -861,7 +857,7 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
+                                    <DataGridTextColumn Header="Horário" Binding="{Binding Horario, StringFormat=\{0:hh\\:mm\}}" />
                                         <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                                     </DataGrid.Columns>
                                 </DataGrid>

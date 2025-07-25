@@ -20,12 +20,13 @@ namespace AgendaNovo
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Agendamento>(entity =>
             {
+
                 entity.Property(a => a.Valor).HasColumnType("decimal(18,2)");
                 entity.Property(a => a.ValorPago).HasColumnType("decimal(18,2)");
             });

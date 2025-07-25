@@ -204,7 +204,7 @@
                         hc:InfoElement.Placeholder="Horário" Margin="0,0,0,10" VerticalAlignment="Bottom"
                              IsReadOnly="True"
                          ItemsSource="{Binding HorariosDisponiveis}" 
-                         SelectedItem="{Binding NovoAgendamento.Horario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         SelectedItem="{Binding HorarioTexto,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           IsSynchronizedWithCurrentItem="False"
                           Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                           BorderBrush="Transparent" SelectionTextBrush="Black"/>
@@ -263,11 +263,10 @@
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                             <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
-                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
-                            <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Crianca.IdadeFormatada}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote}" />
-                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario,StringFormat=\{0:hh\\:mm\}}" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                             <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                             <DataGridTemplateColumn Header="Pago">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -288,8 +287,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario}" />
-                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
+                            <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
+                            <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                            <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Crianca.IdadeFormatada}" />
                         </DataGrid.Columns>
                     </DataGrid>
 
