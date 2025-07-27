@@ -21,10 +21,8 @@
             </Grid.Background>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="420" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="420" />
+
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -51,28 +49,50 @@
                     <DataGridTextColumn Header="Crianca" Binding="{Binding NomeCrianca}"/>
                     <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding IdadeFormatada}"/>
                     <DataGridTextColumn Header="Genero" Binding="{Binding Genero}"/>
-                    <DataGridTextColumn Header="Nascimento" Binding="{Binding NascimentoDateTime}"/>
+                    <DataGridTextColumn Header="Nascimento" Binding="{Binding Nascimento, StringFormat=dd/MM/yyyy}"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <!-- Pendente = Vermelho -->
+                                    <DataTrigger Binding="{Binding Status}" Value="Pendente">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+
+                                    <!-- Ativo = Verde -->
+                                    <DataTrigger Binding="{Binding Status}" Value="Ativo">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+
+                                    <!-- Inativo = Laranja -->
+                                    <DataTrigger Binding="{Binding Status}" Value="Inativo">
+                                        <Setter Property="Foreground" Value="Orange"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
 
             <hc:TextBox Name="txtPesquisa"
-                    Width="500" Height="30"
+                    Width="400" Height="30"
                         BorderBrush="Black" Grid.Row="7"
-                    Margin="0,0,0,10" VerticalAlignment="Bottom"
-                    Grid.Column="3" Grid.ColumnSpan="3" 
+                    Margin="0,0,0,0" VerticalAlignment="Bottom"
+                    Grid.Column="2"
                     hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
                     Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
             <materialDesign:PackIcon Kind="Search" 
                                      Grid.Row="7"
                                      Width="30" Height="25"
-                                     Margin="0,2,0,0" VerticalAlignment="Center"
+                                     Margin="0,2,10,0" VerticalAlignment="Bottom"
                                      HorizontalAlignment="Right"
-                                     Grid.Column="4"/>
-            <DatePicker Grid.Row="6" Grid.Column="0" hc:InfoElement.Placeholder="Nascimento"
-                        Background="White" Foreground="Black" HorizontalAlignment="Center"
-                        FontSize="12" SelectedDate="{Binding ClienteCriancaSelecionado.NascimentoDateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=dd/MM/yyyy}"
-                        BorderBrush="Black"
-                        Width="200"/>
+                                     Grid.Column="2"/>
+            <DatePicker Grid.Row="2" Grid.Column="2" hc:InfoElement.Placeholder="Nascimento"
+                        Background="White" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        FontSize="12" SelectedDate="{Binding CriancaSelecionada.NascimentoDateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=dd/MM/yyyy}"
+                        BorderBrush="Black" Margin="40,0,0,0"
+                        Width="160" Height="38"/>
 
             <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
@@ -80,9 +100,9 @@
                                 PreviewTextInput="txtCliente_PreviewTextInput"
                                  Margin="12,10,0,0"
                                 Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Width="410" Height="38" BorderBrush="Black" Grid.ColumnSpan="2"/>
+                                Width="300" Height="38" BorderBrush="Black" Grid.ColumnSpan="2"/>
             <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
-                                         Width="40" Height="40" Grid.Row="1"                                
+                                         Width="40" Height="40" Grid.Row="1" Margin="0,0,110,0"                             
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                          Foreground="Black" />
 
@@ -91,23 +111,35 @@
             <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone" LostFocus="txtTel_LostFocus"
                         HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
                          Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="410" Height="42" BorderBrush="Black" Margin="12,1,0,1" Grid.Row="2"/>
+                        Width="300" Height="42" BorderBrush="Black" Margin="12,1,0,1" Grid.Row="2"/>
 
             <materialDesign:PackIcon Grid.Column="0" Kind="Phone"
                                          Width="34" Height="34" 
-                                         HorizontalAlignment="Right"
-                                         Foreground="Black" Margin="0,5,1,0" Grid.Row="2"/>
+                                         HorizontalAlignment="Center"
+                                         Foreground="Black" Margin="160,5,1,0" Grid.Row="2"/>
 
             <hc:TextBox x:Name="txtEmail" hc:InfoElement.Placeholder="Email" LostFocus="txtEmail_LostFocus"
                         HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.ColumnSpan="2"
                         Margin="12,0,0,1" Grid.Row="3"
                         Text="{Binding NovoCliente.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="410" Height="42" BorderBrush="Black"/>
+                        Width="350" Height="42" BorderBrush="Black"/>
 
             <materialDesign:PackIcon Grid.Column="0" Kind="Email"
                                          Width="34" Height="34" VerticalAlignment="Bottom"
                                          HorizontalAlignment="Right"
-                                         Foreground="Black" Margin="0,0,0,3" Grid.Row="3"/>
+                                         Foreground="Black" Margin="0,0,70,3" Grid.Row="3"/>
+            <hc:TextBox x:Name="txtinsta" hc:InfoElement.Placeholder="Instagram"
+             HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.ColumnSpan="2"
+             Margin="12,0,0,1" Grid.Row="4"
+             Text="{Binding NovoCliente.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             Width="350" Height="42" BorderBrush="Black"/>
+
+            <hc:TextBox x:Name="txtfcbook" hc:InfoElement.Placeholder="Facebook"
+             HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.ColumnSpan="2"
+             Margin="12,0,0,1" Grid.Row="5"
+             Text="{Binding NovoCliente.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             Width="350" Height="42" BorderBrush="Black"/>
+
             <TextBlock Text="⚠️ Cliente já existente detectado &#10;Uma nova criança será adicionada."
            Foreground="Orange" FontSize="12" HorizontalAlignment="Center" 
            FontWeight="Bold" Background="Black" Height="35" 
@@ -121,58 +153,58 @@
                         Width="117" BorderBrush="Black" Height="20"/>
 
             <hc:ComboBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"
-             HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
-             Margin="12,0,0,0" IsEditable="True" Grid.Row="4"  DisplayMemberPath="Nome"
+             HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Column="2"
+             Margin="12,0,0,0" IsEditable="True" Grid.Row="1"  DisplayMemberPath="Nome"
              ItemsSource="{Binding ListaCriancasDoCliente}"
              Text="{Binding CriancaSelecionada.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-             Width="410" Height="42" BorderBrush="Black"/>
+             Width="300" Height="38" BorderBrush="Black"/>
 
-            <materialDesign:PackIcon Grid.Column="0" Kind="ChildFriendly"
+            <materialDesign:PackIcon Grid.Column="2" Kind="ChildFriendly"
                               Width="34" Height="34" Cursor="Hand"
-                              HorizontalAlignment="Right"
-                              Foreground="Black" Margin="0,9,18,0" Grid.Row="4"/>
+                              HorizontalAlignment="Center"
+                              Foreground="Black" Margin="100,9,0,0" Grid.Row="1"/>
 
-            <hc:ComboBox Grid.Column="0" Height="38" Grid.Row="5"
-                        hc:InfoElement.Placeholder="Gênero" Width="150"
+            <hc:ComboBox Grid.Column="2" Height="38" Grid.Row="2"
+                        hc:InfoElement.Placeholder="Gênero" Width="130"
                          ItemsSource="{Binding GenerosLista}"
                         Text="{Binding CriancaSelecionada.Genero}" VerticalAlignment="Bottom"
                         Background="White" Foreground="Black" HorizontalAlignment="Left"
                         FontSize="12"
                         BorderBrush="Black" SelectionTextBrush="Black" Margin="12,0,0,1"
                         />
-            <hc:TextBox Width="90" Height="38" hc:InfoElement.Placeholder="Idade"
+            <hc:TextBox Width="90" Height="38" hc:InfoElement.Placeholder="Idade" Grid.Column="2"
         Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
-                Background="White" Foreground="Black" HorizontalAlignment="Center"
-                FontSize="12" Grid.Row="5" VerticalAlignment="Bottom" Margin="0,0,0,1"
+                Background="White" Foreground="Black" HorizontalAlignment="Left"
+                FontSize="12" Grid.Row="3" VerticalAlignment="Bottom" Margin="12,0,0,1"
                 BorderBrush="Black" SelectionTextBrush="Black" />
 
-            <hc:ComboBox Width="160" Height="38" Grid.Column="0"
-                         Background="White" Foreground="Black" HorizontalAlignment="Right"
+            <hc:ComboBox Width="160" Height="38" Grid.Column="2"
+                         Background="White" Foreground="Black" HorizontalAlignment="Center"
                          FontFamily="#heveltica" FontSize="12" VerticalAlignment="Bottom"
-                         BorderBrush="Black" Grid.Row="5" hc:InfoElement.Placeholder="Anos/Meses"
+                         BorderBrush="Black" Grid.Row="3" hc:InfoElement.Placeholder="Anos/Meses"
                          ItemsSource="{Binding IdadesUnidadeDisponiveis}"
-                         SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,2,1" />
+                         SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,32,1" />
 
 
             <TextBlock Text="BarreiraDagrid" Grid.Column="1" Visibility="Hidden"/>
 
             <Button x:Name="btnSalvar" Content="Salvar" 
-                            Background="#FF37FF00" Command="{Binding SalvarClienteCriancaCommand}"
+                            Background="LawnGreen" Command="{Binding SalvarClienteCriancaCommand}"
                             hc:BorderElement.CornerRadius="10"
                             HorizontalAlignment="Left"
                             Grid.Row="7" Margin="28,4,0,0"
-                            VerticalAlignment="Top"
-                            Height="50" Width="96" BorderBrush="White"
+                            VerticalAlignment="Bottom"
+                            Height="38" Width="96" BorderBrush="White"
                             />
             <Button x:Name="btnExcluir" Content="Excluir" 
                         Background="Red" Command="{Binding ExcluirClienteOuCriancaSelecionadoCommand}"
                         hc:BorderElement.CornerRadius="10" Margin="0,4,28,0"
                         HorizontalAlignment="Right" Grid.Row="7"
-                        Grid.Column="0" VerticalAlignment="Top"
-                        Height="48" Width="104" BorderBrush="Black"
+                        Grid.Column="0" VerticalAlignment="Bottom"
+                        Height="38" Width="104" BorderBrush="Black"
                             />
-            <Button Content="Editar" Background="Blue" Foreground="White" hc:BorderElement.CornerRadius="10" Grid.Row="7"
-                    Height="48" Width="104" VerticalAlignment="Top" Command="{Binding EditarClienteCriancaSelecionadoCommand}" Margin="0,4,0,0" />
+            <Button Content="Editar" Background="LightSlateGray" Foreground="White" hc:BorderElement.CornerRadius="10" Grid.Row="7"
+                    Height="38" Width="104" VerticalAlignment="Bottom" Command="{Binding EditarClienteCriancaSelecionadoCommand}" Margin="0,4,0,0" />
         </Grid>
 
     </Grid>

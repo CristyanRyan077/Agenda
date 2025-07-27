@@ -23,6 +23,6 @@ namespace AgendaNovo.Models
     {
         Pendente = 0,
         Ativo = 1,
-        Cancelado = 2
+        Inativo = 2
     }
 }

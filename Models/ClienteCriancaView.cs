@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,12 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? nomeCliente;
         [ObservableProperty] private string? telefone;
         [ObservableProperty] private string? email;
+        [ObservableProperty] private StatusCliente status = StatusCliente.Pendente;
+        [ObservableProperty]
+        private string? facebook;
+
+        [ObservableProperty]
+        private string? instagram;
         [ObservableProperty] private string? nomeCrianca;
         [ObservableProperty] private Genero genero = Genero.M;
         [ObservableProperty] private int? idade;
@@ -25,18 +32,11 @@ namespace AgendaNovo.Models
 
         [ObservableProperty] private DateOnly? nascimento;
 
+        [NotMapped]
         public DateTime? NascimentoDateTime
         {
-            get => Nascimento.HasValue ? Nascimento.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
-            set
-            {
-                if (value.HasValue)
-                    Nascimento = DateOnly.FromDateTime(value.Value);
-                else
-                    Nascimento = null;
-                OnPropertyChanged(nameof(NascimentoDateTime));
-                OnPropertyChanged(nameof(Nascimento));
-            }
+            get => Nascimento?.ToDateTime(TimeOnly.MinValue);
+            set => Nascimento = value.HasValue ? DateOnly.FromDateTime(value.Value) : null;
         }
 
         partial void OnNascimentoChanged(DateOnly? oldValue, DateOnly? newValue)

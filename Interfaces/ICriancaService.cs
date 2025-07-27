@@ -14,6 +14,7 @@ namespace AgendaNovo.Interfaces
             Crianca AddOrUpdate(Crianca crianca);
             void Delete(int id);
             void AtualizarIdadeDeTodasCriancas();
+            void AtualizarIdade(Crianca crianca, DateOnly hoje);
             List<Agendamento> GetAgendamentos(int criancaId);
     }
 }

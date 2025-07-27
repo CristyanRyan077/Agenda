@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,81 +18,72 @@ namespace AgendaNovo.Services
         {
             _db = db;
         }
-        public void AtualizarIdadeDeTodasCriancas()
-        {
+          public void AtualizarIdadeDeTodasCriancas()
+          {
+            Debug.WriteLine("AtualizarIdadeDeTodasCriancas chamado");
             var criancasComNascimento = _db.Criancas
+                .Include(c => c.Cliente)
                 .Where(c => c.Nascimento != null)
                 .ToList();
 
             var hoje = DateOnly.FromDateTime(DateTime.Today);
-            var aniversariosDoMes = new StringBuilder();
-            var aniversariantes = criancasComNascimento
-            .Where(c => c.Nascimento.HasValue && c.Nascimento.Value.Day == hoje.Day)
-            .ToList();
 
+            var aniversariantesDoMes = criancasComNascimento
+                .Where(c =>
+                    c.Nascimento.Value.Month == hoje.Month
+                )
+                .ToList();
+
+            // Atualiza idade de todas as crianças
             foreach (var crianca in criancasComNascimento)
+                AtualizarIdade(crianca, hoje);
+
+            _db.SaveChanges();
+
+          
+
+            // AVISO DE ANIVERSÁRIO DO MÊS
+            if (aniversariantesDoMes.Any() && (Properties.Settings.Default.UltimoAvisoMes == hoje.Month ||
+                Properties.Settings.Default.UltimoAvisoAno == hoje.Year))
+                
             {
-                var nascimento = crianca.Nascimento!.Value;
+                var sbMes = new StringBuilder();
+                foreach (var c in aniversariantesDoMes)
+                    sbMes.AppendLine($"- {c.Nome} ({c.Cliente?.Nome})");
 
-                var anos = hoje.Year - nascimento.Year;
-                if (nascimento > hoje.AddYears(-anos)) anos--;
+                    MessageBox.Show(
+                    "Crianças que fazem aniversário este mês:\n\n" + sbMes.ToString(),
+                    "Aniversários do Mês",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
 
-                if (anos > 0)
-                {
-                    crianca.Idade = anos;
-                    crianca.IdadeUnidade = IdadeUnidade.Anos;
-                }
-                else
-                {
-                    var meses = (hoje.Year - nascimento.Year) * 12 + hoje.Month - nascimento.Month;
-                    if (nascimento.Day > hoje.Day) meses--;
+                //Properties.Settings.Default.Reset();
+                Properties.Settings.Default.UltimoAvisoMes = hoje.Month;
+                Properties.Settings.Default.UltimoAvisoAno = hoje.Year;
+                Properties.Settings.Default.Save();
+                Properties.Settings.Default.Save();
 
-                    crianca.Idade = meses;
-                    crianca.IdadeUnidade = IdadeUnidade.Meses;
-                }
-                if (aniversariantes.Any())
-                {
-                    if (Properties.Settings.Default.UltimoAvisoDia != hoje.Day ||
-                        Properties.Settings.Default.UltimoAvisoMes != hoje.Month ||
-                        Properties.Settings.Default.UltimoAvisoAno != hoje.Year)
-                    {
-                        var sb = new StringBuilder();
+            }
+            Debug.WriteLine($"Qtd aniversariantes: {aniversariantesDoMes.Count}");
+        }
+        public void AtualizarIdade(Crianca crianca, DateOnly hoje)
+        {
+            var nascimento = crianca.Nascimento!.Value;
+            var anos = hoje.Year - nascimento.Year;
+            if (nascimento > hoje.AddYears(-anos)) anos--;
 
-                        foreach (var c in aniversariantes)
-                        {
-                            sb.AppendLine($"🎉 {c.Nome} ({c.Cliente?.Nome}) faz mesversário hoje ({nascimento:dd/MM})!");
-                        }
-
-                        MessageBox.Show(sb.ToString(), "Mesversários de Hoje", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Salva para não mostrar de novo hoje
-                        Properties.Settings.Default.UltimoAvisoDia = hoje.Day;
-                        Properties.Settings.Default.UltimoAvisoMes = hoje.Month;
-                        Properties.Settings.Default.UltimoAvisoAno = hoje.Year;
-                        Properties.Settings.Default.Save();
-                    }
-
-
-
-                    if (nascimento.Month == hoje.Month)
-                    {
-                        var cliente = _db.Clientes.FirstOrDefault(c => c.Id == crianca.ClienteId);
-                        var nomeCliente = cliente?.Nome ?? "Desconhecido";
-                        aniversariosDoMes.AppendLine($"- {crianca.Nome} (Cliente: {nomeCliente})");
-                    }
-
-
-                    if (aniversariosDoMes.Length > 0)
-                    {
-                        MessageBox.Show(
-                            "Crianças que fazem aniversário este mês:\n\n" + aniversariosDoMes.ToString(),
-                            "Aniversários do Mês",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information
-                        );
-                    }
-                }
-                _db.SaveChanges();
+            if (anos > 0)
+            {
+                crianca.Idade = anos;
+                crianca.IdadeUnidade = IdadeUnidade.Anos;
+            }
+            else
+            {
+                var meses = (hoje.Year - nascimento.Year) * 12 + hoje.Month - nascimento.Month;
+                if (nascimento.Day > hoje.Day) meses--;
+                crianca.Idade = meses;
+                crianca.IdadeUnidade = IdadeUnidade.Meses;
             }
         }
 

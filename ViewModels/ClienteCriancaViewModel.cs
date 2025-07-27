@@ -5,6 +5,7 @@ using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HandyControl.Controls;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -57,10 +58,11 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
         [ObservableProperty] private Cliente novoCliente = new();
-                [ObservableProperty] private Crianca? criancaSelecionada = new();
+        [ObservableProperty] private Crianca? criancaSelecionada = new();
         private List<ClienteCriancaView> _todosClientes = new();
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
+        public IEnumerable<StatusCliente> StatusLista => Enum.GetValues(typeof(StatusCliente)).Cast<StatusCliente>();
 
 
         private readonly AgendaViewModel _agenda;
@@ -119,7 +121,9 @@ namespace AgendaNovo.ViewModels
                         ClienteId = cliente.Id,
                         NomeCliente = cliente.Nome,
                         Telefone = cliente.Telefone,
-                        Email = cliente.Email
+                        Email = cliente.Email,
+                        
+                        
                     }
                 };
                 }
@@ -130,6 +134,7 @@ namespace AgendaNovo.ViewModels
 
             ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
         }
+
         public void DetectarClientePorCampos()
         {
             if (IsInEditMode)
@@ -305,7 +310,6 @@ namespace AgendaNovo.ViewModels
            
             CarregarClientesDoBanco();
             AtualizarListaClienteCrianca();
-
             LimparInputsClienteCrianca();
             NotifyAll();
 
@@ -317,7 +321,6 @@ namespace AgendaNovo.ViewModels
             CriancaSelecionada.Reset();
             ClienteExistenteDetectado = false;
             IsInEditMode = false;
-            // NÃO limpa ListaCriancas nem ListaCriancasDoCliente
             NotifyAll();
         }
         [RelayCommand]
@@ -336,7 +339,7 @@ namespace AgendaNovo.ViewModels
             else
             {
                 // confirme antes de apagar tudo
-                if (MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
+                if (System.Windows.MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
                                     "Confirma", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                     return;
 
