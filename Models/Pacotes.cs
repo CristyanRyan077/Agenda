@@ -9,16 +9,14 @@ namespace AgendaNovo.Models
 {
     public partial class Pacote : ObservableObject
     {
-        [ObservableProperty]
-        private int id;
+        public int Id;
 
-        [ObservableProperty]
-        private string ?nome;
+        [ObservableProperty] private int? servicoId;
+        public Servico? Servico { get; set; }
 
-        [ObservableProperty]
-        private string ?categoria; 
+        [ObservableProperty] private string nome;
 
-        [ObservableProperty]
-        private decimal valor;
+        [ObservableProperty] private decimal valor;
+
     }
 }

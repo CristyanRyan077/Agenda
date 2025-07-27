@@ -8,13 +8,21 @@ namespace AgendaNovo.Models
 {
     public enum IdadeUnidade
     {
-        Anos,
-        Meses
+        Ano = 0,   
+        Anos = 1,    
+        Mês = 2,
+        Meses = 3
     }
 
     public enum Genero
     {
-        M,
-        F,
+        M = 0,
+        F = 1,
+    }
+    public enum StatusCliente
+    {
+        Pendente = 0,
+        Ativo = 1,
+        Cancelado = 2
     }
 }

@@ -36,11 +36,11 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="18*"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
 
             </Grid.RowDefinitions>
-            <DataGrid Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="7" ItemsSource="{Binding ListaClienteCrianca}"
+            <DataGrid Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="8" ItemsSource="{Binding ListaClienteCrianca}"
                          SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
                          AutoGenerateColumns="False">
                 <DataGrid.Columns>
@@ -51,42 +51,47 @@
                     <DataGridTextColumn Header="Crianca" Binding="{Binding NomeCrianca}"/>
                     <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding IdadeFormatada}"/>
                     <DataGridTextColumn Header="Genero" Binding="{Binding Genero}"/>
+                    <DataGridTextColumn Header="Nascimento" Binding="{Binding NascimentoDateTime}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
             <hc:TextBox Name="txtPesquisa"
                     Width="500" Height="30"
-                        BorderBrush="Black" Grid.Row="6"
+                        BorderBrush="Black" Grid.Row="7"
                     Margin="0,0,0,10" VerticalAlignment="Bottom"
                     Grid.Column="3" Grid.ColumnSpan="3" 
                     hc:InfoElement.Placeholder="Pesquisar por nome ou telefone"
                     Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" />
             <materialDesign:PackIcon Kind="Search" 
-                                     Grid.Row="6"
+                                     Grid.Row="7"
                                      Width="30" Height="25"
                                      Margin="0,2,0,0" VerticalAlignment="Center"
                                      HorizontalAlignment="Right"
                                      Grid.Column="4"/>
-            <DatePicker/>
+            <DatePicker Grid.Row="6" Grid.Column="0" hc:InfoElement.Placeholder="Nascimento"
+                        Background="White" Foreground="Black" HorizontalAlignment="Center"
+                        FontSize="12" SelectedDate="{Binding ClienteCriancaSelecionado.NascimentoDateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=dd/MM/yyyy}"
+                        BorderBrush="Black"
+                        Width="200"/>
 
             <hc:TextBox x:Name="txtCliente" hc:InfoElement.Placeholder="Cliente"
                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                  Grid.Row="1"
                                 PreviewTextInput="txtCliente_PreviewTextInput"
-                                 Margin="12,10,0,6"
+                                 Margin="12,10,0,0"
                                 Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Width="410" Height="38" BorderBrush="Black" Grid.ColumnSpan="2"/>
             <materialDesign:PackIcon Grid.Column="0" Kind="Account" Cursor="Hand"
                                          Width="40" Height="40" Grid.Row="1"                                
                                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                         Foreground="Black" Margin="0,0,0,4" />
+                                         Foreground="Black" />
 
 
 
             <hc:TextBox x:Name="txtTel" hc:InfoElement.Placeholder="Telefone" LostFocus="txtTel_LostFocus"
                         HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
                          Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="410" Height="42" BorderBrush="Black" Margin="12,0,0,0" Grid.Row="2"/>
+                        Width="410" Height="42" BorderBrush="Black" Margin="12,1,0,1" Grid.Row="2"/>
 
             <materialDesign:PackIcon Grid.Column="0" Kind="Phone"
                                          Width="34" Height="34" 
@@ -104,8 +109,8 @@
                                          HorizontalAlignment="Right"
                                          Foreground="Black" Margin="0,0,0,3" Grid.Row="3"/>
             <TextBlock Text="⚠️ Cliente já existente detectado &#10;Uma nova criança será adicionada."
-           Foreground="Orange" FontSize="12" HorizontalAlignment="Right" Margin="0,0,70,0"
-           FontWeight="Bold" Background="Black" Height="30" VerticalAlignment="Top"
+           Foreground="Orange" FontSize="12" HorizontalAlignment="Center" 
+           FontWeight="Bold" Background="Black" Height="35" 
            Visibility="{Binding ClienteExistenteDetectado, Converter={StaticResource BoolToVisibilityConverter}}" />
 
             <hc:TextBox x:Name="txtId" hc:InfoElement.Placeholder="ID"
@@ -117,7 +122,7 @@
 
             <hc:ComboBox x:Name="txtCrianca" hc:InfoElement.Placeholder="Criança"
              HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"
-             Margin="12,2,0,0" IsEditable="True" Grid.Row="4"  DisplayMemberPath="Nome"
+             Margin="12,0,0,0" IsEditable="True" Grid.Row="4"  DisplayMemberPath="Nome"
              ItemsSource="{Binding ListaCriancasDoCliente}"
              Text="{Binding CriancaSelecionada.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              Width="410" Height="42" BorderBrush="Black"/>
@@ -135,17 +140,16 @@
                         FontSize="12"
                         BorderBrush="Black" SelectionTextBrush="Black" Margin="12,0,0,1"
                         />
-
             <hc:TextBox Width="90" Height="38" hc:InfoElement.Placeholder="Idade"
         Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
                 Background="White" Foreground="Black" HorizontalAlignment="Center"
                 FontSize="12" Grid.Row="5" VerticalAlignment="Bottom" Margin="0,0,0,1"
                 BorderBrush="Black" SelectionTextBrush="Black" />
 
-            <ComboBox Width="160" Height="38" Grid.Column="0"
+            <hc:ComboBox Width="160" Height="38" Grid.Column="0"
                          Background="White" Foreground="Black" HorizontalAlignment="Right"
-                         FontFamily="#heveltica" FontSize="18" FontWeight="Bold" VerticalAlignment="Bottom"
-                         BorderBrush="Black" Grid.Row="5"
+                         FontFamily="#heveltica" FontSize="12" VerticalAlignment="Bottom"
+                         BorderBrush="Black" Grid.Row="5" hc:InfoElement.Placeholder="Anos/Meses"
                          ItemsSource="{Binding IdadesUnidadeDisponiveis}"
                          SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,2,1" />
 
@@ -156,18 +160,18 @@
                             Background="#FF37FF00" Command="{Binding SalvarClienteCriancaCommand}"
                             hc:BorderElement.CornerRadius="10"
                             HorizontalAlignment="Left"
-                            Grid.Row="6" Margin="28,4,0,0"
+                            Grid.Row="7" Margin="28,4,0,0"
                             VerticalAlignment="Top"
                             Height="50" Width="96" BorderBrush="White"
                             />
             <Button x:Name="btnExcluir" Content="Excluir" 
                         Background="Red" Command="{Binding ExcluirClienteOuCriancaSelecionadoCommand}"
                         hc:BorderElement.CornerRadius="10" Margin="0,4,28,0"
-                        HorizontalAlignment="Right" Grid.Row="6"
+                        HorizontalAlignment="Right" Grid.Row="7"
                         Grid.Column="0" VerticalAlignment="Top"
                         Height="48" Width="104" BorderBrush="Black"
                             />
-            <Button Content="Editar" Background="Blue" Foreground="White" hc:BorderElement.CornerRadius="10" Grid.Row="6"
+            <Button Content="Editar" Background="Blue" Foreground="White" hc:BorderElement.CornerRadius="10" Grid.Row="7"
                     Height="48" Width="104" VerticalAlignment="Top" Command="{Binding EditarClienteCriancaSelecionadoCommand}" Margin="0,4,0,0" />
         </Grid>
 

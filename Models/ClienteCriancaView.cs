@@ -18,17 +18,31 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? nomeCrianca;
         [ObservableProperty] private Genero genero = Genero.M;
         [ObservableProperty] private int? idade;
-        [ObservableProperty] private IdadeUnidade idadeUnidade = IdadeUnidade.Anos;
         public string? IdadeFormatada =>
-                Idade.HasValue ? $"{Idade} {IdadeUnidade}" : null;
+        Idade.HasValue ? $"{Idade} {IdadeUnidade}" : null;
 
-        partial void OnIdadeUnidadeChanged(IdadeUnidade value)
+        [ObservableProperty] private IdadeUnidade idadeUnidade = IdadeUnidade.Meses;
+
+        [ObservableProperty] private DateOnly? nascimento;
+
+        public DateTime? NascimentoDateTime
         {
-            OnPropertyChanged(nameof(IdadeFormatada));
+            get => Nascimento.HasValue ? Nascimento.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+            set
+            {
+                if (value.HasValue)
+                    Nascimento = DateOnly.FromDateTime(value.Value);
+                else
+                    Nascimento = null;
+                OnPropertyChanged(nameof(NascimentoDateTime));
+                OnPropertyChanged(nameof(Nascimento));
+            }
         }
-        partial void OnIdadeChanged(int? value)
+
+        partial void OnNascimentoChanged(DateOnly? oldValue, DateOnly? newValue)
         {
-            OnPropertyChanged(nameof(IdadeFormatada));
+            OnPropertyChanged(nameof(Idade));
+            OnPropertyChanged(nameof(IdadeUnidade));
         }
     }
 }

@@ -13,6 +13,7 @@ namespace AgendaNovo.Interfaces
             Crianca? GetById(int id);
             Crianca AddOrUpdate(Crianca crianca);
             void Delete(int id);
+            void AtualizarIdadeDeTodasCriancas();
             List<Agendamento> GetAgendamentos(int criancaId);
     }
 }

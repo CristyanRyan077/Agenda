@@ -90,7 +90,8 @@ namespace AgendaNovo
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
             NovoAgendamento = new Agendamento();
-           
+
+
         }
         partial void OnNomeDigitadoChanged(string value)
         {
@@ -573,8 +574,9 @@ namespace AgendaNovo
                 criancaParaAgendar = new Crianca
                 {
                     Nome = NovoAgendamento.Crianca.Nome,
-                    Idade = NovoAgendamento.Crianca.Idade,
                     Genero = NovoAgendamento.Crianca.Genero,
+                    Nascimento = NovoAgendamento.Crianca.Nascimento,
+                    Idade = NovoAgendamento.Crianca.Idade,
                     IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
                     ClienteId = clienteExistente.Id
                 };

@@ -184,19 +184,13 @@
                     </hc:ComboBox>
 
                     <!-- Idade -->
-                    <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left">
-                        <hc:TextBox Width="70" Height="60" hc:InfoElement.Placeholder="Idade"
-                         Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
-                                 Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
-                                FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
-                                BorderBrush="Transparent" SelectionTextBrush="Black"/>
-
-                        <ComboBox Width="90" Height="60"
-                                          Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
-                                          FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
-                                          BorderBrush="Transparent"
-                                          ItemsSource="{Binding IdadesUnidadeDisponiveis}"
-                                          SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left" Width="150">
+                        <DatePicker SelectedDate="{Binding CriancaSelecionada.Nascimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                                     FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
+                                    Height="60" hc:InfoElement.Placeholder="Nascimento"
+                                     Width="150" BorderBrush="Transparent"/>
+                        
                     </StackPanel>
 
                 </Grid>

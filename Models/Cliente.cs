@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AgendaNovo.Models
 {
+
     public partial class Cliente : ObservableObject
     {
         public int Id { get; set; }
@@ -18,7 +19,7 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? telefone;
         [ObservableProperty] private string? email;
         [ObservableProperty] private string? observacao = string.Empty;
-        public Pacote? Pacote { get; set; }
+        [ObservableProperty] private StatusCliente status = StatusCliente.Pendente;
 
         public List<Agendamento> Agendamentos { get; set; } = new();
         public List<Crianca> Criancas { get; set; } = new();

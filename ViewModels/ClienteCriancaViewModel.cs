@@ -1,6 +1,7 @@
 ﻿using AgendaNovo.Interfaces;
 using AgendaNovo.Migrations;
 using AgendaNovo.Models;
+using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -41,9 +42,6 @@ namespace AgendaNovo.ViewModels
             crianca.Id = 0;
             crianca.ClienteId = 0;
             crianca.Nome = string.Empty;
-            crianca.Idade = 0;
-            crianca.Genero = string.Empty;
-            crianca.IdadeUnidade = string.Empty;
         }
     }
     public partial class ClienteCriancaViewModel : ObservableObject
@@ -78,6 +76,7 @@ namespace AgendaNovo.ViewModels
             CarregarClientesDoBanco();
             AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
+            _criancaService.AtualizarIdadeDeTodasCriancas();
 
         }
         private void NotifyAll()
@@ -107,9 +106,10 @@ namespace AgendaNovo.ViewModels
                         Email = cliente.Email,
                         CriancaId = crianca.Id,
                         NomeCrianca = crianca.Nome,
-                        Genero = Enum.TryParse<Genero>(crianca.Genero, out var g) ? g : Genero.M,
+                        Nascimento = crianca.Nascimento,
                         Idade = crianca.Idade,
-                        IdadeUnidade = Enum.TryParse<IdadeUnidade>(crianca.IdadeUnidade, out var u) ? u : IdadeUnidade.Anos
+                        IdadeUnidade = crianca.IdadeUnidade,
+                        Genero = crianca.Genero
                     });
                 }
                 else
@@ -210,8 +210,9 @@ namespace AgendaNovo.ViewModels
 
                     CriancaSelecionada.Id = crianca.Id;
                     CriancaSelecionada.Nome = crianca.Nome;
-                    CriancaSelecionada.Idade = crianca.Idade;
                     CriancaSelecionada.Genero = crianca.Genero;
+                    CriancaSelecionada.Nascimento = crianca.Nascimento;
+                    CriancaSelecionada.Idade = crianca.Idade;
                     CriancaSelecionada.IdadeUnidade = crianca.IdadeUnidade;
                 }
             }
@@ -294,8 +295,9 @@ namespace AgendaNovo.ViewModels
                 : new Crianca { ClienteId = cliente.Id };
 
                 crianca.Nome = CriancaSelecionada.Nome;
-                crianca.Idade = CriancaSelecionada.Idade;
                 crianca.Genero = CriancaSelecionada.Genero;
+                crianca.Nascimento = CriancaSelecionada.Nascimento;
+                crianca.Idade = CriancaSelecionada.Idade;
                 crianca.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
 
                 _criancaService.AddOrUpdate(crianca);
