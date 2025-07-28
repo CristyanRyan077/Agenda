@@ -21,10 +21,10 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? observacao = string.Empty;
         [ObservableProperty] private StatusCliente status = StatusCliente.Pendente;
         [ObservableProperty]
-        private string facebook;
+        private string? facebook;
 
         [ObservableProperty]
-        private string instagram;
+        private string? instagram;
 
         public List<Agendamento> Agendamentos { get; set; } = new();
         public List<Crianca> Criancas { get; set; } = new();

@@ -13,11 +13,14 @@ namespace AgendaNovo
         public int Id { get; set; }
 
         public int ClienteId { get; set; }
-        public Cliente ?Cliente { get; set; }
+        public Cliente ?Cliente { get; set; }   
         public int? CriancaId { get; set; }
         public Crianca? Crianca { get; set; }
-
-        [ObservableProperty] private string? pacote;
+        
+        public Servico? Servico { get; set; }
+        public int? ServicoId { get; set; }
+        public Pacote? Pacote { get; set; }
+        public int? PacoteId { get; set; }
 
         [ObservableProperty] private TimeSpan? horario;
 

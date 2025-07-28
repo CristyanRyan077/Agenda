@@ -35,6 +35,7 @@ namespace AgendaNovo
         }
 
 
+
         private void VerificarNomeComCrianca(string textoCompleto)
         {
             var partes = textoCompleto.Split('-', 2, StringSplitOptions.TrimEntries);

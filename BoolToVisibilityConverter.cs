@@ -9,14 +9,15 @@ namespace AgendaNovo
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool b && b)
-                return Visibility.Visible;
-            return Visibility.Collapsed;
+            if (value == null) return Visibility.Collapsed; // caso null, esconde
+
+            bool flag = (bool)value;
+            return flag ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return (value is Visibility visibility && visibility == Visibility.Visible);
         }
     }
 }

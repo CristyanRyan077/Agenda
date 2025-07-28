@@ -7,11 +7,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AgendaNovo.Models
 {
-    public partial class Servico : ObservableObject
+    public class Servico
     {
         public int Id { get; set; }
-        [ObservableProperty] private string? nome;
 
-        [ObservableProperty] private bool? possuiCrianca;
+        public string? Nome { get; set; }
+
+        public bool PossuiCrianca { get; set; } = true;
+        public Servico()
+        {
+            PossuiCrianca = true;
+        }
     }
 }

@@ -41,22 +41,16 @@ namespace AgendaNovo
 
         private bool _atualizandoCliente = false;
         private bool _preenchendoViaId = false;
-       
 
-
-        private void txtpacote_LostFocus(object sender, RoutedEventArgs e)
+        private void ComboBoxPacotes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var vm = DataContext as AgendaViewModel;
-            if (vm == null)
-                return;
-            var pacoteDigitado = (sender as ComboBox)?.Text?.Trim();
-
-            if (string.IsNullOrWhiteSpace(pacoteDigitado))
-                return;
-
-            vm.PreencherPacote(pacoteDigitado, valor => { vm.NovoAgendamento.Valor = valor; });
-            txtValor.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+            if (vm?.NovoAgendamento?.PacoteId != null)
+            {
+                vm.PreencherValorPacoteSelecionado(vm.NovoAgendamento.PacoteId);
+            }
         }
+
 
         private void txtIdBusca_LostFocus(object sender, RoutedEventArgs e)
         {

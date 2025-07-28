@@ -28,10 +28,14 @@ namespace AgendaNovo
             options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
             services.AddScoped<ICriancaService, CriancaService>();
             services.AddScoped<IClienteService, ClienteService>();
+            services.AddScoped<IPacoteService, PacoteService>();
+            services.AddScoped<IServicoService, ServicoService>();
             services.AddScoped<IAgendamentoService, AgendamentoService>();
 
             services.AddTransient<ClienteService>();
             services.AddTransient<CriancaService>();
+            services.AddTransient<PacoteService>();
+            services.AddTransient<ServicoService>();
             services.AddTransient<AgendamentoService>();
 
             services.AddTransient<Agendar>();

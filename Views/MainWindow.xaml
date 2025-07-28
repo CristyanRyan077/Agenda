@@ -168,7 +168,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -257,7 +257,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -344,7 +344,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -427,7 +427,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
 
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="14" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
@@ -510,7 +510,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -608,7 +608,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -707,7 +707,7 @@
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Pacote}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
+                                                                    <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
                                                                     <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica">
                                                                         <TextBlock.Style>
                                                                             <Style TargetType="TextBlock">
@@ -827,12 +827,12 @@
                                         <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
                                         <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                                         <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
-                                    <DataGridTextColumn Header="Pacote" Width="70" Binding="{Binding Pacote}">
+                                    <DataGridTextColumn Header="Servico.Nome" Width="70" Binding="{Binding Servico.Nome}">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                                                 <Setter Property="TextWrapping" Value="NoWrap"/>
-                                                <Setter Property="ToolTip" Value="{Binding Pacote}"/>
+                                                <Setter Property="ToolTip" Value="{Binding Servico.Nome}"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>

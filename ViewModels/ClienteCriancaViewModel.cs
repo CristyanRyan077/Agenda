@@ -1,5 +1,4 @@
 ﻿using AgendaNovo.Interfaces;
-using AgendaNovo.Migrations;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
@@ -111,7 +110,8 @@ namespace AgendaNovo.ViewModels
                         Nascimento = crianca.Nascimento,
                         Idade = crianca.Idade,
                         IdadeUnidade = crianca.IdadeUnidade,
-                        Genero = crianca.Genero
+                        Genero = crianca.Genero,
+                        Status = cliente.Status,
                     });
                 }
                 else
@@ -122,8 +122,9 @@ namespace AgendaNovo.ViewModels
                         NomeCliente = cliente.Nome,
                         Telefone = cliente.Telefone,
                         Email = cliente.Email,
-                        
-                        
+                        Status = cliente.Status,
+
+
                     }
                 };
                 }

@@ -22,6 +22,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Cliente)
                 .Include(a => a.Crianca)
+                .Include (a => a.Pacote)
+                .Include (a => a.Servico)
                 .AsNoTracking()
                 .ToList();
         }
@@ -31,6 +33,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Cliente)
                 .Include(a => a.Crianca)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
                 .FirstOrDefault(a => a.Id == id);
         }
 
@@ -47,7 +51,8 @@ namespace AgendaNovo.Services
             destino.Tema = origem.Tema;
             destino.Valor = origem.Valor;
             destino.ValorPago = origem.ValorPago;
-            destino.Pacote = origem.Pacote;
+            destino.PacoteId = origem.PacoteId;
+            destino.ServicoId = origem.ServicoId;
             destino.ClienteId = origem.ClienteId;
             destino.CriancaId = origem.CriancaId;
         }
@@ -57,6 +62,8 @@ namespace AgendaNovo.Services
             var existente = _db.Agendamentos
             .Include(a => a.Cliente)
             .Include(a => a.Crianca)
+            .Include(a => a.Pacote)
+            .Include(a => a.Servico)
             .FirstOrDefault(a => a.Id == agendamento.Id);
             if (existente != null)
             {
@@ -80,6 +87,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Cliente)
                 .Include(a => a.Crianca)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
                 .Where(a => a.Data.Date == data.Date)
                 .AsNoTracking()
                 .ToList();
@@ -90,6 +99,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Cliente)
                 .Include(a => a.Crianca)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
                 .Where(a => a.ClienteId == clienteId)
                 .AsNoTracking()
                 .ToList();
@@ -100,6 +111,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Cliente)
                 .Include(a => a.Crianca)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
                 .Where(a => a.CriancaId == criancaId)
                 .AsNoTracking()
                 .ToList();

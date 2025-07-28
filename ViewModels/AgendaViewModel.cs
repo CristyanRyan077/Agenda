@@ -1,4 +1,4 @@
-﻿using AgendaNovo.Migrations;
+﻿
 using AgendaNovo.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,6 +24,7 @@ using AgendaNovo.Interfaces;
 using AgendaNovo.Services;
 using System.ComponentModel;
 using System.Windows.Threading;
+using System.Collections.Immutable;
 
 namespace AgendaNovo
 {
@@ -36,8 +37,8 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
         [ObservableProperty] private decimal valorPacote;
-        public ObservableCollection<string> ListaPacotes { get; } = new();
         [ObservableProperty] private Agendamento? itemSelecionado;
+        [ObservableProperty] private Pacote? pacoteselecionado;
 
 
         //Cliente
@@ -64,35 +65,80 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
 
         //Outros
+        [ObservableProperty] private ObservableCollection<Servico> listaServicos = new();
+        [ObservableProperty] private Servico? servicoSelecionado;
         [ObservableProperty] private string textoPesquisa = string.Empty;
+        [ObservableProperty] private ObservableCollection<Pacote> listaPacotes = new();
+        [ObservableProperty] private ObservableCollection<Pacote> listaPacotesFiltrada = new();
         [ObservableProperty]
         private string nomeDigitado = string.Empty;
 
         [ObservableProperty]
         private bool mostrarSugestoes = false;
-
+        public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
         private readonly ICriancaService _criancaService;
+        private readonly IPacoteService _pacoteService;
+        private readonly IServicoService _servicoService;
 
         public AgendaViewModel(IAgendamentoService agendamentoService,
         IClienteService clienteService,
-        ICriancaService criancaService)
+        ICriancaService criancaService,
+        IPacoteService pacoteService,
+        IServicoService servicoService)
         {
 
             _agendamentoService = agendamentoService;
             _clienteService = clienteService;
             _criancaService = criancaService;
+            _pacoteService = pacoteService;
+            _servicoService = servicoService;
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
-            NovoAgendamento = new Agendamento();
+                NovoAgendamento = new Agendamento
+    {
+        Servico = new Servico { PossuiCrianca = true } // Padrão inicial
+    };
 
 
         }
+        partial void OnServicoSelecionadoChanged(Servico? value)
+        {
+            if (value == null)
+            {
+                Debug.WriteLine("[OnServicoSelecionadoChanged] Serviço nulo -> limpando pacotes");
+                NovoAgendamento.ServicoId = null;
+                ListaPacotesFiltrada.Clear();
+                OnPropertyChanged(nameof(MostrarCrianca));
+                return;
+            }
+
+            Debug.WriteLine($"[OnServicoSelecionadoChanged] Serviço selecionado: {value.Nome} (Id={value.Id})");
+
+            // Atualiza o Id do serviço
+            NovoAgendamento.ServicoId = value.Id;
+
+            // Filtra pacotes compatíveis
+            FiltrarPacotesPorServico(value.Id);
+
+            // Se não precisa de criança, limpa seleção
+            if (!value.PossuiCrianca)
+            {
+                CriancaSelecionada = null;
+                ListaCriancas.Clear();
+                NovoAgendamento.CriancaId = null;
+                Debug.WriteLine("[OnServicoSelecionadoChanged] Serviço sem criança -> limpando bindings de criança");
+            }
+
+            OnPropertyChanged(nameof(MostrarCrianca));
+        }
+
+
         partial void OnNomeDigitadoChanged(string value)
         {
             var termo = value?.ToLower() ?? "";
@@ -106,11 +152,25 @@ namespace AgendaNovo
 
             MostrarSugestoes = ClientesFiltrados.Count > 0 && !string.IsNullOrWhiteSpace(termo);
         }
+        partial void OnPacoteselecionadoChanged(Pacote? value)
+        {
+            if (value == null)
+            {
+                NovoAgendamento.PacoteId = null;
+                NovoAgendamento.Valor = 0;
+                return;
+            }
+
+            Debug.WriteLine($"[OnPacoteselecionadoChanged] Pacote selecionado: {value.Nome} (Id={value.Id})");
+            NovoAgendamento.PacoteId = value.Id;
+            NovoAgendamento.Valor = value.Valor;
+        }
 
         public void Inicializar()
         {
                 CarregarDadosDoBanco();
                 CarregarPacotes();
+                CarregarServicos();
                 AtualizarHorariosDisponiveis();
         }
         public void CarregarDadosDoBanco()
@@ -147,9 +207,51 @@ namespace AgendaNovo
 
         public void CarregarPacotes()
         {
-            ListaPacotes.Clear();
-            foreach (var nome in _pacotesFixos.Keys.OrderBy(p => p))
-                ListaPacotes.Add(nome);
+            Debug.WriteLine("[CarregarPacotes] Iniciando carregamento de pacotes.");
+            var pacotes = _pacoteService.GetAll();
+            Debug.WriteLine($"[CarregarPacotes] Pacotes carregados do banco: {pacotes.Count()}");
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ListaPacotes.Clear();
+                foreach (var p in pacotes)
+                {
+                    Debug.WriteLine($"[CarregarPacotes] Adicionando pacote: {p.Nome} (ServicoId={p.ServicoId})");
+                    ListaPacotes.Add(p);
+                }
+
+                if (NovoAgendamento.ServicoId.HasValue)
+                {
+                    Debug.WriteLine($"[CarregarPacotes] Chamando filtro para ServicoId={NovoAgendamento.ServicoId}");
+                    FiltrarPacotesPorServico(NovoAgendamento.ServicoId.Value);
+                }
+                else
+                {
+                    Debug.WriteLine("[CarregarPacotes] Sem ServicoId definido, limpando ListaPacotesFiltrada.");
+                    ListaPacotesFiltrada.Clear();
+                }
+            });
+        }
+        private void FiltrarPacotesPorServico(int servicoId)
+        {
+            Debug.WriteLine($"[FiltrarPacotesPorServico] Chamado para ServicoId={servicoId}");
+            ListaPacotesFiltrada.Clear();
+
+            var pacotesFiltrados = ListaPacotes.Where(p => p.ServicoId == servicoId).ToList();
+            Debug.WriteLine($"[FiltrarPacotesPorServico] Pacotes encontrados: {pacotesFiltrados.Count}");
+
+            foreach (var pacote in pacotesFiltrados)
+            {
+                Debug.WriteLine($"[FiltrarPacotesPorServico] Adicionando pacote: {pacote.Nome} (Id={pacote.Id})");
+                ListaPacotesFiltrada.Add(pacote);
+            }
+        }
+        public void CarregarServicos()
+        {
+            ListaServicos.Clear();
+            var servicos = _servicoService.GetAll();
+            foreach (var s in servicos)
+                ListaServicos.Add(s);
         }
         private void ResetarFormulario()
         {
@@ -170,52 +272,7 @@ namespace AgendaNovo
             "9:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
         };
 
-        public IEnumerable<String> PacotesDisponiveis =>
-        _pacotesFixos
-        .OrderBy(p => p.Key)
-        .Select(p => p.Key);
 
-
-        private readonly Dictionary<string, decimal> _pacotesFixos = new()
-        {      
-            {"Smash The Cake - Compartilhado (Pré-Definido)",350m},
-            {"Smash The Cake - Pct 01: Basico (Mediante Catálogo)",450m},
-            {"Smash The Cake - Pct 02: Premium (Personalidado Individual)",600m},
-            {"Acompanhamento Mensal: pct01",80m},
-            {"Acompanhamento Mensal: pct02",150m},
-            {"Acompanhamento Mensal: - Datas Comemorativas",100m},
-            {"Gestante - pct01: Prata",200m},
-            {"Gestante - pct02: Ouro",350m},
-            {"Gestante - pct03: Diamante",550m},
-            {"Infantil pct01",150m},
-            {"Infantil pct02",250m},
-            {"Aniversario pct01",450m},   
-            {"Aniversario pct02",600m},
-            {"Aniversario pct03",900m},
-            {"Aniversario pct04",1300m},
-            {"Evento - Casamento Civil: pct01",350m},
-            {"Evento - Casamento Civil: pct02",550m},
-            {"Evento - Casamentos: pct01",500m},
-            {"Evento - Casamentos: pct02",900m},
-            {"Evento - Casamentos: pct03",1400m},
-            {"B-Day Adulto - pct01: Prata",200m},
-            {"B-Day Adulto - pct02: Ouro",350m},
-            {"B-Day Adulto - pct03: Diamante",550},
-            {"Casal - pct01 (Fundo Preto/Branco)",150m},
-            {"Familia - pct01 (Recamier e Biombo",200m},
-            {"Ensaio Infantil(B-Day) - pct01",300m},
-            {"Ensaio Infantil(B-Day) - pct02",550m},
-            {"B-Day Infantil - pct03",500m},
-            {"Chá de Revelação + Vídeo - pct01",350m},
-            {"Pack de Fotos - pct01 (Individual)",100m},
-            {"Pack de Fotos - pct02 (Indivídual/Produtos)",150m},
-            {"Produtos Corporativos - Interno",100m},
-            {"Evento Religioso - pct01",550m},
-            {"Evento Religioso - pct02",900m},
-            {"Evento Religioso - pct03",1400m},
-            {"Evento 15 Anos - pct01",550m},
-            {"Book Niver Fest - Aniversário + Sessão Infantil",700m}
-        };
 
 
         [RelayCommand]
@@ -323,7 +380,6 @@ namespace AgendaNovo
                 UseShellExecute = true
             });
         }
-
         partial void OnItemSelecionadoChanged(Agendamento? value)
         {
 
@@ -367,11 +423,15 @@ namespace AgendaNovo
                     Crianca = cri ?? new Crianca(),
                     Data = ag.Data,
                     Horario = ag.Horario,
-                    Pacote = ag.Pacote,
                     Tema = ag.Tema,
                     Valor = ag.Valor,
-                    ValorPago = ag.ValorPago
+                    ValorPago = ag.ValorPago,
+                    ServicoId = value.ServicoId,
+                    PacoteId = value.PacoteId
                 };
+                ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == value.ServicoId);
+                Pacoteselecionado = ListaPacotes.FirstOrDefault(p => p.Id == value.PacoteId);
+
                 Debug.WriteLine("Horario preenchido: " + ag.Horario);
                 OnPropertyChanged(nameof(ClienteSelecionado));
                 OnPropertyChanged(nameof(NovoCliente));
@@ -409,6 +469,8 @@ namespace AgendaNovo
         {
             NovoAgendamento = new Agendamento();
             ItemSelecionado = null;
+            ServicoSelecionado = null;
+            Pacoteselecionado = null;
             NomeDigitado = string.Empty;
             NovoCliente = new Cliente();
             NovoCliente.Id = 0;
@@ -528,19 +590,33 @@ namespace AgendaNovo
         }
 
 
-        public void PreencherPacote(string? pacoteDigitado, Action<decimal> preencher)
+        public void PreencherPacote(int? pacoteId, Action<decimal> preencher)
         {
-            if (string.IsNullOrWhiteSpace(pacoteDigitado))
+            if (!pacoteId.HasValue)
                 return;
 
-            if (_pacotesFixos.TryGetValue(pacoteDigitado.Trim(), out var valor))
+            var pacote = _pacoteService.GetById(pacoteId.Value);
+            if (pacote != null)
             {
-                preencher(valor);
+                preencher(pacote.Valor);
+            }
+        }
+        public void PreencherValorPacoteSelecionado(int? pacoteId)
+        {
+            if (!pacoteId.HasValue)
+                return;
+
+            var pacote = _pacoteService.GetById(pacoteId.Value);
+            if (pacote != null)
+            {
+                // Preenche o valor do pacote no agendamento
+                NovoAgendamento.Valor = pacote.Valor;
+                OnPropertyChanged(nameof(NovoAgendamento));
             }
         }
 
 
-        [RelayCommand]
+            [RelayCommand]
         private void Agendar()
         {
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
@@ -558,6 +634,7 @@ namespace AgendaNovo
             var clienteExistente = _clienteService.GetById(NovoCliente.Id);
             if (clienteExistente == null)
                 return;
+
 
 
             Crianca criancaParaAgendar = null;
@@ -582,10 +659,18 @@ namespace AgendaNovo
                 };
                 _criancaService.AddOrUpdate(criancaParaAgendar);
             }
-
+            if (!MostrarCrianca) // se serviço não possui criança
+            {
+                CriancaSelecionada = null;
+                NovoAgendamento.CriancaId = null;
+                NovoAgendamento.Crianca = null;
+            }
             // 4) Prepara o objeto a salvar
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id;
+            NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
+            NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
+
 
             bool agendamentoNovo = NovoAgendamento.Id == 0;
 
@@ -614,9 +699,8 @@ namespace AgendaNovo
                             $"Cliente: {cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +
-                            $"Pacote: {NovoAgendamento.Pacote}\n" +
+                            $"Serviço: {NovoAgendamento.Servico.Nome}\n" +
                             $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
-
                             $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                             $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
                             $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +

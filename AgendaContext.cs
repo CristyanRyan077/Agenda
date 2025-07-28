@@ -17,6 +17,8 @@ namespace AgendaNovo
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Crianca> Criancas { get; set; }
         public DbSet<Agendamento> Agendamentos { get; set; }
+        public DbSet <Servico> Servicos { get; set; }
+        public DbSet <Pacote> Pacotes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -44,6 +46,17 @@ namespace AgendaNovo
                 .WithMany()
                 .HasForeignKey(a => a.CriancaId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Agendamento>()
+               .HasOne(a => a.Servico)
+               .WithMany()
+               .HasForeignKey(a => a.ServicoId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Agendamento>()
+                .HasOne(a => a.Pacote)
+                .WithMany()
+                .HasForeignKey(a => a.PacoteId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relação entre Criança e Cliente (evitando múltiplos caminhos em cascata)
             modelBuilder.Entity<Crianca>()
@@ -51,6 +64,11 @@ namespace AgendaNovo
                 .WithMany(c => c.Criancas)
                 .HasForeignKey(c => c.ClienteId)
                 .OnDelete(DeleteBehavior.Cascade); // ou .NoAction()
+            modelBuilder.Entity<Servico>()
+                .Property(s => s.PossuiCrianca)
+                .HasDefaultValue(true);
+
+            base.OnModelCreating(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
         }

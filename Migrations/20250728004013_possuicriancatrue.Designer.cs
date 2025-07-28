@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250709184825_AdicionarColunaPago")]
-    partial class AdicionarColunaPago
+    [Migration("20250728004013_possuicriancatrue")]
+    partial class possuicriancatrue
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -36,26 +36,23 @@ namespace AgendaNovo.Migrations
                     b.Property<int>("ClienteId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CriancaId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CriancaId1")
+                    b.Property<int?>("CriancaId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Horario")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<TimeSpan?>("Horario")
+                        .HasColumnType("time");
 
-                    b.Property<string>("Pacote")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("PacoteId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("Pago")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Servico")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ServicoId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Tema")
                         .HasColumnType("nvarchar(max)");
@@ -63,7 +60,7 @@ namespace AgendaNovo.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ValorPendente")
+                    b.Property<decimal>("ValorPago")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -72,7 +69,9 @@ namespace AgendaNovo.Migrations
 
                     b.HasIndex("CriancaId");
 
-                    b.HasIndex("CriancaId1");
+                    b.HasIndex("PacoteId");
+
+                    b.HasIndex("ServicoId");
 
                     b.ToTable("Agendamentos");
                 });
@@ -88,8 +87,20 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Facebook")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Instagram")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Telefone")
                         .HasColumnType("nvarchar(max)");
@@ -110,15 +121,17 @@ namespace AgendaNovo.Migrations
                     b.Property<int>("ClienteId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Genero")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Genero")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Idade")
                         .HasColumnType("int");
 
-                    b.Property<string>("IdadeUnidade")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("IdadeUnidade")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("Nascimento")
+                        .HasColumnType("date");
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
@@ -128,6 +141,51 @@ namespace AgendaNovo.Migrations
                     b.HasIndex("ClienteId");
 
                     b.ToTable("Criancas");
+                });
+
+            modelBuilder.Entity("AgendaNovo.Models.Pacote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ServicoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServicoId");
+
+                    b.ToTable("Pacotes");
+                });
+
+            modelBuilder.Entity("AgendaNovo.Models.Servico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PossuiCrianca")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Servicos");
                 });
 
             modelBuilder.Entity("AgendaNovo.Agendamento", b =>
@@ -141,16 +199,25 @@ namespace AgendaNovo.Migrations
                     b.HasOne("AgendaNovo.Models.Crianca", "Crianca")
                         .WithMany()
                         .HasForeignKey("CriancaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("AgendaNovo.Models.Crianca", null)
-                        .WithMany("Agendamentos")
-                        .HasForeignKey("CriancaId1");
+                    b.HasOne("AgendaNovo.Models.Pacote", "Pacote")
+                        .WithMany()
+                        .HasForeignKey("PacoteId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AgendaNovo.Models.Servico", "Servico")
+                        .WithMany()
+                        .HasForeignKey("ServicoId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Cliente");
 
                     b.Navigation("Crianca");
+
+                    b.Navigation("Pacote");
+
+                    b.Navigation("Servico");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Crianca", b =>
@@ -164,16 +231,20 @@ namespace AgendaNovo.Migrations
                     b.Navigation("Cliente");
                 });
 
+            modelBuilder.Entity("AgendaNovo.Models.Pacote", b =>
+                {
+                    b.HasOne("AgendaNovo.Models.Servico", "Servico")
+                        .WithMany()
+                        .HasForeignKey("ServicoId");
+
+                    b.Navigation("Servico");
+                });
+
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>
                 {
                     b.Navigation("Agendamentos");
 
                     b.Navigation("Criancas");
-                });
-
-            modelBuilder.Entity("AgendaNovo.Models.Crianca", b =>
-                {
-                    b.Navigation("Agendamentos");
                 });
 #pragma warning restore 612, 618
         }
