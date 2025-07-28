@@ -46,8 +46,6 @@ namespace AgendaNovo.ViewModels
     }
     public partial class ClienteCriancaViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ObservableCollection<ClienteCriancaView> listaClienteCrianca = new();
 
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
         [ObservableProperty] private bool clienteExistenteDetectado;
@@ -75,7 +73,6 @@ namespace AgendaNovo.ViewModels
             _clienteService = clienteService;
             _criancaService = criancaService;
             CarregarClientesDoBanco();
-            AtualizarListaClienteCrianca();
             LimparCamposClienteCrianca();
             _criancaService.AtualizarIdadeDeTodasCriancas();
 
@@ -85,7 +82,6 @@ namespace AgendaNovo.ViewModels
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(CriancaSelecionada));
             OnPropertyChanged(nameof(ClienteCriancaSelecionado));
-            OnPropertyChanged(nameof(ListaClienteCrianca));
             OnPropertyChanged(nameof(ListaCriancasDoCliente));
             OnPropertyChanged(nameof(ListaCriancas));
             OnPesquisaTextChanged(PesquisaText);
@@ -105,6 +101,7 @@ namespace AgendaNovo.ViewModels
                         NomeCliente = cliente.Nome,
                         Telefone = cliente.Telefone,
                         Email = cliente.Email,
+                        
                         CriancaId = crianca.Id,
                         NomeCrianca = crianca.Nome,
                         Nascimento = crianca.Nascimento,
@@ -112,6 +109,8 @@ namespace AgendaNovo.ViewModels
                         IdadeUnidade = crianca.IdadeUnidade,
                         Genero = crianca.Genero,
                         Status = cliente.Status,
+                        Facebook = cliente.Facebook,
+                        Instagram = cliente.Instagram
                     });
                 }
                 else
@@ -123,6 +122,8 @@ namespace AgendaNovo.ViewModels
                         Telefone = cliente.Telefone,
                         Email = cliente.Email,
                         Status = cliente.Status,
+                        Facebook = cliente.Facebook,
+                        Instagram = cliente.Instagram
 
 
                     }
@@ -133,7 +134,7 @@ namespace AgendaNovo.ViewModels
             foreach (var cli in todos)
                 ListaClientes.Add(cli);
 
-            ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
+            AtualizarPaginacao();
         }
 
         public void DetectarClientePorCampos()
@@ -160,6 +161,10 @@ namespace AgendaNovo.ViewModels
                 NovoCliente.Nome = encontrado.Nome;
                 NovoCliente.Telefone = encontrado.Telefone;
                 NovoCliente.Email = encontrado.Email;
+                NovoCliente.Observacao = encontrado.Observacao;
+                NovoCliente.Facebook = encontrado.Facebook;
+                NovoCliente.Instagram = encontrado.Instagram;
+
 
                 ListaCriancasDoCliente.Clear();
                 foreach (var c in _criancaService.GetByClienteId(encontrado.Id))
@@ -180,13 +185,6 @@ namespace AgendaNovo.ViewModels
 
 
 
-        public void AtualizarListaClienteCrianca()
-        {
-            listaClienteCrianca.Clear();
-
-            foreach (var item in _todosClientes)
-                listaClienteCrianca.Add(item);
-        }
 
         [RelayCommand]
         private void EditarClienteCriancaSelecionado()
@@ -204,6 +202,9 @@ namespace AgendaNovo.ViewModels
             NovoCliente.Nome = cliente.Nome;
             NovoCliente.Telefone = cliente.Telefone;
             NovoCliente.Email = cliente.Email;
+            NovoCliente.Observacao = cliente.Observacao;
+            NovoCliente.Facebook = cliente.Facebook;
+            NovoCliente.Instagram = cliente.Instagram;
 
 
             CarregarCriancasDoCliente(cliente);
@@ -276,6 +277,9 @@ namespace AgendaNovo.ViewModels
                 cliente.Nome = NovoCliente.Nome;
                 cliente.Telefone = NovoCliente.Telefone;
                 cliente.Email = NovoCliente.Email;
+                cliente.Observacao = NovoCliente.Observacao;
+                cliente.Instagram = NovoCliente.Instagram;
+                cliente.Facebook = NovoCliente.Facebook;
                 _clienteService.Update(cliente);
             }
             else
@@ -285,6 +289,9 @@ namespace AgendaNovo.ViewModels
                     Nome = NovoCliente.Nome,
                     Telefone = NovoCliente.Telefone,
                     Email = NovoCliente.Email,
+                    Observacao = NovoCliente.Observacao,
+                    Facebook = NovoCliente.Facebook,
+                    Instagram = NovoCliente.Instagram,
                     Criancas = new List<Crianca>()
                 };
                 cliente = _clienteService.Add(cliente);
@@ -308,9 +315,8 @@ namespace AgendaNovo.ViewModels
 
                 _criancaService.AddOrUpdate(crianca);
             }
-           
+            AtualizarPaginacao();
             CarregarClientesDoBanco();
-            AtualizarListaClienteCrianca();
             LimparInputsClienteCrianca();
             NotifyAll();
 
@@ -391,7 +397,6 @@ namespace AgendaNovo.ViewModels
            // _db.Criancas.RemoveRange(cliente.Criancas);
             */
                
-                AtualizarListaClienteCrianca();
                 IsInEditMode = false;
                 ClienteExistenteDetectado = false;
                 NotifyAll();
@@ -402,21 +407,62 @@ namespace AgendaNovo.ViewModels
         }
         partial void OnPesquisaTextChanged(string value)
         {
+            PaginaAtual = 1;
+
             if (string.IsNullOrWhiteSpace(value))
             {
-                ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(_todosClientes);
+                // Sem filtro, paginação com todos os clientes
+                AtualizarPaginacao();
                 return;
             }
 
             var filtro = value.Trim().ToLower();
 
+            // Aplica filtro na lista total
             var filtrados = _todosClientes.Where(c =>
                 (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
                 (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
                 (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro))
-            );
+            ).ToList();
 
-            ListaClienteCrianca = new ObservableCollection<ClienteCriancaView>(filtrados);
+            AtualizarPaginacao(filtrados);
+        }
+        [ObservableProperty]
+        private int paginaAtual = 1;
+        private int _tamanhoPagina = 10;
+
+       
+        [ObservableProperty]
+        private int totalPaginas;
+
+        public ObservableCollection<ClienteCriancaView> PaginaClientes { get; set; } = new();
+        public void AtualizarPaginacao(List<ClienteCriancaView>? listaFiltrada = null)
+        {
+            var origem = listaFiltrada ?? _todosClientes;
+
+            TotalPaginas = (int)Math.Ceiling(origem.Count / (double)_tamanhoPagina);
+
+            var pagina = origem
+                .Skip((PaginaAtual - 1) * _tamanhoPagina)
+                .Take(_tamanhoPagina)
+                .ToList();
+
+            PaginaClientes.Clear();
+            foreach (var c in pagina)
+                PaginaClientes.Add(c);
+        }
+        [RelayCommand]
+        private void ProximaPagina()
+        {
+            if (PaginaAtual < TotalPaginas)
+                PaginaAtual++;
+        }
+
+        [RelayCommand]
+        private void PaginaAnterior()
+        {
+            if (PaginaAtual > 1)
+                PaginaAtual--;
         }
 
     }

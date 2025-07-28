@@ -682,6 +682,9 @@ namespace AgendaNovo
             {
                 _agendamentoService.Update(NovoAgendamento);
             }
+
+            _clienteService.AtivarSePendente(clienteExistente.Id);
+
             var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
             var crianca = NovoAgendamento.CriancaId.HasValue
                 ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)

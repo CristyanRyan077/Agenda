@@ -14,6 +14,10 @@ namespace AgendaNovo.Interfaces
         Cliente? GetById(int id);
         Cliente? DetectExisting(string? telefone, string? email);
         Cliente Add(Cliente cliente);
+
+
+        void AtivarSePendente(int clienteId);
+
         void Update(Cliente cliente);
         void Delete(int id);
         List<Agendamento> GetAgendamentos(int clienteId);

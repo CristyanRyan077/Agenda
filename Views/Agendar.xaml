@@ -94,7 +94,7 @@
                    Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                    BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3"/>
 
-                    <hc:ComboBox Name="txtpacote" Width="300" Height="60"
+                    <hc:ComboBox Name="txtpacote" Width="305" Height="60"
                                               IsEditable="True" IsTextSearchEnabled="True"
                                      DisplayMemberPath="Nome" SelectionChanged="ComboBoxPacotes_SelectionChanged"
                                  hc:InfoElement.Placeholder="Pacote"
@@ -120,15 +120,15 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <hc:TextBox Grid.Column="0" Width="250" Height="60" Margin="0,0,0,0"
+                    <hc:TextBox Grid.Column="0" Width="281" Height="60" Margin="0,0,0,0"
                               hc:InfoElement.Placeholder="Tema" HorizontalAlignment="Left"
                               Text="{Binding NovoAgendamento.Tema}"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                               BorderBrush="Black" SelectionTextBrush="Black">
                     </hc:TextBox>
                     <materialDesign:PackIcon Grid.Column="0" Kind="Theatre"
-                                         Width="34" Height="34" Margin="150,0,0,0"
-                                         HorizontalAlignment="Center"
+                                         Width="34" Height="34" Margin="0,0,0,0"
+                                         HorizontalAlignment="Right"
                                          Foreground="White" VerticalAlignment="Center"/>
 
                     <hc:TextBox Name="txtValor" Grid.Column="1" Width="180" Height="60"
@@ -137,10 +137,10 @@
                             IsReadOnly="True"
                             Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                             BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" Margin="115,0,0,0"/>
+                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" HorizontalAlignment="Right"/>
 
                     <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPago, UpdateSourceTrigger=PropertyChanged }"
-                            Grid.Column="2" Width="180" Height="60" HorizontalAlignment="Right"
+                            Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
                             hc:InfoElement.Placeholder="Pago"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                               BorderBrush="Transparent" SelectionTextBrush="Black"/>

@@ -52,6 +52,7 @@ namespace AgendaNovo.Services
             return null;
         }
 
+
         public Cliente Add(Cliente cliente)
         {
             _db.Clientes.Add(cliente);
@@ -71,6 +72,16 @@ namespace AgendaNovo.Services
             if (cliente == null) return;
             _db.Clientes.Remove(cliente);
             _db.SaveChanges();
+        }
+        public void AtivarSePendente(int clienteId)
+        {
+            var cliente = GetById(clienteId);
+            if (cliente != null && (cliente.Status == StatusCliente.Pendente)
+                || (cliente.Status == StatusCliente.Inativo))
+            {
+                cliente.Status = StatusCliente.Ativo;
+                Update(cliente);
+            }
         }
         public List<Agendamento> GetAgendamentos(int clienteId)
         {

@@ -3,9 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:vm="clr-namespace:AgendaNovo.ViewModels"
-            xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:conv="clr-namespace:AgendaNovo.Converters"
     x:Class="AgendaNovo.GerenciarClientes"
     mc:Ignorable="d"
     WindowState="Maximized"
@@ -58,7 +59,40 @@
                 <hc:TextBox Name="txtCliente" Padding="10" Background="White" Foreground="Black"
                          hc:InfoElement.Placeholder="Nome do Cliente" SelectionBrush="Black"
                          Text="{Binding NovoCliente.Nome, Mode=TwoWay}"
-                         Margin="0,4" BorderBrush="Black"/>
+                         Margin="0,4,0,4" BorderBrush="Black"/>
+                <StackPanel Orientation="Horizontal">
+                    <hc:TextBox Name="txtCrianca" Width="260" HorizontalAlignment="Left"
+                        hc:InfoElement.Placeholder="Criança"
+                        Padding="8" Background="White"
+                        SelectionBrush="Black"
+                        Text="{Binding CriancaSelecionada.Nome, Mode=TwoWay}"
+                         Margin="0,4,4,4" BorderBrush="Black"/>
+
+                    <hc:ComboBox materialDesign:HintAssist.Hint="Gênero"
+                        Padding="8" Background="White" Width="200" hc:InfoElement.Placeholder="Gênero"
+                        ItemsSource="{Binding GenerosLista}" HorizontalAlignment="Right"
+                        Text="{Binding CriancaSelecionada.Genero}" BorderBrush="Black"
+                        Margin="0,4"/>
+                </StackPanel>
+               
+
+                <StackPanel Orientation="Horizontal" Margin="0,4">
+                    <hc:TextBox hc:InfoElement.Placeholder="Idade" BorderBrush="Black"
+                Padding="4" Width="80" Background="White"
+              Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
+              Margin="0,0,8,0"/>
+                    <hc:ComboBox hc:InfoElement.Placeholder="Anos/meses" BorderBrush="Black"
+                 Padding="8" Width="120" Margin="0,0,10,0" Background="White"
+               ItemsSource="{Binding IdadesUnidadeDisponiveis}"
+               SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}"
+               />
+              <DatePicker materialDesign:HintAssist.Hint="Nascimento" BorderBrush="Black" 
+                              Padding="8" Width="200" HorizontalAlignment="Left"  hc:InfoElement.Placeholder="Nascimento"
+                            SelectedDate="{Binding CriancaSelecionada.NascimentoDateTime, Mode=TwoWay}"
+                            />
+                </StackPanel>
+
+              
 
                 <hc:TextBox  SelectionTextBrush="Black" hc:InfoElement.Placeholder="Telefone"
                          LostFocus="txtTel_LostFocus" Background="White" Padding="10"
@@ -70,53 +104,29 @@
                          Text="{Binding NovoCliente.Email, Mode=TwoWay}"
                          Margin="0,4" BorderBrush="Black"/>
 
-                <hc:TextBox hc:InfoElement.Placeholder="Instagram" materialDesign:HintAssist.Hint="Instagram"
-                         Height="32"    Padding="8" Background="White"
-                         Text="{Binding NovoCliente.Instagram, Mode=TwoWay}"
-                          Margin="0,4" BorderBrush="Black"/>
-
-                <hc:TextBox hc:InfoElement.Placeholder="Facebook"
-                         Height="32"    Padding="8" Background="White"
-                         Text="{Binding NovoCliente.Facebook, Mode=TwoWay}"
-                          Margin="0,4" BorderBrush="Black"/>
+               
             </StackPanel>
         </materialDesign:Card>
 
         <!-- Card Criança -->
         <materialDesign:Card Grid.Row="1" Grid.Column="1" Margin="5" Width="400" HorizontalAlignment="Left" Padding="15" Background="#FFC0B6E5">
             <StackPanel>
-                <TextBlock Text="Criança" FontWeight="Bold"
+                <TextBlock Text="Adicionais" FontWeight="Bold"
                            FontSize="14" Foreground="#444" Margin="0,0,0,8"/>
+                <hc:TextBox hc:InfoElement.Placeholder="Instagram" materialDesign:HintAssist.Hint="Instagram"
+                              Height="32"    Padding="8" Background="White" Foreground="Purple"
+                              Text="{Binding NovoCliente.Instagram, Mode=TwoWay}"
+                               Margin="0,4" BorderBrush="Black"/>
 
-                <hc:TextBox Name="txtCrianca" Width="300" HorizontalAlignment="Left"
-                              hc:InfoElement.Placeholder="Criança"
-                              Padding="8" Background="White"
-                              SelectionBrush="Black"
-                          Text="{Binding CriancaSelecionada.Nome, Mode=TwoWay}"
+                <hc:TextBox hc:InfoElement.Placeholder="Facebook"
+                          Height="32"    Padding="8" Background="White" Foreground="Blue"
+                          Text="{Binding NovoCliente.Facebook, Mode=TwoWay}"
                            Margin="0,4" BorderBrush="Black"/>
+                <hc:TextBox hc:InfoElement.Placeholder="Observação"
+                            Height="32"    Padding="8" Background="White"
+                            Text="{Binding NovoCliente.Observacao, Mode=TwoWay}"
+                             Margin="0,4" BorderBrush="Black"/>
 
-                <hc:ComboBox materialDesign:HintAssist.Hint="Gênero"
-                              Padding="8" Background="White" Width="200" hc:InfoElement.Placeholder="Gênero"
-                          ItemsSource="{Binding GenerosLista}" HorizontalAlignment="Left"
-                          Text="{Binding CriancaSelecionada.Genero}" BorderBrush="Black"
-                          Margin="0,4"/>
-
-                <StackPanel Orientation="Horizontal" Margin="0,4">
-                    <hc:TextBox hc:InfoElement.Placeholder="Idade" BorderBrush="Black"
-                               Padding="4" Width="80" Background="White"
-                             Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,8,0"/>
-                    <hc:ComboBox hc:InfoElement.Placeholder="Anos/meses" BorderBrush="Black"
-                                Padding="8" Width="110" Background="White"
-                              ItemsSource="{Binding IdadesUnidadeDisponiveis}"
-                              SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, UpdateSourceTrigger=PropertyChanged}"
-                              />
-                </StackPanel>
-
-                <DatePicker materialDesign:HintAssist.Hint="Nascimento" BorderBrush="Black" BorderThickness="1"
-                             Padding="10" Width="200" HorizontalAlignment="Left"  hc:InfoElement.Placeholder="Nascimento"
-                            SelectedDate="{Binding CriancaSelecionada.NascimentoDateTime, Mode=TwoWay}"
-                            Margin="0,4"/>
             </StackPanel>
         </materialDesign:Card>
 
@@ -135,7 +145,20 @@
                     Background="Red" Foreground="White"
                     Width="120" Height="34" Margin="6"/>
         </StackPanel>
-
+        <StackPanel Orientation="Horizontal" Grid.Row="3">
+            <Button Content="Anterior" Command="{Binding PaginaAnteriorCommand}" IsEnabled="{Binding PaginaAtual, Converter={StaticResource MaiorQue1Converter}}"/>
+            <TextBlock Text="{Binding PaginaAtual}" Margin="10,0"/>
+            <TextBlock Text="de"/>
+            <TextBlock Text="{Binding TotalPaginas}" Margin="5,0"/>
+            <Button Content="Próxima" Command="{Binding ProximaPaginaCommand}">
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource MenorQueConverter}">
+                        <Binding Path="PaginaAtual"/>
+                        <Binding Path="TotalPaginas"/>
+                    </MultiBinding>
+                </Button.IsEnabled>
+            </Button>
+        </StackPanel>
         <!-- Pesquisa -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
             <hc:TextBox hc:InfoElement.Placeholder="Buscar por nome"
@@ -147,7 +170,7 @@
 
         <!-- DataGrid -->
         <DataGrid Grid.Row="4" Grid.ColumnSpan="2"
-                  ItemsSource="{Binding ListaClienteCrianca}"
+                  ItemsSource="{Binding PaginaClientes}"
                   SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
                   AutoGenerateColumns="False"
                    Margin="5"
@@ -178,6 +201,12 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Observação" Binding="{Binding Observacao}"/>
+                <DataGridTextColumn Header="Facebook"   Binding="{Binding Facebook}"/>
+                <DataGridTextColumn Header="Instagram"  Binding="{Binding Instagram}"/>
+
+
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -14,6 +14,7 @@ namespace AgendaNovo.Interfaces
         void Update(Agendamento agendamento);
         void Delete(int id);
 
+
         // Filtros úteis
         List<Agendamento> GetByDate(DateTime data);
         List<Agendamento> GetByCliente(int clienteId);
