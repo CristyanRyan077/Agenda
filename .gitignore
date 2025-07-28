@@ -8,4 +8,7 @@
 *.zip
 bin/
 obj/
+AgendaNovo/Migrations/
 
+/Migrations/20250728174748_initialcreate.cs
+/Migrations/20250728174748_initialcreate.Designer.cs
