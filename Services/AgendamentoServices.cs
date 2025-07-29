@@ -17,6 +17,15 @@ namespace AgendaNovo.Services
         {
             _db = db;
         }
+        public void AtivarSePendente(int agendamentoid)
+        {
+            var agendamento = GetById(agendamentoid);
+            if (agendamento != null && (agendamento.Status == StatusAgendamento.Pendente))
+            {
+                agendamento.Status = StatusAgendamento.Concluido;
+                Update(agendamento);
+            }
+        }
 
         public List<Agendamento> GetAll()
         {

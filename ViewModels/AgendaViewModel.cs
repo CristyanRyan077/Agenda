@@ -898,17 +898,28 @@ namespace AgendaNovo
         [RelayCommand]
         private void ProximaSemana() => DataReferencia = DataReferencia.AddDays(7);
         public string HorarioTexto
-{
-    get => NovoAgendamento?.Horario?.ToString(@"hh\:mm") ?? "";
-    set
-    {
-        if (TimeSpan.TryParse(value, out var parsed) && NovoAgendamento != null)
         {
-            NovoAgendamento.Horario = parsed;
-            OnPropertyChanged(nameof(HorarioTexto));
+            get => NovoAgendamento?.Horario?.ToString(@"hh\:mm") ?? "";
+            set
+            {
+                if (TimeSpan.TryParse(value, out var parsed) && NovoAgendamento != null)
+                {
+                    NovoAgendamento.Horario = parsed;
+                    OnPropertyChanged(nameof(HorarioTexto));
+                }
+            }
         }
-    }
-}
+        [RelayCommand]
+        private void ConcluirAgendamento(Agendamento agendamento)
+        {
+            if (agendamento is null)
+                return;
+
+            _agendamentoService.AtivarSePendente(agendamento.Id);
+
+            
+        }
+
     }
 
 

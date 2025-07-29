@@ -165,6 +165,10 @@
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <Button Content="✓"
+                                                                            Command="{Binding DataContext.ConcluirAgendamentoCommand,
+                                                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                            CommandParameter="{Binding}" />
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
