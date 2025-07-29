@@ -33,6 +33,8 @@ namespace AgendaNovo.Models
 
         [ObservableProperty] private DateOnly? nascimento;
 
+        public List<Agendamento> Agendamentos { get; set; } = new();
+
         [NotMapped]
         public DateTime? NascimentoDateTime
         {

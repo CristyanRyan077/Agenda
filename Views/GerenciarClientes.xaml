@@ -37,10 +37,12 @@
             <!-- Pesquisa -->
             <RowDefinition Height="*"/>
             <!-- DataGrid -->
+            <RowDefinition Height="Auto"/>
+            <!-- Paginação -->
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="520" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -49,7 +51,7 @@
                    Foreground="Orange" FontSize="12" HorizontalAlignment="Center"
                    FontWeight="Bold" Background="Black" Padding="6"
                    Visibility="{Binding ClienteExistenteDetectado, Converter={StaticResource BoolToVisibilityConverter}}"
-                   Grid.ColumnSpan="2" Margin="0,0,0,10"/>
+                   Grid.Column="0" Margin="0,0,0,10"/>
 
         <!-- Card Cliente -->
         <materialDesign:Card Grid.Row="1" Grid.Column="0" Margin="5" Width="500" HorizontalAlignment="Left" Padding="15" Background="#FF7BE9F6">
@@ -108,22 +110,49 @@
             </StackPanel>
         </materialDesign:Card>
 
+        <materialDesign:Card Grid.Column="1" Background="Transparent" Grid.Row="1" HorizontalAlignment="Left"
+                             Width="480" Height="300" Visibility="{Binding TemHistorico, Converter={StaticResource BoolToVisibilityConverter}}">
+
+            <StackPanel Margin="10">
+                <TextBlock Background="White" Text="Histórico de Agendamentos" 
+                   FontSize="18" 
+                   FontWeight="Bold"
+                   Margin="0,0,0,10"/>
+
+                <ItemsControl ItemsSource="{Binding HistoricoAgendamentos}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical" Margin="0,5">
+                                <TextBlock Text="{Binding Data, StringFormat='dd/MM/yyyy'}" FontWeight="Bold"/>
+                                <TextBlock FontWeight="Bold" Foreground="Green" Text="{Binding Status}" FontStyle="Italic"/>
+                                <TextBlock Text="{Binding Servico.Nome}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+        </materialDesign:Card>
+
         <!-- Card Criança -->
-        <materialDesign:Card Grid.Row="1" Grid.Column="1" Margin="5" Width="400" HorizontalAlignment="Left" Padding="15" Background="#FFC0B6E5">
+        <materialDesign:Card Grid.Row="1" Grid.Column="1" Margin="0,0,0,0" Width="330" HorizontalAlignment="Right" Padding="15" Background="#FFC0B6E5">
             <StackPanel>
                 <TextBlock Text="Adicionais" FontWeight="Bold"
                            FontSize="14" Foreground="#444" Margin="0,0,0,8"/>
                 <hc:TextBox hc:InfoElement.Placeholder="Instagram" materialDesign:HintAssist.Hint="Instagram"
-                              Height="32"    Padding="8" Background="White" Foreground="Purple"
+                              Height="32"  Width="300" HorizontalAlignment="Left"   Padding="8" Background="White" Foreground="Purple"
                               Text="{Binding NovoCliente.Instagram, Mode=TwoWay}"
                                Margin="0,4" BorderBrush="Black"/>
 
                 <hc:TextBox hc:InfoElement.Placeholder="Facebook"
-                          Height="32"    Padding="8" Background="White" Foreground="Blue"
+                          Height="32" Width="300" HorizontalAlignment="Left"    Padding="8" Background="White" Foreground="Blue"
                           Text="{Binding NovoCliente.Facebook, Mode=TwoWay}"
                            Margin="0,4" BorderBrush="Black"/>
                 <hc:TextBox hc:InfoElement.Placeholder="Observação"
-                            Height="32"    Padding="8" Background="White"
+                            TextWrapping="Wrap"
+                            AcceptsReturn="True"
+                            VerticalScrollBarVisibility="Auto"
+                            Height="80" Width="300" HorizontalAlignment="Left" Padding="8" Background="White"
                             Text="{Binding NovoCliente.Observacao, Mode=TwoWay}"
                              Margin="0,4" BorderBrush="Black"/>
 
@@ -145,12 +174,15 @@
                     Background="Red" Foreground="White"
                     Width="120" Height="34" Margin="6"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="3">
-            <Button Content="Anterior" Command="{Binding PaginaAnteriorCommand}" IsEnabled="{Binding PaginaAtual, Converter={StaticResource MaiorQue1Converter}}"/>
-            <TextBlock Text="{Binding PaginaAtual}" Margin="10,0"/>
-            <TextBlock Text="de"/>
-            <TextBlock Text="{Binding TotalPaginas}" Margin="5,0"/>
-            <Button Content="Próxima" Command="{Binding ProximaPaginaCommand}">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,20" Grid.Row="5">
+            <Button Content="⮜" FontSize="33" FontWeight="Bold" Background="Transparent" Command="{Binding PaginaAnteriorCommand}"
+                    Height="50" IsEnabled="{Binding PaginaAtual, Converter={StaticResource MaiorQue1Converter}}"
+                    BorderBrush="Transparent"/>
+            <TextBlock Text="{Binding PaginaAtual}" Margin="0,20,0,0"/>
+            <TextBlock Text="de" Margin="0,20,0,0"/>
+            <TextBlock Text="{Binding TotalPaginas}" Margin="0,20,0,0"/>
+            <Button Content="⮞" FontWeight="Bold" Foreground="Black" BorderBrush="Transparent"
+                    Background="Transparent" FontSize="33" Height="50" Command="{Binding ProximaPaginaCommand}">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource MenorQueConverter}">
                         <Binding Path="PaginaAtual"/>
@@ -158,6 +190,11 @@
                     </MultiBinding>
                 </Button.IsEnabled>
             </Button>
+            <ComboBox ItemsSource="{Binding OpcoesTamanhoPagina}"
+              SelectedItem="{Binding TamanhoPagina, Mode=TwoWay}"
+              Width="60" Height="40"
+              Margin="15,0,0,0"
+              ToolTip="Itens por página"/>
         </StackPanel>
         <!-- Pesquisa -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
@@ -169,7 +206,7 @@
         </StackPanel>
 
         <!-- DataGrid -->
-        <DataGrid Grid.Row="4" Grid.ColumnSpan="2"
+        <DataGrid Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Top" MinHeight="200"
                   ItemsSource="{Binding PaginaClientes}"
                   SelectedItem="{Binding ClienteCriancaSelecionado, Mode=TwoWay}"
                   AutoGenerateColumns="False"
@@ -202,9 +239,9 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Observação" Binding="{Binding Observacao}"/>
                 <DataGridTextColumn Header="Facebook"   Binding="{Binding Facebook}"/>
                 <DataGridTextColumn Header="Instagram"  Binding="{Binding Instagram}"/>
+                <DataGridTextColumn Header="Observação" Binding="{Binding Observacao}"/>
 
 
             </DataGrid.Columns>

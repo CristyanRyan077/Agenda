@@ -49,10 +49,14 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty] private ClienteCriancaView? clienteCriancaSelecionado;
         [ObservableProperty] private bool clienteExistenteDetectado;
+        [ObservableProperty]
+        private bool completouAcompanhamento;
         [ObservableProperty] private bool isInEditMode;
         [ObservableProperty] private string pesquisaText;
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
+        [ObservableProperty]
+        private ObservableCollection<Agendamento> historicoAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
@@ -65,13 +69,23 @@ namespace AgendaNovo.ViewModels
         private readonly AgendaViewModel _agenda;
         private readonly IClienteService _clienteService;
         private readonly ICriancaService _criancaService;
+        private readonly IAgendamentoService _agendamentoService;
+        private readonly IServicoService _servicoService;
+        private readonly IPacoteService _pacoteService;
 
 
-        public ClienteCriancaViewModel(IClienteService clienteService,
-        ICriancaService criancaService)
+        public ClienteCriancaViewModel(IAgendamentoService agendamentoService,
+        IClienteService clienteService,
+        ICriancaService criancaService,
+        IPacoteService pacoteService,
+        IServicoService servicoService)
         {
+
+            _agendamentoService = agendamentoService;
             _clienteService = clienteService;
             _criancaService = criancaService;
+            _pacoteService = pacoteService;
+            _servicoService = servicoService;
             CarregarClientesDoBanco();
             LimparCamposClienteCrianca();
             _criancaService.AtualizarIdadeDeTodasCriancas();
@@ -110,7 +124,8 @@ namespace AgendaNovo.ViewModels
                         Genero = crianca.Genero,
                         Status = cliente.Status,
                         Facebook = cliente.Facebook,
-                        Instagram = cliente.Instagram
+                        Instagram = cliente.Instagram,
+                        Observacao = cliente.Observacao
                     });
                 }
                 else
@@ -123,7 +138,8 @@ namespace AgendaNovo.ViewModels
                         Email = cliente.Email,
                         Status = cliente.Status,
                         Facebook = cliente.Facebook,
-                        Instagram = cliente.Instagram
+                        Instagram = cliente.Instagram,
+                        Observacao = cliente.Observacao
 
 
                     }
@@ -179,8 +195,32 @@ namespace AgendaNovo.ViewModels
         }
 
 
+        public bool TemHistorico => HistoricoAgendamentos?.Any() == true;
+        partial void OnClienteCriancaSelecionadoChanged(ClienteCriancaView? value)
+        {
+            if (value == null)
+            {
+                HistoricoAgendamentos.Clear();
+                return;
+            }
 
-     
+            var agendamentosdocliente = _clienteService.GetAgendamentos(value.ClienteId) ?? new List<Agendamento>();
+
+            // Atualiza o histórico
+            HistoricoAgendamentos = new ObservableCollection<Agendamento>(agendamentosdocliente
+                .OrderByDescending(a => a.Data));
+            OnPropertyChanged(nameof(TemHistorico));// Ordena do mais recente para o mais antigo
+
+            // Se quiser calcular acompanhamento mensal completo:
+            var mensalcompleto = agendamentosdocliente
+                .Where(a => a.Status == StatusAgendamento.Concluido
+                            && a.Data.Year == DateTime.Now.Year
+                            && a.ServicoId == 2)
+                .Select(a => a.Data.Month)
+                .Distinct();
+
+            CompletouAcompanhamento = mensalcompleto.Count() == 12;
+        }
 
 
 
@@ -259,17 +299,7 @@ namespace AgendaNovo.ViewModels
             if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
 
-
-
             Cliente cliente;
-            /*if (!clienteFoiEditado && ListaClientes.Any(c =>
-                c.Nome.Equals(NovoCliente.Nome, StringComparison.OrdinalIgnoreCase)
-                && c.Id != NovoCliente.Id))
-            {
-                MessageBox.Show("Já existe um cliente com esse nome.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            } */
-
 
             if (NovoCliente.Id != 0)
             {
@@ -429,9 +459,16 @@ namespace AgendaNovo.ViewModels
         }
         [ObservableProperty]
         private int paginaAtual = 1;
-        private int _tamanhoPagina = 10;
+        [ObservableProperty]
+        private int tamanhoPagina = 10;
+        public List<int> OpcoesTamanhoPagina { get; } = new() { 10, 20, 50 };
+        partial void OnTamanhoPaginaChanged(int value)
+        {
+            PaginaAtual = 1;
+            AtualizarPaginacao();
+        }
 
-       
+
         [ObservableProperty]
         private int totalPaginas;
 
@@ -440,11 +477,11 @@ namespace AgendaNovo.ViewModels
         {
             var origem = listaFiltrada ?? _todosClientes;
 
-            TotalPaginas = (int)Math.Ceiling(origem.Count / (double)_tamanhoPagina);
+            TotalPaginas = (int)Math.Ceiling(origem.Count / (double)TamanhoPagina);
 
             var pagina = origem
-                .Skip((PaginaAtual - 1) * _tamanhoPagina)
-                .Take(_tamanhoPagina)
+                .Skip((PaginaAtual - 1) * TamanhoPagina)
+                .Take(TamanhoPagina)
                 .ToList();
 
             PaginaClientes.Clear();
@@ -455,14 +492,20 @@ namespace AgendaNovo.ViewModels
         private void ProximaPagina()
         {
             if (PaginaAtual < TotalPaginas)
+            {
                 PaginaAtual++;
+                AtualizarPaginacao();
+            }
         }
 
         [RelayCommand]
         private void PaginaAnterior()
         {
             if (PaginaAtual > 1)
+            {
                 PaginaAtual--;
+                AtualizarPaginacao();
+            }
         }
 
     }

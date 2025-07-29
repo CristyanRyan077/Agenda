@@ -51,6 +51,9 @@ namespace AgendaNovo.Migrations
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tema")
                         .HasColumnType("nvarchar(max)");
 

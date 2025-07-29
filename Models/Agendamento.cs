@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AgendaNovo.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using ControlzEx.Standard;
 
 namespace AgendaNovo
 {
@@ -29,6 +30,9 @@ namespace AgendaNovo
         [ObservableProperty] private decimal valor;
 
         [ObservableProperty] private decimal valorPago;
+
+        [ObservableProperty]
+        private StatusAgendamento status = StatusAgendamento.Pendente;
 
         public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPago, 2);
         public bool Pago { get; set; }

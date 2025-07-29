@@ -552,6 +552,7 @@ namespace AgendaNovo
             NovoCliente.Nome = cliente.Nome;
             NovoCliente.Telefone = cliente.Telefone;
             NovoCliente.Email = cliente.Email;
+            novoCliente.Observacao = cliente.Observacao;
 
             ListaCriancas.Clear();
             foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())

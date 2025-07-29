@@ -212,7 +212,7 @@
 
 
                 </Grid>
-                <hc:ComboBox Grid.Column="0" Grid.Row="5" Width="200" Height="60" HorizontalAlignment="Left"
+                <hc:ComboBox Grid.Column="0" Grid.Row="5" Width="140" Height="60" HorizontalAlignment="Left"
                         hc:InfoElement.Placeholder="Horário" Margin="0,0,0,10" VerticalAlignment="Bottom"
                              IsReadOnly="True"
                          ItemsSource="{Binding HorariosDisponiveis}" 
@@ -220,6 +220,13 @@
                           IsSynchronizedWithCurrentItem="False"
                           Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                           BorderBrush="Transparent" SelectionTextBrush="Black"/>
+
+                <hc:ComboBox Grid.Column="0" Text="{Binding ClienteSelecionado.Observacao}"  Grid.Row="5" Width="330" Height="60" HorizontalAlignment="Center"
+                       hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
+                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                            IsReadOnly="True"/>
+
+
                 <Button Content="Limpar Campos"
                                 Background="LightGray"
                                 Command="{Binding LimparCamposCommand}"
@@ -232,16 +239,16 @@
                                 />
                 <Button Content="Copiar horários livres"
                           Command="{Binding CopiarHorariosLivresCommand}"
-                          FontSize="15" FontFamily="Arial" 
-                          Width="170" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                          FontSize="15" FontFamily="Arial"  Grid.Column="2"
+                          Width="170" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center"
                           Margin="0,0,0,10" Background="#FF00FFE2"
                           Grid.Row="5"/>
                 <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
-                          Foreground="White" Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,10,270,0"
+                          Foreground="White" Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="90,10,0,0"
                           />
 
                 <!-- Calendário -->
-                <StackPanel Grid.Row="1" Grid.RowSpan="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Calendar Width="350" Height="300"
                           SelectedDate="{Binding NovoAgendamento.Data, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           Language="pt-br">

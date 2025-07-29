@@ -88,6 +88,8 @@ namespace AgendaNovo.Services
             return _db.Agendamentos
                 .Include(a => a.Crianca)
                 .Include(a => a.Cliente)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
                 .Where(a => a.ClienteId == clienteId)
                 .AsNoTracking()
                 .ToList();
