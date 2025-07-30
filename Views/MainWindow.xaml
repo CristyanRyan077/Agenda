@@ -156,20 +156,33 @@
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
+                                                                <Grid Margin="0 0 4 5">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="auto" />
+                                                                    </Grid.ColumnDefinitions>
 
 
-                                                                <StackPanel Orientation="Horizontal" Margin="0 0 4 5">
-                                                                    <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
-                                                                    <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
-                                                                    <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
-                                                                    <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
-                                                                    <Button Content="✓"
+                                                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="0 0 4 5">
+                                                                        <TextBlock Text="↳ " FontSize="16" Margin="5,-6,0,0"/>
+                                                                        <TextBlock Text="{Binding Crianca.Nome}" FontFamily="Arial" FontSize="14"/>
+                                                                        <TextBlock Text=" | " Foreground="Gray"/>
+                                                                        <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
+                                                                        <TextBlock Text=" | " Foreground="Gray"/>
+                                                                        <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    </StackPanel>
+                                                                    <Button Grid.Column="1"
+                                                                            Width="34" 
+                                                                            Background="#E6F6EA"
+                                                                            BorderBrush="#A8D5A2"
+                                                                            BorderThickness="1"
                                                                             Command="{Binding DataContext.ConcluirAgendamentoCommand,
-                                                                            RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                            CommandParameter="{Binding}" />
-                                                                </StackPanel>
+                                                                                      RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                            CommandParameter="{Binding}">
+                                                                        <TextBlock Text="✓" FontSize="18" Foreground="Green"
+                                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Button>
+                                                                </Grid>
 
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>

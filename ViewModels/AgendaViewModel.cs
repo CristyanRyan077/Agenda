@@ -584,6 +584,7 @@ namespace AgendaNovo
 
             if (cliente is not null)
             {
+
                 preencher(cliente);
                 foreach (var crianca in cliente.Criancas)
                     ListaCriancas.Add(crianca);
@@ -617,7 +618,7 @@ namespace AgendaNovo
         }
 
 
-            [RelayCommand]
+        [RelayCommand]
         private void Agendar()
         {
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
@@ -697,13 +698,14 @@ namespace AgendaNovo
             ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
             : "";
             DataReferencia = NovoAgendamento.Data;
+            var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
 
 
             var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
                             $"Cliente: {cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +
-                            $"Serviço: {NovoAgendamento.Servico.Nome}\n" +
+                            $"Serviço: {servicoNome}\n" +
                             $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
                             $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                             $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
