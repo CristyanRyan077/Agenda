@@ -24,8 +24,8 @@ namespace AgendaNovo
             base.OnStartup(e);
             var services = new ServiceCollection();
             services.AddDbContext<AgendaContext>(options =>
-            //options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;"));
-            options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
+            options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;"));
+            //options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
             services.AddScoped<ICriancaService, CriancaService>();
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IPacoteService, PacoteService>();

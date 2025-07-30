@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250727232231_colunateste")]
-    partial class colunateste
+    [Migration("20250730175814_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,9 @@ namespace AgendaNovo.Migrations
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tema")
                         .HasColumnType("nvarchar(max)");
 
@@ -62,9 +65,6 @@ namespace AgendaNovo.Migrations
 
                     b.Property<decimal>("ValorPago")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("teste")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -181,8 +181,10 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("PossuiCrianca")
-                        .HasColumnType("bit");
+                    b.Property<bool>("PossuiCrianca")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.HasKey("Id");
 
