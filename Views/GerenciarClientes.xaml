@@ -241,6 +241,19 @@
         </StackPanel>
         <!-- Pesquisa -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
+            <RadioButton Content="Todos"
+                 GroupName="FiltroClientes"
+                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=Todos, Converter={StaticResource StringEqualsConverter}}" />
+
+            <RadioButton Content="Pendentes"
+                 GroupName="FiltroClientes"
+                         Margin="10,0,0,0"
+                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=Pendente, Converter={StaticResource StringEqualsConverter}}" />
+
+            <RadioButton Content="Inativos"
+                 GroupName="FiltroClientes"
+                         Margin="10,0,10,0"
+                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=Inativo, Converter={StaticResource StringEqualsConverter}}" />
             <hc:TextBox hc:InfoElement.Placeholder="Buscar por nome"
                      Height="32" Width="350" Background="White" HorizontalAlignment="Right"
                      Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Black"

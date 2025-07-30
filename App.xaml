@@ -19,6 +19,7 @@
             <conv:MenorQueTotalPaginasConverter x:Key="MenorQueTotalPaginasConverter"/>
             <conv:MenorQueConverter x:Key="MenorQueConverter"/>
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:StringEqualsConverter x:Key="StringEqualsConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -61,6 +61,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
         private List<ClienteCriancaView> _todosClientes = new();
+        [ObservableProperty] private string filtroSelecionado;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public IEnumerable<StatusCliente> StatusLista => Enum.GetValues(typeof(StatusCliente)).Cast<StatusCliente>();
@@ -102,10 +103,12 @@ namespace AgendaNovo.ViewModels
         }
         private void CarregarClientesDoBanco()
         {
+
             var todos = _clienteService?.GetAllWithChildren()
            ?? new List<Cliente>();
             _todosClientes = todos.SelectMany(cliente =>
             {
+                var agendamentos = _clienteService.GetAgendamentos(cliente.Id)?.ToList() ?? new List<Agendamento>();
                 var filhos = cliente.Criancas ?? new List<Crianca>();
                 if (filhos.Any())
                 {
@@ -125,7 +128,8 @@ namespace AgendaNovo.ViewModels
                         Status = cliente.Status,
                         Facebook = cliente.Facebook,
                         Instagram = cliente.Instagram,
-                        Observacao = cliente.Observacao
+                        Observacao = cliente.Observacao,
+                        Agendamentos = agendamentos
                     });
                 }
                 else
@@ -139,7 +143,8 @@ namespace AgendaNovo.ViewModels
                         Status = cliente.Status,
                         Facebook = cliente.Facebook,
                         Instagram = cliente.Instagram,
-                        Observacao = cliente.Observacao
+                        Observacao = cliente.Observacao,
+                        Agendamentos = agendamentos
 
 
                     }
@@ -434,6 +439,38 @@ namespace AgendaNovo.ViewModels
                 LimparCamposClienteCrianca();
                 return;
 
+        }
+        partial void OnFiltroSelecionadoChanged(string value)
+        {
+            AplicarFiltros();
+        }
+        private void AplicarFiltros()
+        {
+            var agora = DateTime.Now;
+            var clientesFiltrados = _todosClientes;
+
+            if (FiltroSelecionado == "Pendentes")
+            {
+                clientesFiltrados = clientesFiltrados
+                    .Where(c => c.Agendamentos.Any(a => a.ValorPago < a.Pacote?.Valor))
+                    .ToList();
+            }
+            else if (FiltroSelecionado == "Inativos")
+            {
+                clientesFiltrados = clientesFiltrados
+                    .Where(c => !c.Agendamentos.Any(a => (agora - a.Data).TotalDays <= 60))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(PesquisaText))
+            {
+                clientesFiltrados = clientesFiltrados
+                    .Where(c => c.NomeCliente.Contains(PesquisaText, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            PaginaClientes = new ObservableCollection<ClienteCriancaView>(clientesFiltrados);
+            AtualizarPaginacao();
         }
         partial void OnPesquisaTextChanged(string value)
         {
