@@ -60,6 +60,9 @@ namespace AgendaNovo
 
         private void btnAgenda_Click(object sender, RoutedEventArgs e)
         {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
             if (DataContext is AgendaViewModel vm)
             {
                 vm.LimparCamposCommand.Execute(null);
@@ -77,6 +80,9 @@ namespace AgendaNovo
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
             (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
 
             if (_janelaClientes == null || !_janelaClientes.IsLoaded)

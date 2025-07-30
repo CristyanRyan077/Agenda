@@ -1,30 +1,31 @@
 ﻿
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
+using AgendaNovo.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ControlzEx.Standard;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
-using System.Globalization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using AgendaNovo.Interfaces;
-using AgendaNovo.Services;
-using System.ComponentModel;
 using System.Windows.Threading;
-using System.Collections.Immutable;
 
 namespace AgendaNovo
 {
@@ -78,6 +79,7 @@ namespace AgendaNovo
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
+
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
@@ -674,6 +676,7 @@ namespace AgendaNovo
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
 
 
+
             bool agendamentoNovo = NovoAgendamento.Id == 0;
 
             if (agendamentoNovo)
@@ -684,8 +687,12 @@ namespace AgendaNovo
             {
                 _agendamentoService.Update(NovoAgendamento);
             }
+            if (NovoAgendamento.Valor == NovoAgendamento.ValorPago)
+            {
+                _clienteService.AtivarSePendente(clienteExistente.Id);
+                _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
+            }
 
-            _clienteService.AtivarSePendente(clienteExistente.Id);
 
             var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
             var crianca = NovoAgendamento.CriancaId.HasValue
