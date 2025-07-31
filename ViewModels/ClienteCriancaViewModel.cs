@@ -62,6 +62,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Crianca? criancaSelecionada = new();
         private List<ClienteCriancaView> _todosClientes = new();
         [ObservableProperty] private string filtroSelecionado;
+        private List<ClienteCriancaView> _clientesFiltrados = new();
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public IEnumerable<StatusCliente> StatusLista => Enum.GetValues(typeof(StatusCliente)).Cast<StatusCliente>();
@@ -87,9 +88,11 @@ namespace AgendaNovo.ViewModels
             _criancaService = criancaService;
             _pacoteService = pacoteService;
             _servicoService = servicoService;
+            _clienteService.ClienteInativo();
             CarregarClientesDoBanco();
             LimparCamposClienteCrianca();
             _criancaService.AtualizarIdadeDeTodasCriancas();
+
 
         }
         private void NotifyAll()
@@ -155,7 +158,8 @@ namespace AgendaNovo.ViewModels
             foreach (var cli in todos)
                 ListaClientes.Add(cli);
 
-            AtualizarPaginacao();
+            _clientesFiltrados = _todosClientes;
+            AtualizarPaginacao(_clientesFiltrados);
         }
 
         public void DetectarClientePorCampos()
@@ -297,6 +301,8 @@ namespace AgendaNovo.ViewModels
             ListaCriancas.Clear();
             ListaCriancasDoCliente.Clear();
             NotifyAll();
+            _clientesFiltrados = _todosClientes;
+            AtualizarPaginacao(_clientesFiltrados);
         }
         [RelayCommand]
         private void SalvarClienteCrianca()
@@ -350,7 +356,8 @@ namespace AgendaNovo.ViewModels
 
                 _criancaService.AddOrUpdate(crianca);
             }
-            AtualizarPaginacao();
+            _clientesFiltrados = _todosClientes;
+            AtualizarPaginacao(_clientesFiltrados);
             CarregarClientesDoBanco();
             LimparInputsClienteCrianca();
             NotifyAll();
@@ -364,6 +371,8 @@ namespace AgendaNovo.ViewModels
             ClienteExistenteDetectado = false;
             IsInEditMode = false;
             NotifyAll();
+
+
         }
         [RelayCommand]
         private void ExcluirClienteOuCriancaSelecionado()
@@ -442,57 +451,61 @@ namespace AgendaNovo.ViewModels
         }
         partial void OnFiltroSelecionadoChanged(string value)
         {
-            AplicarFiltros();
+            AplicarFiltrosComPesquisa();
         }
-        private void AplicarFiltros()
+        private void AplicarFiltrosComPesquisa()
         {
             var agora = DateTime.Now;
-            var clientesFiltrados = _todosClientes;
+            var clientesFiltrados = _todosClientes.AsEnumerable();
 
-            if (FiltroSelecionado == "Pendentes")
+            if (FiltroSelecionado == "Pendente")
             {
                 clientesFiltrados = clientesFiltrados
-                    .Where(c => c.Agendamentos.Any(a => a.ValorPago < a.Pacote?.Valor))
-                    .ToList();
+                    .Where(c => c.Agendamentos.Any(a => (a.Pacote != null) && a.ValorPago < a.Pacote.Valor));
             }
-            else if (FiltroSelecionado == "Inativos")
+            else if (FiltroSelecionado == "Concluido")
             {
                 clientesFiltrados = clientesFiltrados
-                    .Where(c => !c.Agendamentos.Any(a => (agora - a.Data).TotalDays <= 60))
-                    .ToList();
+                    .Where(c => c.Status != StatusCliente.Inativo &&
+                                c.Agendamentos.Any() &&
+                                c.Agendamentos.All(a => (a.Pacote != null) && a.ValorPago >= a.Pacote.Valor));
+            }
+            else if (FiltroSelecionado == "Inativo")
+            {
+                clientesFiltrados = clientesFiltrados
+                    .Where(c =>
+                        c.Status == StatusCliente.Inativo ||
+                        c.Agendamentos.Any() &&
+                        c.Agendamentos.Max(a => a.Data) < agora.AddDays(-60)
+                    );
+            }
+            else if (FiltroSelecionado == "S/A")
+            {
+                clientesFiltrados = clientesFiltrados
+                    .Where(c => c.Agendamentos.Count == 0);
             }
 
+            // Filtro de pesquisa
             if (!string.IsNullOrWhiteSpace(PesquisaText))
             {
+                var filtro = PesquisaText.Trim().ToLower();
                 clientesFiltrados = clientesFiltrados
-                    .Where(c => c.NomeCliente.Contains(PesquisaText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                    .Where(c =>
+                        (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
+                        (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
+                        (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro))
+                    );
             }
 
-            PaginaClientes = new ObservableCollection<ClienteCriancaView>(clientesFiltrados);
-            AtualizarPaginacao();
+            _clientesFiltrados = clientesFiltrados.ToList();
+            PaginaAtual = 1;
+            AtualizarPaginacao(_clientesFiltrados);
         }
+
         partial void OnPesquisaTextChanged(string value)
         {
             PaginaAtual = 1;
-
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                // Sem filtro, paginação com todos os clientes
-                AtualizarPaginacao();
-                return;
-            }
-
-            var filtro = value.Trim().ToLower();
-
-            // Aplica filtro na lista total
-            var filtrados = _todosClientes.Where(c =>
-                (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
-                (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
-                (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro))
-            ).ToList();
-
-            AtualizarPaginacao(filtrados);
+            AplicarFiltrosComPesquisa();        
         }
         [ObservableProperty]
         private int paginaAtual = 1;
@@ -502,7 +515,7 @@ namespace AgendaNovo.ViewModels
         partial void OnTamanhoPaginaChanged(int value)
         {
             PaginaAtual = 1;
-            AtualizarPaginacao();
+            AplicarFiltrosComPesquisa();
         }
 
 
@@ -531,7 +544,7 @@ namespace AgendaNovo.ViewModels
             if (PaginaAtual < TotalPaginas)
             {
                 PaginaAtual++;
-                AtualizarPaginacao();
+                AtualizarPaginacao(_clientesFiltrados);
             }
         }
 
@@ -541,7 +554,7 @@ namespace AgendaNovo.ViewModels
             if (PaginaAtual > 1)
             {
                 PaginaAtual--;
-                AtualizarPaginacao();
+                AtualizarPaginacao(_clientesFiltrados);
             }
         }
 
