@@ -299,26 +299,41 @@ namespace AgendaNovo
                 OnPropertyChanged(nameof(DiaChkDom));
             }
         }
-
-        public void VerificarClientesComMesmoNome()
+        [ObservableProperty]
+        private bool preenchendoViaId;
+        public void VerificarDuplicidadeNome()
         {
-            if (string.IsNullOrWhiteSpace(NovoCliente?.Nome))
+            if (PreenchendoViaId)
+            {
+                Debug.WriteLine("preenchendo via id");
+                return;
+            }
+
+            var nomeDigitado = NomeDigitado?.Trim();
+            if (string.IsNullOrWhiteSpace(nomeDigitado))
                 return;
 
-            var nome = NovoCliente.Nome.Trim();
-
             var clientesIguais = ListaClientes
-                .Where(c => c.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase))
+                .Where(c => string.Equals(c.Nome?.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            if (clientesIguais.Count > 1 ||
-               (clientesIguais.Count == 1 && clientesIguais[0].Id != NovoCliente.Id))
+            if (clientesIguais.Count > 1)
             {
-                var texto = string.Join("\n\n", clientesIguais.Select(c =>
+                Debug.WriteLine("encontrado duplicado");
+                var textoDuplicados = string.Join("\n\n", clientesIguais.Select(c =>
                     $"ID: {c.Id}\nNome: {c.Nome}\n" +
-                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome} ({cr.Idade} anos)"))}\n" +
+                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome}"))}\n" +
                     $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
-                MessageBox.Show($"⚠️ Já existe(m) cliente(s) com este nome:\n\n{texto}", "Aviso de duplicidade", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                MessageBox.Show($"⚠ Existem vários clientes com esse nome:\n\n{textoDuplicados}",
+                                "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                ClienteSelecionado = null;
+                NomeDigitado = string.Empty;
+            }
+            else if (clientesIguais.Count == 1)
+            {
+                ClienteSelecionado = clientesIguais.First();
             }
         }
         public void FiltrarAgendamentos()

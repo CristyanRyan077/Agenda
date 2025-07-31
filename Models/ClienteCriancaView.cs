@@ -17,7 +17,7 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? telefone;
         [ObservableProperty] private string? email;
         [ObservableProperty] private string? observacao;
-        [ObservableProperty] private StatusCliente status = StatusCliente.Inativo;
+        [ObservableProperty] private StatusCliente status = StatusCliente.SA;
         [ObservableProperty]
         private string? facebook;
 

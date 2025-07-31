@@ -52,9 +52,8 @@ namespace AgendaNovo
         }
 
 
-        private void txtIdBusca_LostFocus(object sender, RoutedEventArgs e)
+        private async void txtIdBusca_LostFocus(object sender, RoutedEventArgs e)
         {
-
             var vm = DataContext as AgendaViewModel;
             if (vm == null) return;
 
@@ -63,17 +62,22 @@ namespace AgendaNovo
                 var cliente = vm.ListaClientes.FirstOrDefault(c => c.Id == id);
                 if (cliente != null)
                 {
+                    Debug.WriteLine("🟡 Começando preenchimento via ID");
                     _preenchendoViaId = true;
                     vm.ClienteSelecionado = cliente;
                     txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
+                    await Task.Delay(10);
                 }
                 else
                 {
                     MessageBox.Show("Cliente com esse ID não encontrado.");
                 }
             }
+            await Task.Delay(100);
+            _preenchendoViaId = false;
+            Debug.WriteLine("🔴 Flag resetada");
         }
         private void dgAgendamentos_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

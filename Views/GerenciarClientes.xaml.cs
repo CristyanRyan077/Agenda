@@ -107,5 +107,11 @@ namespace AgendaNovo
             if (DataContext is ClienteCriancaViewModel vm)
                 vm.DetectarClientePorCampos();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var vm = (ClienteCriancaViewModel)this.DataContext;
+            vm.VerificarClientesInativos();
+        }
     }
 }
