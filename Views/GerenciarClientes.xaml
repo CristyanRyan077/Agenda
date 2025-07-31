@@ -244,16 +244,26 @@
             <RadioButton Content="Todos"
                  GroupName="FiltroClientes"
                  IsChecked="{Binding FiltroSelecionado, ConverterParameter=Todos, Converter={StaticResource StringEqualsConverter}}" />
+            
+            <RadioButton Content="Concluidos" Foreground="Green"
+                 GroupName="FiltroClientes"
+                         Margin="10,0,0,0"
+                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=Concluido, Converter={StaticResource StringEqualsConverter}}" />
 
-            <RadioButton Content="Pendentes"
+            <RadioButton Content="Pendentes" Foreground="DarkRed"
                  GroupName="FiltroClientes"
                          Margin="10,0,0,0"
                  IsChecked="{Binding FiltroSelecionado, ConverterParameter=Pendente, Converter={StaticResource StringEqualsConverter}}" />
 
-            <RadioButton Content="Inativos"
+            <RadioButton Content="Inativos" Foreground="OrangeRed"
                  GroupName="FiltroClientes"
                          Margin="10,0,10,0"
                  IsChecked="{Binding FiltroSelecionado, ConverterParameter=Inativo, Converter={StaticResource StringEqualsConverter}}" />
+            
+            <RadioButton Content="S/A" Foreground="Gray"
+                 GroupName="FiltroClientes"
+                         Margin="10,0,10,0"
+                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=S/A, Converter={StaticResource StringEqualsConverter}}" />
             <hc:TextBox hc:InfoElement.Placeholder="Buscar por nome"
                      Height="32" Width="350" Background="White" HorizontalAlignment="Right"
                      Text="{Binding PesquisaText, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Black"

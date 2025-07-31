@@ -692,6 +692,8 @@ namespace AgendaNovo
                 _clienteService.AtivarSePendente(clienteExistente.Id);
                 _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
             }
+            if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
+                _clienteService.ValorIncompleto(clienteExistente.Id);
 
 
             var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);

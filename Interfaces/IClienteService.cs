@@ -17,6 +17,8 @@ namespace AgendaNovo.Interfaces
 
 
         void AtivarSePendente(int clienteId);
+        void ValorIncompleto(int clienteId);
+        void ClienteInativo();
 
         void Update(Cliente cliente);
         void Delete(int id);

@@ -83,6 +83,40 @@ namespace AgendaNovo.Services
                 Update(cliente);
             }
         }
+        public void ValorIncompleto(int clienteId)
+        {
+            var cliente = GetById(clienteId);
+            if (cliente != null && (cliente.Status == StatusCliente.Inativo)
+                || (cliente.Status == StatusCliente.Ativo))
+            {
+                cliente.Status = StatusCliente.Pendente;
+                Update(cliente);
+            }
+        }
+        public void ClienteInativo()
+        {
+            var agora = DateTime.Now;
+            var clientes = _db.Clientes
+                .Include(c => c.Agendamentos)
+                .ToList();
+
+            foreach (var cliente in clientes)
+            {
+                if (cliente.Agendamentos.Any())
+                {
+                    var ultimaData = cliente.Agendamentos.Max(a => a.Data);
+
+                    if (ultimaData < agora.AddDays(-60) &&
+                        (cliente.Status == StatusCliente.Ativo || cliente.Status == StatusCliente.Pendente))
+                    {
+                        cliente.Status = StatusCliente.Inativo;
+                        _db.Update(cliente);
+                    }
+                }
+            }
+
+            _db.SaveChanges();
+        }
         public List<Agendamento> GetAgendamentos(int clienteId)
         {
             return _db.Agendamentos
