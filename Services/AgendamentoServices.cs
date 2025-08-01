@@ -23,6 +23,7 @@ namespace AgendaNovo.Services
             if (agendamento != null && (agendamento.Status == StatusAgendamento.Pendente))
             {
                 agendamento.Status = StatusAgendamento.Concluido;
+                agendamento.ValorPago = agendamento.Valor;
                 Update(agendamento);
             }
         }

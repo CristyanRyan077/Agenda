@@ -172,10 +172,11 @@
                                                                         <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
                                                                     </StackPanel>
                                                                     <Button Grid.Column="1"
-                                                                            Width="34" 
+                                                                            Width="34"                                                                           
                                                                             Background="#E6F6EA"
                                                                             BorderBrush="#A8D5A2"
                                                                             BorderThickness="1"
+                                                                            Visibility="{Binding MostrarCheck, Converter={StaticResource BoolToVisibilityConverter}}"
                                                                             Command="{Binding DataContext.ConcluirAgendamentoCommand,
                                                                                       RelativeSource={RelativeSource AncestorType=Window}}"
                                                                             CommandParameter="{Binding}">

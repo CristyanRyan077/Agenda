@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,10 @@ namespace AgendaNovo
 {
     public partial class Agendamento : ObservableObject
     {
+        public Agendamento()
+        {
+            MostrarCheck = true;
+        }
         public int Id { get; set; }
 
         public int ClienteId { get; set; }
@@ -33,6 +38,16 @@ namespace AgendaNovo
 
         [ObservableProperty]
         private StatusAgendamento status = StatusAgendamento.Pendente;
+
+
+        private bool _mostrarCheck;
+
+        [NotMapped]
+        public bool MostrarCheck
+        {
+            get => _mostrarCheck;
+            set => SetProperty(ref _mostrarCheck, value);
+        }
 
         public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPago, 2);
         public bool Pago { get; set; }

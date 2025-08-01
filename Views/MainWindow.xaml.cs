@@ -68,12 +68,16 @@ namespace AgendaNovo
                 vm.LimparCamposCommand.Execute(null);
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
-                    var main = new Agendar(vm); // reuse o mesmo vm da MainWindow
-                    main.Show();
+                    _janelaAgenda = new Agendar(vm); 
+                    _janelaAgenda.Owner = this;
+                    _janelaAgenda.Closed += (s, ev) => _janelaAgenda = null;
+                    _janelaAgenda.Show();
                 }
                 else
                 {
-                    _janelaAgenda.Focus();
+                    if (_janelaAgenda.WindowState == WindowState.Minimized)
+                        _janelaAgenda.WindowState = WindowState.Normal;
+                    _janelaAgenda.Activate();
                 }
             }
         }
@@ -87,16 +91,16 @@ namespace AgendaNovo
 
             if (_janelaClientes == null || !_janelaClientes.IsLoaded)
             {
-                // em vez de new, resolve via DI
                 _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
                 _janelaClientes.Owner = this;
+                _janelaClientes.Closed += (s, ev) => _janelaClientes = null;
                 _janelaClientes.Show();
-
-
             }
             else
             {
-                _janelaClientes.Focus();
+                if (_janelaClientes.WindowState == WindowState.Minimized)
+                    _janelaClientes.WindowState = WindowState.Normal;
+                _janelaClientes.Activate();
             }
         }
     }

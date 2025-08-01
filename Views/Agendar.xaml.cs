@@ -63,21 +63,19 @@ namespace AgendaNovo
                 if (cliente != null)
                 {
                     Debug.WriteLine("🟡 Começando preenchimento via ID");
-                    _preenchendoViaId = true;
+                    vm.PreenchendoViaId = true;
+                    vm.IgnorarProximoTextChanged = true;
                     vm.ClienteSelecionado = cliente;
                     txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
-                    await Task.Delay(10);
+                    await Task.Delay(300);
                 }
                 else
                 {
                     MessageBox.Show("Cliente com esse ID não encontrado.");
                 }
             }
-            await Task.Delay(100);
-            _preenchendoViaId = false;
-            Debug.WriteLine("🔴 Flag resetada");
         }
         private void dgAgendamentos_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

@@ -46,12 +46,8 @@ namespace AgendaNovo
         [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
-        private bool _verificacaoJaFeita;
-        public bool VerificacaoJaFeita
-        {
-            get => _verificacaoJaFeita;
-            set => SetProperty(ref _verificacaoJaFeita, value);
-        }
+        [ObservableProperty]
+        private bool usuarioDigitouNome;
         public ObservableCollection<Cliente> ClientesFiltrados { get; set; } = new();
 
         //Crianca
@@ -73,6 +69,9 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Pacote> listaPacotesFiltrada = new();
         [ObservableProperty]
         private string nomeDigitado = string.Empty;
+        [ObservableProperty]
+        private bool ignorarProximoTextChanged;
+        [ObservableProperty] private bool mostrarCheck;
 
         [ObservableProperty]
         private bool mostrarSugestoes = false;
@@ -102,10 +101,11 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
-                NovoAgendamento = new Agendamento
-    {
-        Servico = new Servico { PossuiCrianca = true } // Padrão inicial
-    };
+            NovoAgendamento = new Agendamento
+            {
+                Servico = new Servico { PossuiCrianca = true } // Padrão inicial
+            };
+            mostrarCheck = true;
 
 
         }
@@ -303,15 +303,17 @@ namespace AgendaNovo
         private bool preenchendoViaId;
         public void VerificarDuplicidadeNome()
         {
-            if (PreenchendoViaId)
+            if (PreenchendoViaId || !UsuarioDigitouNome)
             {
                 Debug.WriteLine("preenchendo via id");
                 return;
             }
+            UsuarioDigitouNome = false;
 
             var nomeDigitado = NomeDigitado?.Trim();
             if (string.IsNullOrWhiteSpace(nomeDigitado))
                 return;
+
 
             var clientesIguais = ListaClientes
                 .Where(c => string.Equals(c.Nome?.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase))
@@ -330,6 +332,7 @@ namespace AgendaNovo
 
                 ClienteSelecionado = null;
                 NomeDigitado = string.Empty;
+                LimparCampos();
             }
             else if (clientesIguais.Count == 1)
             {
@@ -457,11 +460,13 @@ namespace AgendaNovo
                 OnPropertyChanged(nameof(NovoAgendamento));
                 OnPropertyChanged(nameof(NovoAgendamento.Horario));
                 OnPropertyChanged(nameof(NovoAgendamento.Tema));
+                OnPropertyChanged(nameof(HorarioTexto));
                 OnPropertyChanged(nameof(CriancaSelecionada));
                 _suspendendoDataChanged = true;
                 DataSelecionada = ag.Data;
-                AtualizarHorariosDisponiveis();
                 _suspendendoDataChanged = false;
+                AtualizarHorariosDisponiveis();
+                NovoAgendamento.Horario = ag.Horario;
                 OnPropertyChanged(nameof(HorariosDisponiveis));
 
             }
@@ -486,6 +491,7 @@ namespace AgendaNovo
         {
             NovoAgendamento = new Agendamento();
             ItemSelecionado = null;
+            ClienteSelecionado = null;
             ServicoSelecionado = null;
             Pacoteselecionado = null;
             NomeDigitado = string.Empty;
@@ -942,6 +948,7 @@ namespace AgendaNovo
                 return;
 
             _agendamentoService.AtivarSePendente(agendamento.Id);
+            agendamento.MostrarCheck = false;
 
             
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,17 @@ namespace AgendaNovo.Views.Controles
        
         private void AutoCompleteBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            var vm = DataContext as AgendaViewModel;
+            if (vm == null)
+                return;
+            if (vm.IgnorarProximoTextChanged)
+            {
+                vm.IgnorarProximoTextChanged = false;
+                vm.PreenchendoViaId = false;
+                return;
+            }
+            vm.UsuarioDigitouNome = true;
+            vm.PreenchendoViaId = false;
             AtualizarPlaceholder();
         }
         private async void AutoCompleteBox_LostFocus(object sender, RoutedEventArgs e)
@@ -49,15 +61,15 @@ namespace AgendaNovo.Views.Controles
             if (!AutoCompleteBox.IsKeyboardFocusWithin && string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
                 PlaceholderText.Visibility = Visibility.Visible;
             var vm = DataContext as AgendaViewModel;
-            if (vm != null)
+            if (vm != null )
             {
                 vm.MostrarSugestoes = false;
                 if (!vm.PreenchendoViaId)
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(500);
                     vm.VerificarDuplicidadeNome();
                 }
-            }
+            }   
         }
 
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)
