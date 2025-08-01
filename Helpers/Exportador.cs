@@ -39,15 +39,15 @@ namespace AgendaNovo.Helpers
             ws.Cell("B4").Value = cliente.Status.ToString();
 
             ws.Cell("A5").Value = "Observação:";
-            ws.Cell("A5").Value = cliente.Observacao;
+            ws.Cell("B5").Value = cliente.Observacao;
 
 
             // Espaço e cabeçalho de agendamentos
             ws.Cell("A7").Value = "Data";
             ws.Cell("B7").Value = "Serviço";
-            ws.Cell("C7").Value = "Status Agendamento";
+            ws.Cell("C7").Value = "Status";
 
-            int linha = 6;
+            int linha = 8;
             foreach (var ag in agendamentos)
             {
                 ws.Cell(linha, 1).Value = ag.Data.ToString("dd/MM/yyyy");
