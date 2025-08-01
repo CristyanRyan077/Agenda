@@ -145,14 +145,16 @@ namespace AgendaNovo
         {
             var termo = value?.ToLower() ?? "";
             var filtrados = ListaClientes
-                .Where(c => c.Nome.ToLower().Contains(termo))
+                .Where(c =>
+            (!string.IsNullOrEmpty(c.Nome) && c.Nome.ToLower().Contains(termo)) ||
+            (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.EndsWith(termo)))
                 .ToList();
 
             ClientesFiltrados.Clear();
             foreach (var cliente in filtrados)
                 ClientesFiltrados.Add(cliente);
 
-            MostrarSugestoes = ClientesFiltrados.Count > 0 && !string.IsNullOrWhiteSpace(termo);
+            MostrarSugestoes = ClientesFiltrados.Any();
         }
         partial void OnPacoteselecionadoChanged(Pacote? value)
         {
@@ -695,19 +697,8 @@ namespace AgendaNovo
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
-
-
-
-            bool agendamentoNovo = NovoAgendamento.Id == 0;
-
-            if (agendamentoNovo)
-            {
-                _agendamentoService.Add(NovoAgendamento);
-            }
-            else
-            {
-                _agendamentoService.Update(NovoAgendamento);
-            }
+            _agendamentoService.Add(NovoAgendamento);
+            
             if (NovoAgendamento.Valor == NovoAgendamento.ValorPago)
             {
                 _clienteService.AtivarSePendente(clienteExistente.Id);
@@ -744,8 +735,78 @@ namespace AgendaNovo
                             $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
                 Clipboard.SetText(texto);
                 MessageBox.Show("Agendamento copiado para a área de transferência!");
-            if (agendamentoNovo)
+                var telefone = cliente.Telefone;
+                string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
+                string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
+                Thread.Sleep(500);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });          
+
+            CarregarDadosDoBanco();
+            OnPropertyChanged(nameof(DataReferencia));
+            AtualizarAgendamentos();
+            FiltrarAgendamentos();
+            AtualizarHorariosDisponiveis();
+            LimparCampos();
+            OnPropertyChanged(nameof(ListaAgendamentos));
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
+                ItemSelecionado = null;
+            }), System.Windows.Threading.DispatcherPriority.Background);
+
+        }
+        [RelayCommand]
+        private void Editar()
+        {
+            if (NovoAgendamento == null || NovoAgendamento.Id == 0)
+                return;
+            var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
+            if (cliente == null)
+                return;
+
+            var crianca = NovoAgendamento.CriancaId.HasValue
+                ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
+                : null;
+
+            NovoAgendamento.Cliente = cliente;
+            NovoAgendamento.Crianca = crianca;
+            _agendamentoService.Update(NovoAgendamento);
+
+            if (NovoAgendamento.Valor == NovoAgendamento.ValorPago)
+            {
+                _clienteService.AtivarSePendente(cliente.Id);
+                _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
+            }
+            else if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
+            {
+                _clienteService.ValorIncompleto(cliente.Id);
+            }
+            DataReferencia = NovoAgendamento.Data;
+            if (MessageBox.Show("Deseja enviar o agendamento atualizado via WhatsApp?", "Confirmar envio",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                var textoCrianca = crianca != null
+                    ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
+                    : "";
+                var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
+
+                var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
+                                $"Cliente: {cliente.Nome} - {textoCrianca}" +
+                                $"Telefone: {cliente.Telefone}\n" +
+                                $"Tema: {NovoAgendamento.Tema}\n" +
+                                $"Serviço: {servicoNome}\n" +
+                                $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
+                                $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
+                                $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
+                                $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
+                                $"  (A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
+                                $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
+
+                Clipboard.SetText(texto);
+
                 var telefone = cliente.Telefone;
                 string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
                 string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
@@ -764,11 +825,10 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             LimparCampos();
             OnPropertyChanged(nameof(ListaAgendamentos));
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 ItemSelecionado = null;
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
+            }, System.Windows.Threading.DispatcherPriority.Background);
         }
         public void AtualizarPago(Agendamento agendamento)
         {
@@ -940,17 +1000,6 @@ namespace AgendaNovo
                     OnPropertyChanged(nameof(HorarioTexto));
                 }
             }
-        }
-        [RelayCommand]
-        private void ConcluirAgendamento(Agendamento agendamento)
-        {
-            if (agendamento is null)
-                return;
-
-            _agendamentoService.AtivarSePendente(agendamento.Id);
-            agendamento.MostrarCheck = false;
-
-            
         }
 
     }

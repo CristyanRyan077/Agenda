@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Helpers;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
@@ -234,6 +235,18 @@ namespace AgendaNovo.ViewModels
 
             CompletouAcompanhamento = mensalcompleto.Count() == 12;
         }
+        [RelayCommand]
+        private void ExportarClienteSelecionadoParaExcel()
+        {
+            if (ClienteCriancaSelecionado == null)
+                return;
+
+            var cliente = ClienteCriancaSelecionado;
+            var agendamentos = _clienteService.GetAgendamentos(cliente.ClienteId) ?? new List<Agendamento>();
+
+            Exportador.ExportarClienteParaExcel(cliente, agendamentos);
+        }
+
 
 
 

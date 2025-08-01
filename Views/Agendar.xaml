@@ -53,6 +53,7 @@
               BorderBrush="Black" SelectionTextBrush="Black"
               hc:InfoElement.Placeholder="ID"
               LostFocus="txtIdBusca_LostFocus"/>
+                    
                 </Grid>
 
                 <!-- Linha 1: Cliente e Telefone -->
@@ -196,7 +197,7 @@
 
                     <!-- Idade -->
                     <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Left">
-                        <hc:TextBox Width="110" Height="60" hc:InfoElement.Placeholder="Idade"
+                        <hc:TextBox Width="110" Height="60" hc:InfoElement.Placeholder="Idade" Margin="0,0,5,0"
                          Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
                                  Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
                                 FontFamily="#heveltica" FontSize="17" FontWeight="Bold"
@@ -323,6 +324,12 @@
                             Width="180" Height="50"
                             FontWeight="Bold" FontSize="16"
                             Background="Green" Foreground="White"/>
+                        <Button Content="Editar"
+                                  Command="{Binding EditarCommand}"
+                                  Width="180" Height="50"
+                                  FontWeight="Bold" FontSize="16"
+                                  Background="Blue" Foreground="White"/>
+
 
 
                         <Button Content="Excluir"

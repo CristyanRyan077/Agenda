@@ -27,9 +27,17 @@
                PopupAnimation="Slide">
             <Border Background="White" BorderBrush="Gray" BorderThickness="1" MaxHeight="150">
                 <ListBox ItemsSource="{Binding ClientesFiltrados}"
-                         DisplayMemberPath="Nome" LostFocus="AutoCompleteBox_LostFocus"
-                         SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
-                         />
+         SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+         LostFocus="AutoCompleteBox_LostFocus">
+    <ListBox.ItemTemplate>
+        <DataTemplate>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding Nome}" FontWeight="Bold" />
+                <TextBlock Text="{Binding Telefone}" FontSize="12" Foreground="Gray" />
+            </StackPanel>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+</ListBox>
             </Border>
         </Popup>
         <TextBlock x:Name="PlaceholderText"
