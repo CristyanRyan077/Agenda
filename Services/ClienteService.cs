@@ -1,11 +1,12 @@
-﻿using System;
+﻿using AgendaNovo.Interfaces;
+using AgendaNovo.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AgendaNovo.Interfaces;
-using AgendaNovo.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Windows;
 
 namespace AgendaNovo.Services
 {
@@ -77,7 +78,8 @@ namespace AgendaNovo.Services
         {
             var cliente = GetById(clienteId);
             if (cliente != null && (cliente.Status == StatusCliente.Pendente)
-                || (cliente.Status == StatusCliente.Inativo))
+                || (cliente.Status == StatusCliente.Inativo)
+                || (cliente.Status == StatusCliente.SA))
             {
                 cliente.Status = StatusCliente.Ativo;
                 Update(cliente);
@@ -87,7 +89,8 @@ namespace AgendaNovo.Services
         {
             var cliente = GetById(clienteId);
             if (cliente != null && (cliente.Status == StatusCliente.Inativo)
-                || (cliente.Status == StatusCliente.Ativo))
+                || (cliente.Status == StatusCliente.Ativo)
+                || (cliente.Status == StatusCliente.SA))
             {
                 cliente.Status = StatusCliente.Pendente;
                 Update(cliente);
@@ -100,6 +103,8 @@ namespace AgendaNovo.Services
                 .Include(c => c.Agendamentos)
                 .ToList();
 
+            var clientesInativados = new List<string>();
+
             foreach (var cliente in clientes)
             {
                 if (cliente.Agendamentos.Any())
@@ -111,11 +116,18 @@ namespace AgendaNovo.Services
                     {
                         cliente.Status = StatusCliente.Inativo;
                         _db.Update(cliente);
+                        var diasInativos = (agora - ultimaData).Days;
+                        clientesInativados.Add($"{cliente.Nome} - Tel: {cliente.Telefone} - Inativo há {diasInativos} dias");
                     }
                 }
             }
 
             _db.SaveChanges();
+            if (clientesInativados.Any())
+            {
+                var mensagem = "Clientes marcados como inativos:\n\n" + string.Join("\n", clientesInativados);
+                MessageBox.Show(mensagem, "Clientes Inativos", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         public List<Agendamento> GetAgendamentos(int clienteId)
         {

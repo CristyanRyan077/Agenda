@@ -14,6 +14,7 @@
     d:DesignWidth="1366"
     d:DesignHeight="768"
     MinWidth="1000" MinHeight="600"
+    Loaded="Window_Loaded"
     d:DataContext="{d:DesignInstance Type=vm:ClienteCriancaViewModel}">
     <Window.Background>
         <LinearGradientBrush>
@@ -194,6 +195,7 @@
                 <hc:TextBox hc:InfoElement.Placeholder="Observação"
                             TextWrapping="Wrap"
                             AcceptsReturn="True"
+                            VerticalContentAlignment="Top"
                             VerticalScrollBarVisibility="Auto"
                             Height="80" Width="300" HorizontalAlignment="Left" Padding="8" Background="White"
                             Text="{Binding NovoCliente.Observacao, Mode=TwoWay}"
@@ -300,6 +302,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Status}" Value="Inativo">
                                     <Setter Property="Foreground" Value="Orange"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="SA">
+                                    <Setter Property="Foreground" Value="Gray"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

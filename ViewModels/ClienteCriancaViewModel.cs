@@ -161,6 +161,10 @@ namespace AgendaNovo.ViewModels
             _clientesFiltrados = _todosClientes;
             AtualizarPaginacao(_clientesFiltrados);
         }
+        public void VerificarClientesInativos()
+        {
+            _clienteService.ClienteInativo();
+        }
 
         public void DetectarClientePorCampos()
         {
@@ -370,6 +374,9 @@ namespace AgendaNovo.ViewModels
             CriancaSelecionada.Reset();
             ClienteExistenteDetectado = false;
             IsInEditMode = false;
+            NovoCliente.Observacao = string.Empty;
+            NovoCliente.Instagram = string.Empty;
+            NovoCliente.Facebook = string.Empty;
             NotifyAll();
 
 
@@ -381,21 +388,15 @@ namespace AgendaNovo.ViewModels
 
             var cliId = ClienteCriancaSelecionado.ClienteId;
             var criId = ClienteCriancaSelecionado.CriancaId;
-
-
-            if (criId != null)
-            {
-                _criancaService.Delete(criId.Value);
-            }
-            else
-            {
                 // confirme antes de apagar tudo
                 if (System.Windows.MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
                                     "Confirma", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                     return;
-
-                _clienteService.Delete(cliId);
+            if (criId != null)
+            {
+                _criancaService.Delete(criId.Value);
             }
+            _clienteService.Delete(cliId);
 
             // 1) Monta o objeto de backup
             /*var backup = new

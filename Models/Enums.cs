@@ -23,7 +23,8 @@ namespace AgendaNovo.Models
     {
         Pendente = 0,
         Ativo = 1,
-        Inativo = 2
+        Inativo = 2,
+        SA = 3
     }
 
     public enum StatusAgendamento
