@@ -248,14 +248,11 @@
                           Width="170" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center"
                           Margin="0,0,0,10" Background="#FF00FFE2"
                           Grid.Row="5"/>
-                <materialDesign:PackIcon Kind="Clock" Width="50" Height="40"
-                          Foreground="White" Grid.Row="5" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="90,10,0,0"
-                          />
 
                 <!-- Calendário -->
                 <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Calendar Width="350" Height="300"
-                          SelectedDate="{Binding NovoAgendamento.Data, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedDate="{Binding DataSelecionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           Language="pt-br">
                         <Calendar.LayoutTransform>
                             <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
@@ -276,7 +273,7 @@
 
 
                     <DataGrid AutoGenerateColumns="False"
-                          Height="200"
+                          Height="300"
                           Width="1000"
                           HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"

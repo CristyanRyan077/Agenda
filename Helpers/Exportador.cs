@@ -29,14 +29,16 @@ namespace AgendaNovo.Helpers
             ws.Cell("A1").Value = "Nome:";
             ws.Cell("B1").Value = cliente.NomeCliente;
 
-            ws.Cell("A2").Value = "Telefone:";
+            ws.Cell("B1").Value = "Telefone:";
             ws.Cell("B2").Value = cliente.Telefone;
 
-            ws.Cell("A3").Value = "Email:";
+            ws.Cell("C1").Value = "Email:";
             ws.Cell("B3").Value = cliente.Email;
 
-            ws.Cell("A4").Value = "Status Cliente:";
+            ws.Cell("D1").Value = "Status Cliente:";
             ws.Cell("B4").Value = cliente.Status.ToString();
+
+            ws.Cell("1").Value = "Status Cliente:";
 
             ws.Cell("A5").Value = "Observação:";
             ws.Cell("B5").Value = cliente.Observacao;

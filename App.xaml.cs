@@ -1,6 +1,7 @@
 ﻿using AgendaNovo.Interfaces;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
+using AgendaNovo.Views;
 using HandyControl.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,31 +25,28 @@ namespace AgendaNovo
             base.OnStartup(e);
             var services = new ServiceCollection();
             services.AddDbContext<AgendaContext>(options =>
-            options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;"));
-            //options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
-            services.AddScoped<ICriancaService, CriancaService>();
-            services.AddScoped<IClienteService, ClienteService>();
-            services.AddScoped<IPacoteService, PacoteService>();
-            services.AddScoped<IServicoService, ServicoService>();
-            services.AddScoped<IAgendamentoService, AgendamentoService>();
+            //options.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AgendaDB;"));
+            options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
 
-            services.AddTransient<ClienteService>();
-            services.AddTransient<CriancaService>();
-            services.AddTransient<PacoteService>();
-            services.AddTransient<ServicoService>();
-            services.AddTransient<AgendamentoService>();
-
+            //Services
+            services.AddTransient<IClienteService, ClienteService>();
+            services.AddTransient<ICriancaService, CriancaService>();
+            services.AddTransient<IPacoteService, PacoteService>();
+            services.AddTransient<IServicoService, ServicoService>();
+            services.AddTransient<IAgendamentoService, AgendamentoService>();
+            //Views
             services.AddTransient<Agendar>();
             services.AddTransient<MainWindow>();
             services.AddTransient<GerenciarClientes>();
             services.AddTransient<Login>();
+            services.AddTransient<Calendario>();
 
-            services.AddScoped<ClienteCriancaViewModel>();
-
+            //ViewModels
+            services.AddTransient<CalendarioViewModel>();
+            services.AddTransient<ClienteCriancaViewModel>();
             services.AddSingleton<AgendaViewModel>();
+
             ServiceProvider = services.BuildServiceProvider();
-
-
             var login = ServiceProvider.GetRequiredService<Login>();
             login.Show();
 

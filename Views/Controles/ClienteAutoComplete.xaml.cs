@@ -49,27 +49,19 @@ namespace AgendaNovo.Views.Controles
             if (vm.IgnorarProximoTextChanged)
             {
                 vm.IgnorarProximoTextChanged = false;
-                vm.PreenchendoViaId = false;
                 return;
             }
             vm.UsuarioDigitouNome = true;
-            vm.PreenchendoViaId = false;
             AtualizarPlaceholder();
         }
-        private async void AutoCompleteBox_LostFocus(object sender, RoutedEventArgs e)
+        private void AutoCompleteBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!AutoCompleteBox.IsKeyboardFocusWithin && string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
                 PlaceholderText.Visibility = Visibility.Visible;
             var vm = DataContext as AgendaViewModel;
             if (vm != null )
-            {
                 vm.MostrarSugestoes = false;
-                if (!vm.PreenchendoViaId)
-                {
-                    await Task.Delay(500);
-                    vm.VerificarDuplicidadeNome();
-                }
-            }   
+
         }
 
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)

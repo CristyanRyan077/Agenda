@@ -23,7 +23,6 @@ namespace AgendaNovo.Services
             if (agendamento != null && (agendamento.Status == StatusAgendamento.Pendente))
             {
                 agendamento.Status = StatusAgendamento.Concluido;
-                agendamento.ValorPago = agendamento.Valor;
                 Update(agendamento);
             }
         }
@@ -38,6 +37,8 @@ namespace AgendaNovo.Services
                 .AsNoTracking()
                 .ToList();
         }
+
+
 
         public Agendamento? GetById(int id)
         {

@@ -243,14 +243,29 @@
         </StackPanel>
         <StackPanel Grid.Row="3" VerticalAlignment="Bottom">
             <Button Content="Exportar Para Excel" Foreground="Black"
-                    FontWeight="Bold"
+                    FontWeight="Bold" 
                     Margin="10,0,0,0" Background="ForestGreen"
-                    Command="{Binding ExportarClienteSelecionadoParaExcelCommand}"
+                    Command="{Binding ExportarTodosClientesParaExcelCommand}"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"/>
+                    VerticalAlignment="Center"/>
         </StackPanel>
         <!-- Pesquisa -->
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10">
+            <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
+                <ComboBox Width="120" Margin="5,0"
+              ItemsSource="{Binding Meses}"
+              SelectedItem="{Binding MesSelecionado}" 
+              DisplayMemberPath="Nome"
+              SelectedValuePath="Numero" />
+
+                <ComboBox Width="100" Margin="5,0"
+              ItemsSource="{Binding Anos}"
+              SelectedItem="{Binding AnoSelecionado}" />
+
+                <Button Content="Filtrar Concluídos no Mês" 
+            Command="{Binding FiltrarPorMesCommand}" 
+            Background="LightSkyBlue" Margin="5,0"/>
+            </StackPanel>
             <RadioButton Content="Todos"
                  GroupName="FiltroClientes"
                  IsChecked="{Binding FiltroSelecionado, ConverterParameter=Todos, Converter={StaticResource StringEqualsConverter}}" />
@@ -296,6 +311,11 @@
                 <DataGridTextColumn Header="Email" Binding="{Binding Email }"/>
                 <DataGridTextColumn Header="Criança" Binding="{Binding NomeCrianca}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Idade" Binding="{Binding IdadeFormatada}" IsReadOnly="True" />
+                <DataGridTextColumn Header="Pago no Mês"
+                        Binding="{Binding TotalPagoMesAtual, StringFormat={}{0:C}}"/>
+
+                <DataGridTextColumn Header="Total Pago"
+                        Binding="{Binding TotalPagoHistorico, StringFormat={}{0:C}}"/>
                 <DataGridTextColumn Header="Gênero" Binding="{Binding Genero}" />
                 <DataGridTextColumn Header="Nascimento" Binding="{Binding Nascimento, StringFormat=dd/MM/yyyy}" IsReadOnly="True" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" >

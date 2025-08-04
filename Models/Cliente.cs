@@ -20,6 +20,8 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? email;
         [ObservableProperty] private string? observacao = string.Empty;
         [ObservableProperty] private StatusCliente status = StatusCliente.SA;
+        public decimal TotalPagoMesAtual { get; set; }
+        public decimal TotalPagoHistorico { get; set; }
         [ObservableProperty]
         private string? facebook;
 

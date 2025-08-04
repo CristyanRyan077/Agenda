@@ -33,6 +33,7 @@ namespace AgendaNovo.Models
         public Cliente? Cliente { get; set; }
 
         public string? IdadeFormatada => $"{Idade} {IdadeUnidade}";
+        public DateTime? UltimaAtualizacaoIdade { get; set; }
         partial void OnNascimentoChanged(DateOnly? value)
         {
             if (value.HasValue)

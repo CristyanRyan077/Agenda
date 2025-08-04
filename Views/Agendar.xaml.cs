@@ -62,25 +62,17 @@ namespace AgendaNovo
                 var cliente = vm.ListaClientes.FirstOrDefault(c => c.Id == id);
                 if (cliente != null)
                 {
-                    Debug.WriteLine("🟡 Começando preenchimento via ID");
-                    vm.PreenchendoViaId = true;
                     vm.IgnorarProximoTextChanged = true;
                     vm.ClienteSelecionado = cliente;
                     txtTelefone.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.TextProperty)?.UpdateTarget();
                     txtcrianca.GetBindingExpression(ComboBox.SelectedItemProperty)?.UpdateTarget();
-                    await Task.Delay(300);
                 }
                 else
                 {
                     MessageBox.Show("Cliente com esse ID não encontrado.");
                 }
             }
-        }
-        private void dgAgendamentos_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Assim que trocar o registro, limpamos o Text do Combo
-            
         }
 
         private void txtCliente_KeyDown(object sender, KeyEventArgs e)

@@ -20,60 +20,53 @@ namespace AgendaNovo.Services
         }
           public void AtualizarIdadeDeTodasCriancas()
           {
-            Debug.WriteLine("AtualizarIdadeDeTodasCriancas chamado");
-            var criancasComNascimento = _db.Criancas
-                .Include(c => c.Cliente)
-                .Where(c => c.Nascimento != null)
-                .ToList();
-
+            Debug.WriteLine("AtualizarIdadeDeTodasCriancas() FOI CHAMADO");
             var hoje = DateOnly.FromDateTime(DateTime.Today);
 
-            var aniversariantesDoMes = criancasComNascimento
-                .Where(c =>
-                    c.Nascimento.Value.Month == hoje.Month
-                )
+            var criancas = _db.Criancas
+                .Include(c => c.Cliente)
                 .ToList();
 
-            // Atualiza idade de todas as crianças
-            foreach (var crianca in criancasComNascimento)
+
+
+            foreach (var crianca in criancas)
+            {
+                var precisaAtualizar = crianca.UltimaAtualizacaoIdade == null ||
+                    crianca.UltimaAtualizacaoIdade.Value.Year != hoje.Year ||
+                    crianca.UltimaAtualizacaoIdade.Value.Month != hoje.Month;
+                if (!precisaAtualizar)
+                    continue;
+
+                if (crianca.Nascimento == null)
+                {
+                    // Apenas marca como atualizado no mês, mesmo sem calcular idade
+                    crianca.UltimaAtualizacaoIdade = hoje.ToDateTime(TimeOnly.MinValue);
+                    Debug.WriteLine($"[SemNascimento] Marcado como atualizado: {crianca.Nome}");
+                    continue;
+                }
+
                 AtualizarIdade(crianca, hoje);
 
-            _db.SaveChanges();
-
-          
-
-            // AVISO DE ANIVERSÁRIO DO MÊS
-            if (aniversariantesDoMes.Any() && (Properties.Settings.Default.UltimoAvisoMes == hoje.Month ||
-                Properties.Settings.Default.UltimoAvisoAno == hoje.Year))
-                
-            {
-                var sbMes = new StringBuilder();
-                foreach (var c in aniversariantesDoMes)
-                    sbMes.AppendLine($"- {c.Nome} ({c.Cliente?.Nome})");
-
-                    MessageBox.Show(
-                    "Crianças que fazem aniversário este mês:\n\n" + sbMes.ToString(),
-                    "Aniversários do Mês",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
-
-                //Properties.Settings.Default.Reset();
-                Properties.Settings.Default.UltimoAvisoMes = hoje.Month;
-                Properties.Settings.Default.UltimoAvisoAno = hoje.Year;
-                Properties.Settings.Default.Save();
-                Properties.Settings.Default.Save();
-
             }
-            Debug.WriteLine($"Qtd aniversariantes: {aniversariantesDoMes.Count}");
+
+            _db.SaveChanges();         
         }
         public void AtualizarIdade(Crianca crianca, DateOnly hoje)
         {
+            Debug.WriteLine($"AtualizarIdade chamado para {crianca.Nome} em {DateTime.Now} - DataNascimento: {crianca.Nascimento} - ÚltimaAtualizacao: {crianca.UltimaAtualizacaoIdade}");
+
             var nascimento = crianca.Nascimento!.Value;
             var anos = hoje.Year - nascimento.Year;
             if (nascimento > hoje.AddYears(-anos)) anos--;
+            if (crianca.Idade == anos && crianca.IdadeUnidade == IdadeUnidade.Ano)
+                return;
+            if (anos == 1)
+            {
+                crianca.Idade = anos;
+                crianca.IdadeUnidade = IdadeUnidade.Ano;
+            }
 
-            if (anos > 0)
+            if (anos > 1)
             {
                 crianca.Idade = anos;
                 crianca.IdadeUnidade = IdadeUnidade.Anos;
@@ -85,6 +78,32 @@ namespace AgendaNovo.Services
                 crianca.Idade = meses;
                 crianca.IdadeUnidade = IdadeUnidade.Meses;
             }
+            crianca.UltimaAtualizacaoIdade = hoje.ToDateTime(TimeOnly.MinValue);
+        }
+        public void AtualizarIdadeSemNascimento(Crianca crianca, DateOnly hoje)
+        {
+            Debug.WriteLine($"AtualizarIdade chamado para {crianca.Nome} em {DateTime.Now} - DataNascimento: {crianca.Nascimento} - ÚltimaAtualizacao: {crianca.UltimaAtualizacaoIdade}");
+
+            if (crianca.UltimaAtualizacaoIdade.HasValue &&
+               crianca.UltimaAtualizacaoIdade.Value.Month == hoje.Month &&
+               crianca.UltimaAtualizacaoIdade.Value.Year == hoje.Year)
+            {
+                return; // Já atualizou esse mês
+            }
+            if (crianca.IdadeUnidade == IdadeUnidade.Meses || crianca.IdadeUnidade == IdadeUnidade.Mês)
+            {
+                crianca.Idade++;
+                if (crianca.Idade >= 12)
+                {
+                    crianca.Idade = 1;
+                    crianca.IdadeUnidade = IdadeUnidade.Ano;
+                }
+            }
+            else
+            {
+                crianca.Idade++;
+            }
+            crianca.UltimaAtualizacaoIdade = hoje.ToDateTime(TimeOnly.MinValue);
         }
 
         public List<Crianca> GetByClienteId(int clienteId)

@@ -33,4 +33,9 @@ namespace AgendaNovo.Models
         Concluido = 1,
         Cancelado = 2,
     }
+    public enum TipoBusca
+    {
+        Cliente,
+        Agendamento
+    }
 }

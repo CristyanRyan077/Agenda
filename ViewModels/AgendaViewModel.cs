@@ -2,10 +2,13 @@
 using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
+using AgendaNovo.Views;
+using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlzEx.Standard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using System;
 using System;
 using System.Collections.Generic;
@@ -113,14 +116,12 @@ namespace AgendaNovo
         {
             if (value == null)
             {
-                Debug.WriteLine("[OnServicoSelecionadoChanged] Serviço nulo -> limpando pacotes");
                 NovoAgendamento.ServicoId = null;
                 ListaPacotesFiltrada.Clear();
                 OnPropertyChanged(nameof(MostrarCrianca));
                 return;
             }
 
-            Debug.WriteLine($"[OnServicoSelecionadoChanged] Serviço selecionado: {value.Nome} (Id={value.Id})");
 
             // Atualiza o Id do serviço
             NovoAgendamento.ServicoId = value.Id;
@@ -134,7 +135,6 @@ namespace AgendaNovo
                 CriancaSelecionada = null;
                 ListaCriancas.Clear();
                 NovoAgendamento.CriancaId = null;
-                Debug.WriteLine("[OnServicoSelecionadoChanged] Serviço sem criança -> limpando bindings de criança");
             }
 
             OnPropertyChanged(nameof(MostrarCrianca));
@@ -165,7 +165,6 @@ namespace AgendaNovo
                 return;
             }
 
-            Debug.WriteLine($"[OnPacoteselecionadoChanged] Pacote selecionado: {value.Nome} (Id={value.Id})");
             NovoAgendamento.PacoteId = value.Id;
             NovoAgendamento.Valor = value.Valor;
         }
@@ -180,8 +179,8 @@ namespace AgendaNovo
         public void CarregarDadosDoBanco()
         {
 
-            var agendamentos = _agendamentoService.GetAll();
-            var clientes = _clienteService.GetAllWithChildren();
+            var agendamentos = _agendamentoService.GetAll().ToList();
+            var clientes = _clienteService.GetAllWithChildren().ToList();
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -211,42 +210,34 @@ namespace AgendaNovo
 
         public void CarregarPacotes()
         {
-            Debug.WriteLine("[CarregarPacotes] Iniciando carregamento de pacotes.");
             var pacotes = _pacoteService.GetAll();
-            Debug.WriteLine($"[CarregarPacotes] Pacotes carregados do banco: {pacotes.Count()}");
 
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ListaPacotes.Clear();
                 foreach (var p in pacotes)
                 {
-                    Debug.WriteLine($"[CarregarPacotes] Adicionando pacote: {p.Nome} (ServicoId={p.ServicoId})");
                     ListaPacotes.Add(p);
                 }
 
                 if (NovoAgendamento.ServicoId.HasValue)
                 {
-                    Debug.WriteLine($"[CarregarPacotes] Chamando filtro para ServicoId={NovoAgendamento.ServicoId}");
                     FiltrarPacotesPorServico(NovoAgendamento.ServicoId.Value);
                 }
                 else
                 {
-                    Debug.WriteLine("[CarregarPacotes] Sem ServicoId definido, limpando ListaPacotesFiltrada.");
                     ListaPacotesFiltrada.Clear();
                 }
             });
         }
         private void FiltrarPacotesPorServico(int servicoId)
         {
-            Debug.WriteLine($"[FiltrarPacotesPorServico] Chamado para ServicoId={servicoId}");
             ListaPacotesFiltrada.Clear();
 
             var pacotesFiltrados = ListaPacotes.Where(p => p.ServicoId == servicoId).ToList();
-            Debug.WriteLine($"[FiltrarPacotesPorServico] Pacotes encontrados: {pacotesFiltrados.Count}");
 
             foreach (var pacote in pacotesFiltrados)
             {
-                Debug.WriteLine($"[FiltrarPacotesPorServico] Adicionando pacote: {pacote.Nome} (Id={pacote.Id})");
                 ListaPacotesFiltrada.Add(pacote);
             }
         }
@@ -273,7 +264,7 @@ namespace AgendaNovo
 
         private readonly List<string> _horariosFixos = new()
         {
-            "9:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
+            "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
         };
 
 
@@ -301,46 +292,7 @@ namespace AgendaNovo
                 OnPropertyChanged(nameof(DiaChkDom));
             }
         }
-        [ObservableProperty]
-        private bool preenchendoViaId;
-        public void VerificarDuplicidadeNome()
-        {
-            if (PreenchendoViaId || !UsuarioDigitouNome)
-            {
-                Debug.WriteLine("preenchendo via id");
-                return;
-            }
-            UsuarioDigitouNome = false;
-
-            var nomeDigitado = NomeDigitado?.Trim();
-            if (string.IsNullOrWhiteSpace(nomeDigitado))
-                return;
-
-
-            var clientesIguais = ListaClientes
-                .Where(c => string.Equals(c.Nome?.Trim(), nomeDigitado, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (clientesIguais.Count > 1)
-            {
-                Debug.WriteLine("encontrado duplicado");
-                var textoDuplicados = string.Join("\n\n", clientesIguais.Select(c =>
-                    $"ID: {c.Id}\nNome: {c.Nome}\n" +
-                    $"Crianças:\n{string.Join("\n", c.Criancas.Select(cr => $"- {cr.Nome}"))}\n" +
-                    $"Telefone: {c.Telefone}\nEmail: {c.Email}"));
-
-                MessageBox.Show($"⚠ Existem vários clientes com esse nome:\n\n{textoDuplicados}",
-                                "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                ClienteSelecionado = null;
-                NomeDigitado = string.Empty;
-                LimparCampos();
-            }
-            else if (clientesIguais.Count == 1)
-            {
-                ClienteSelecionado = clientesIguais.First();
-            }
-        }
+      
         public void FiltrarAgendamentos()
         {
            AgendamentosFiltrados.Clear();
@@ -402,82 +354,6 @@ namespace AgendaNovo
                 UseShellExecute = true
             });
         }
-        partial void OnItemSelecionadoChanged(Agendamento? value)
-        {
-
-            var ag = value;
-            if (ag == null) return;
-            try
-            {
-                _selecionandoDaGrid = true;
-
-
-                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ag.ClienteId);
-                if (cliente == null)
-                {
-                    MessageBox.Show("Cliente não encontrado ou inválido.");
-                    return;
-                }
-                ClienteSelecionado = null; // força reset e evita disparo intermediário
-                NovoCliente = cliente;
-                ClienteSelecionado = cliente;
-                NomeDigitado = cliente.Nome;
-                OnPropertyChanged(nameof(ClienteSelecionado));
-                OnPropertyChanged(nameof(NovoCliente));
-
-
-
-                ListaCriancas.Clear();
-                foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
-                    ListaCriancas.Add(cr);
-
-                var cri = ag.Crianca != null
-                  ? cliente.Criancas.FirstOrDefault(c => c.Id == ag.Crianca.Id)
-                  : null;
-                CriancaSelecionada = cri;
-                OnPropertyChanged(nameof(CriancaSelecionada));
-
-                NovoAgendamento = new Agendamento
-                {
-                    Id = ag.Id,
-                    ClienteId = cliente.Id,
-                    Cliente = cliente,
-                    Crianca = cri ?? new Crianca(),
-                    Data = ag.Data,
-                    Horario = ag.Horario,
-                    Tema = ag.Tema,
-                    Valor = ag.Valor,
-                    ValorPago = ag.ValorPago,
-                    ServicoId = value.ServicoId,
-                    PacoteId = value.PacoteId
-                };
-                ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == value.ServicoId);
-                Pacoteselecionado = ListaPacotes.FirstOrDefault(p => p.Id == value.PacoteId);
-
-                Debug.WriteLine("Horario preenchido: " + ag.Horario);
-                OnPropertyChanged(nameof(ClienteSelecionado));
-                OnPropertyChanged(nameof(NovoCliente));
-                OnPropertyChanged(nameof(NovoAgendamento.Pacote));
-                OnPropertyChanged(nameof(HorariosDisponiveis));
-                OnPropertyChanged(nameof(NovoAgendamento));
-                OnPropertyChanged(nameof(NovoAgendamento.Horario));
-                OnPropertyChanged(nameof(NovoAgendamento.Tema));
-                OnPropertyChanged(nameof(HorarioTexto));
-                OnPropertyChanged(nameof(CriancaSelecionada));
-                _suspendendoDataChanged = true;
-                DataSelecionada = ag.Data;
-                _suspendendoDataChanged = false;
-                AtualizarHorariosDisponiveis();
-                NovoAgendamento.Horario = ag.Horario;
-                OnPropertyChanged(nameof(HorariosDisponiveis));
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erro ao selecionar item: " + ex.Message);
-            }
-            _selecionandoDaGrid = false;
-        }
 
 
 
@@ -522,30 +398,44 @@ namespace AgendaNovo
 
         partial void OnDataSelecionadaChanged(DateTime value)
         {
-            if (_suspendendoDataChanged) return;
             FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
         }
         public void AtualizarHorariosDisponiveis()
         {
+
             var horarioStr = NovoAgendamento?.Horario?.ToString(@"hh\:mm");
 
             var ocupados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date && a.Id != NovoAgendamento.Id)
+                .Where(a => a.Data.Date == DataSelecionada.Date && (NovoAgendamento.Id == 0 || a.Id != NovoAgendamento.Id))
                 .Select(a => a.Horario?.ToString(@"hh\:mm"))
                 .Where(h => !string.IsNullOrEmpty(h))
                 .ToList();
 
+            if (NovoAgendamento.Horario.HasValue)
+            {
+                var horarioSelecionado = NovoAgendamento.Horario.Value.ToString(@"hh\:mm");
+                if (!ocupados.Contains(horarioSelecionado))
+                {
+                    ocupados.Add(horarioSelecionado);
+                }
+            }
+
+
             var livres = _horariosFixos
                 .Where(h => !ocupados.Contains(h))
                 .ToList();
+
 
             HorariosDisponiveis.Clear();
             foreach (var h in livres)
                 HorariosDisponiveis.Add(h);
 
             if (!string.IsNullOrEmpty(horarioStr) && !HorariosDisponiveis.Contains(horarioStr))
+            {
                 NovoAgendamento.Horario = null;
+            }
+
             OnPropertyChanged(nameof(HorarioTexto));
         }
 
@@ -671,9 +561,9 @@ namespace AgendaNovo
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
             }
 
-            if (criancaParaAgendar == null
-               && NovoAgendamento.Crianca != null
-               && !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+            else if (NovoAgendamento.Id == 0 &&
+           NovoAgendamento.Crianca != null &&
+           !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
             {
                 criancaParaAgendar = new Crianca
                 {
@@ -694,12 +584,16 @@ namespace AgendaNovo
             }
             // 4) Prepara o objeto a salvar
             NovoAgendamento.ClienteId = clienteExistente.Id;
-            NovoAgendamento.CriancaId = criancaParaAgendar?.Id;
+            NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
-            _agendamentoService.Add(NovoAgendamento);
-            
-            if (NovoAgendamento.Valor == NovoAgendamento.ValorPago)
+
+            if (NovoAgendamento.Id == 0)
+                _agendamentoService.Add(NovoAgendamento);
+            else
+                _agendamentoService.Update(NovoAgendamento);
+
+            if (NovoAgendamento.Valor <= NovoAgendamento.ValorPago)
             {
                 _clienteService.AtivarSePendente(clienteExistente.Id);
                 _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
@@ -715,75 +609,6 @@ namespace AgendaNovo
 
             NovoAgendamento.Cliente = cliente;
             NovoAgendamento.Crianca = crianca;
-            var textoCrianca = crianca != null
-            ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
-            : "";
-            DataReferencia = NovoAgendamento.Data;
-            var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
-
-
-            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
-                            $"Cliente: {cliente.Nome} - {textoCrianca}" +
-                            $"Telefone: {cliente.Telefone}\n" +
-                            $"Tema: {NovoAgendamento.Tema}\n" +
-                            $"Serviço: {servicoNome}\n" +
-                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
-                            $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
-                            $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
-                            $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
-                            $"  (A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
-                            $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
-                Clipboard.SetText(texto);
-                MessageBox.Show("Agendamento copiado para a área de transferência!");
-                var telefone = cliente.Telefone;
-                string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
-                string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
-                Thread.Sleep(500);
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });          
-
-            CarregarDadosDoBanco();
-            OnPropertyChanged(nameof(DataReferencia));
-            AtualizarAgendamentos();
-            FiltrarAgendamentos();
-            AtualizarHorariosDisponiveis();
-            LimparCampos();
-            OnPropertyChanged(nameof(ListaAgendamentos));
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                ItemSelecionado = null;
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
-        }
-        [RelayCommand]
-        private void Editar()
-        {
-            if (NovoAgendamento == null || NovoAgendamento.Id == 0)
-                return;
-            var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
-            if (cliente == null)
-                return;
-
-            var crianca = NovoAgendamento.CriancaId.HasValue
-                ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
-                : null;
-
-            NovoAgendamento.Cliente = cliente;
-            NovoAgendamento.Crianca = crianca;
-            _agendamentoService.Update(NovoAgendamento);
-
-            if (NovoAgendamento.Valor == NovoAgendamento.ValorPago)
-            {
-                _clienteService.AtivarSePendente(cliente.Id);
-                _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
-            }
-            else if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
-            {
-                _clienteService.ValorIncompleto(cliente.Id);
-            }
             DataReferencia = NovoAgendamento.Data;
             if (MessageBox.Show("Deseja enviar o agendamento atualizado via WhatsApp?", "Confirmar envio",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -799,18 +624,17 @@ namespace AgendaNovo
                                 $"Tema: {NovoAgendamento.Tema}\n" +
                                 $"Serviço: {servicoNome}\n" +
                                 $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
-                                $"📍 *AVISOS*:\r\n\r\n-  A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
+                                $"📍 *AVISOS*:\r\n- A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                                 $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
                                 $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
-                                $"  (A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
+                                $"(A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
                                 $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
 
                 Clipboard.SetText(texto);
-
                 var telefone = cliente.Telefone;
                 string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
                 string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
-                Thread.Sleep(500);
+                Thread.Sleep(100);
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = url,
@@ -825,10 +649,94 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             LimparCampos();
             OnPropertyChanged(nameof(ListaAgendamentos));
-            Application.Current.Dispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 ItemSelecionado = null;
-            }, System.Windows.Threading.DispatcherPriority.Background);
+            }), System.Windows.Threading.DispatcherPriority.Background);
+
+            if (Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is EditarAgendamento) is Window win)
+            {
+                win.DialogResult = true;
+                win.Close();
+            }
+
+        }
+        [RelayCommand]
+        private void Editar()
+        {
+            var ag = _agendamentoService.GetById(ItemSelecionado.Id);
+            if (ag == null) return;
+            try
+            {
+
+
+
+                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ag.ClienteId);
+                if (cliente == null)
+                {
+                    MessageBox.Show("Cliente não encontrado ou inválido.");
+                    return;
+                }
+                ClienteSelecionado = null; // força reset e evita disparo intermediário
+                NovoCliente = cliente;
+                ClienteSelecionado = cliente;
+                NomeDigitado = cliente.Nome;
+                OnPropertyChanged(nameof(ClienteSelecionado));
+                OnPropertyChanged(nameof(NovoCliente));
+
+
+
+                ListaCriancas.Clear();
+                foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
+                    ListaCriancas.Add(cr);
+
+                var cri = ag.Crianca != null
+                    ? cliente.Criancas.FirstOrDefault(c => c.Id == ag.Crianca.Id)
+                    : null;
+                CriancaSelecionada = cri;
+                OnPropertyChanged(nameof(CriancaSelecionada));
+
+                NovoAgendamento = new Agendamento
+                {
+                    Id = ag.Id,
+                    ClienteId = cliente.Id,
+                    Cliente = cliente,
+                    Crianca = cri ?? new Crianca(),
+                    Data = ag.Data,
+                    Horario = ag.Horario,
+                    Tema = ag.Tema,
+                    Valor = ag.Valor,
+                    ValorPago = ag.ValorPago,
+                    ServicoId = ag.ServicoId,
+                    PacoteId = ag.PacoteId
+                };
+                ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == ag.ServicoId);
+                Pacoteselecionado = ListaPacotes.FirstOrDefault(p => p.Id == ag.PacoteId);
+
+                OnPropertyChanged(nameof(ClienteSelecionado));
+                OnPropertyChanged(nameof(NovoCliente));
+                OnPropertyChanged(nameof(NovoAgendamento.Pacote));
+                OnPropertyChanged(nameof(HorariosDisponiveis));
+                OnPropertyChanged(nameof(NovoAgendamento));
+                OnPropertyChanged(nameof(NovoAgendamento.Horario));
+                OnPropertyChanged(nameof(NovoAgendamento.Tema));
+                OnPropertyChanged(nameof(HorarioTexto));
+                OnPropertyChanged(nameof(CriancaSelecionada));
+                _suspendendoDataChanged = true;
+                DataSelecionada = ag.Data;
+                _suspendendoDataChanged = false;
+                AtualizarHorariosDisponiveis();
+                NovoAgendamento.Horario = ag.Horario;
+                OnPropertyChanged(nameof(HorariosDisponiveis));
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao selecionar item: " + ex.Message);
+            }
+            _selecionandoDaGrid = false;
+
         }
         public void AtualizarPago(Agendamento agendamento)
         {
@@ -1001,6 +909,7 @@ namespace AgendaNovo
                 }
             }
         }
+     
 
     }
 

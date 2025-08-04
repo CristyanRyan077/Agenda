@@ -20,6 +20,9 @@
             <conv:MenorQueConverter x:Key="MenorQueConverter"/>
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <local:StringEqualsConverter x:Key="StringEqualsConverter"/>
+            <conv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
+            <conv:MesAnoPtBrConverter x:Key="MesAnoPtBrConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

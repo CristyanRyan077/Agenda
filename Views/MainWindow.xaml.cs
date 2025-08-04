@@ -11,6 +11,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AgendaNovo.Interfaces;
 using AgendaNovo.ViewModels;
+using AgendaNovo.Views;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,6 +30,7 @@ namespace AgendaNovo
 
         private GerenciarClientes _janelaClientes;
         private Agendar _janelaAgenda;
+        private Calendario _calendario;
         public AgendaViewModel vm { get; }
 
         public GerenciarClientes Clientevm { get; }
@@ -69,7 +71,6 @@ namespace AgendaNovo
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
                     _janelaAgenda = new Agendar(vm); 
-                    _janelaAgenda.Owner = this;
                     _janelaAgenda.Closed += (s, ev) => _janelaAgenda = null;
                     _janelaAgenda.Show();
                 }
@@ -92,7 +93,6 @@ namespace AgendaNovo
             if (_janelaClientes == null || !_janelaClientes.IsLoaded)
             {
                 _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
-                _janelaClientes.Owner = this;
                 _janelaClientes.Closed += (s, ev) => _janelaClientes = null;
                 _janelaClientes.Show();
             }
@@ -101,6 +101,27 @@ namespace AgendaNovo
                 if (_janelaClientes.WindowState == WindowState.Minimized)
                     _janelaClientes.WindowState = WindowState.Normal;
                 _janelaClientes.Activate();
+            }
+        }
+
+        private void btnCalendario_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
+
+            if (_calendario == null || !_calendario.IsLoaded)
+            {
+                _calendario = _sp.GetRequiredService<Calendario>();
+                _calendario.Closed += (s, ev) => _calendario = null;
+                _calendario.Show();
+            }
+            else
+            {
+                if (_calendario.WindowState == WindowState.Minimized)
+                    _calendario.WindowState = WindowState.Normal;
+                _calendario.Activate();
             }
         }
     }

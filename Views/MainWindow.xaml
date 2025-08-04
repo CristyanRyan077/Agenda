@@ -37,7 +37,15 @@
                         <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
                 </StackPanel>
             </Button>
-        </ToolBar>
+
+                <Button Name="btnCalendario" Height="60" Padding="4" Margin="10,0,0,0"
+                        BorderBrush="Black" FontSize="14" Click="btnCalendario_Click">
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" Foreground="Green">Calendario</TextBlock>
+                    </StackPanel>
+                </Button>
+
+            </ToolBar>
     </ToolBarTray>
 
     <TabControl Margin="0,4,0,0">
@@ -156,11 +164,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray" Margin="4,0"/>
                                                                     <TextBlock Text="{Binding Cliente.Email}" FontSize="12"/>
                                                                 </StackPanel>
-                                                                <Grid Margin="0 0 4 5">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*" />
-                                                                        <ColumnDefinition Width="auto" />
-                                                                    </Grid.ColumnDefinitions>
+
 
 
                                                                     <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="0 0 4 5">
@@ -169,21 +173,10 @@
                                                                         <TextBlock Text=" | " Foreground="Gray"/>
                                                                         <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                         <TextBlock Text=" | " Foreground="Gray"/>
-                                                                        <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                        <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                     </StackPanel>
-                                                                    <Button Grid.Column="1"
-                                                                            Width="34"                                                                           
-                                                                            Background="#E6F6EA"
-                                                                            BorderBrush="#A8D5A2"
-                                                                            BorderThickness="1"
-                                                                            Visibility="{Binding MostrarCheck, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                                            Command="{Binding DataContext.ConcluirAgendamentoCommand,
-                                                                                      RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                            CommandParameter="{Binding}">
-                                                                        <TextBlock Text="✓" FontSize="18" Foreground="Green"
-                                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                    </Button>
-                                                                </Grid>
+                                                                  
+
 
                                                                 <StackPanel Orientation="Horizontal">
                                                                     <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 10 4" FontFamily="Helvetica"/>
@@ -271,7 +264,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -358,7 +351,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -441,7 +434,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -524,7 +517,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -622,7 +615,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -721,7 +714,7 @@
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
                                                                     <TextBlock Text="{Binding Crianca.IdadeFormatada}" FontSize="12"/>
                                                                     <TextBlock Text=" | " Foreground="Gray"/>
-                                                                    <TextBlock Text="{Binding Crianca.Genero}" FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Cliente.Observacao}" FontSize="12"/>
                                                                 </StackPanel>
 
                                                                 <StackPanel Orientation="Horizontal">
@@ -842,7 +835,7 @@
                                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
                                         <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                                         <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
-                                        <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
+                                        <DataGridTextColumn Header="Genero" Binding="{Binding Cliente.Observacao}" />
                                         <DataGridTextColumn Header="Idade" Binding="{Binding Crianca.Idade}" />
                                         <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                                     <DataGridTextColumn Header="Servico.Nome" Width="70" Binding="{Binding Servico.Nome}">

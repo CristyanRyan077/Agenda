@@ -3,10 +3,13 @@ using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
+using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DocumentFormat.OpenXml.Spreadsheet;
 using HandyControl.Controls;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -64,6 +67,19 @@ namespace AgendaNovo.ViewModels
         private List<ClienteCriancaView> _todosClientes = new();
         [ObservableProperty] private string filtroSelecionado;
         private List<ClienteCriancaView> _clientesFiltrados = new();
+        public ObservableCollection<(int Numero, string Nome)> Meses { get; } = new(
+        System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat
+        .MonthNames
+        .Where(nome => !string.IsNullOrEmpty(nome))
+        .Select((nome, index) => (index + 1, nome))
+        .ToList()
+            );
+        public ObservableCollection<int> Anos { get; } = new(
+        Enumerable.Range(DateTime.Now.Year - 5, 6).Reverse().ToList()
+        );
+        [ObservableProperty] private int mesSelecionado = DateTime.Now.Month;
+        [ObservableProperty] private int anoSelecionado = DateTime.Now.Year;
+
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public IEnumerable<StatusCliente> StatusLista => Enum.GetValues(typeof(StatusCliente)).Cast<StatusCliente>();
@@ -105,15 +121,32 @@ namespace AgendaNovo.ViewModels
             OnPropertyChanged(nameof(ListaCriancas));
             OnPesquisaTextChanged(PesquisaText);
         }
+        [RelayCommand]
+        private void FiltrarPorMes()
+        {
+            _clientesFiltrados = _todosClientes
+                .Where(cli => cli.Agendamentos.Any(a =>
+                    a.Status == StatusAgendamento.Concluido &&
+                    a.Data.Month == MesSelecionado &&
+                    a.Data.Year == AnoSelecionado))
+                .ToList();
+
+            AtualizarPaginacao(_clientesFiltrados);
+        }
         private void CarregarClientesDoBanco()
         {
-
+            var mesAtual = DateTime.Now.Month;
+            var anoAtual = DateTime.Now.Year;
             var todos = _clienteService?.GetAllWithChildren()
            ?? new List<Cliente>();
             _todosClientes = todos.SelectMany(cliente =>
             {
                 var agendamentos = _clienteService.GetAgendamentos(cliente.Id)?.ToList() ?? new List<Agendamento>();
                 var filhos = cliente.Criancas ?? new List<Crianca>();
+                decimal totalHistorico = agendamentos.Sum(a => a.ValorPago);
+                decimal totalMesAtual = agendamentos
+                    .Where(a => a.Data.Month == mesAtual && a.Data.Year == anoAtual)
+                    .Sum(a => a.ValorPago);
                 if (filhos.Any())
                 {
                     return filhos.Select(crianca => new ClienteCriancaView
@@ -133,7 +166,7 @@ namespace AgendaNovo.ViewModels
                         Facebook = cliente.Facebook,
                         Instagram = cliente.Instagram,
                         Observacao = cliente.Observacao,
-                        Agendamentos = agendamentos
+                        Agendamentos = agendamentos,
                     });
                 }
                 else
@@ -148,7 +181,7 @@ namespace AgendaNovo.ViewModels
                         Facebook = cliente.Facebook,
                         Instagram = cliente.Instagram,
                         Observacao = cliente.Observacao,
-                        Agendamentos = agendamentos
+                        Agendamentos = agendamentos,
 
 
                     }
@@ -207,6 +240,22 @@ namespace AgendaNovo.ViewModels
                 ClienteExistenteDetectado = false;
             }
         }
+        private void AtualizarDadosClienteSelecionado()
+        {
+            if (ClienteCriancaSelecionado == null) return;
+
+            var clienteAtualizado = _clienteService.GetById(ClienteCriancaSelecionado.ClienteId);
+            if (clienteAtualizado == null) return;
+
+            var agendamentosAtualizados = _clienteService.GetAgendamentos(clienteAtualizado.Id)?.ToList() ?? new List<Agendamento>();
+
+            ClienteCriancaSelecionado.Agendamentos = agendamentosAtualizados;
+
+            // Força a notificação visual
+            OnPropertyChanged(nameof(ClienteCriancaSelecionado));
+            OnPropertyChanged(nameof(PaginaClientes));
+            AtualizarPaginacao(_clientesFiltrados);
+        }
 
 
         public bool TemHistorico => HistoricoAgendamentos?.Any() == true;
@@ -236,15 +285,62 @@ namespace AgendaNovo.ViewModels
             CompletouAcompanhamento = mensalcompleto.Count() == 12;
         }
         [RelayCommand]
-        private void ExportarClienteSelecionadoParaExcel()
+        private void ExportarTodosClientesParaExcel()
         {
-            if (ClienteCriancaSelecionado == null)
+            var salvar = new SaveFileDialog
+            {
+                FileName = $"Todos_Clientes.xlsx",
+                Filter = "Arquivo Excel (*.xlsx)|*.xlsx"
+            };
+
+            if (salvar.ShowDialog() != true)
                 return;
+            var TodosClientes = _clienteService.GetAllWithChildren();
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Clientes");
 
-            var cliente = ClienteCriancaSelecionado;
-            var agendamentos = _clienteService.GetAgendamentos(cliente.ClienteId) ?? new List<Agendamento>();
+            ws.Cell("A1").Value = "Nome";
+            ws.Cell("B1").Value = "Telefone";
+            ws.Cell("C1").Value = "Email";
+            ws.Cell("D1").Value = "Crianças";
+            ws.Cell("E1").Value = "Pago no mês";
+            ws.Cell("F1").Value = "Pago no total";
+            ws.Cell("G1").Value = "Qtd. Agendamentos";
+            ws.Cell("H1").Value = "Status";
+            ws.Cell("I1").Value = "Observação";
+            int linha = 3;
 
-            Exportador.ExportarClienteParaExcel(cliente, agendamentos);
+            foreach (var cliente in TodosClientes)
+            {
+                var agendamentos = _clienteService.GetAgendamentos(cliente.Id) ?? new List<Agendamento>();
+                var totalMes = agendamentos
+                .Where(a => a.Data.Month == DateTime.Now.Month && a.Data.Year == DateTime.Now.Year)
+                .Sum(a => a.ValorPago);
+
+                var totalHistorico = agendamentos
+                    .Sum(a => a.ValorPago);
+
+                // Crianças em string separada por vírgula
+                var nomesCriancas = string.Join(", ", cliente.Criancas.Select(c => c.Nome));
+
+                ws.Cell(linha, 1).Value = cliente.Nome;
+                ws.Cell(linha, 2).Value = cliente.Telefone;
+                ws.Cell(linha, 3).Value = cliente.Email;
+                ws.Cell(linha, 4).Value = nomesCriancas;
+                ws.Cell(linha, 5).Value = totalMes.ToString("C"); 
+                ws.Cell(linha, 6).Value = totalHistorico.ToString("C");
+                ws.Cell(linha, 7).Value = agendamentos.Count;
+                ws.Cell(linha, 8).Value = cliente.Status.ToString();
+                ws.Cell(linha, 9).Value = cliente.Observacao;
+
+
+                linha++;
+            }
+
+
+            ws.Columns().AdjustToContents();
+
+            workbook.SaveAs(salvar.FileName);
         }
 
 
@@ -378,6 +474,7 @@ namespace AgendaNovo.ViewModels
             CarregarClientesDoBanco();
             LimparInputsClienteCrianca();
             NotifyAll();
+            AtualizarDadosClienteSelecionado();
 
 
         }

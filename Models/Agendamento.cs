@@ -49,7 +49,7 @@ namespace AgendaNovo
             set => SetProperty(ref _mostrarCheck, value);
         }
 
-        public bool EstaPago => Math.Round(Valor, 2) == Math.Round(ValorPago, 2);
+        public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
 
         [ObservableProperty] private DateTime data = DateTime.Today;
