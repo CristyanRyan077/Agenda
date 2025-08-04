@@ -61,7 +61,7 @@ namespace AgendaNovo
 
 
         //Data e horario
-        [ObservableProperty] private DateTime dataSelecionada = DateTime.Today;
+        [ObservableProperty] private DateTime dataSelecionada;
         [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
 
         //Outros
@@ -109,6 +109,7 @@ namespace AgendaNovo
                 Servico = new Servico { PossuiCrianca = true } // Padrão inicial
             };
             mostrarCheck = true;
+            Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
 
 
         }
@@ -175,6 +176,8 @@ namespace AgendaNovo
                 CarregarPacotes();
                 CarregarServicos();
                 AtualizarHorariosDisponiveis();
+            if (dataSelecionada == default)
+                DataSelecionada = DateTime.Today;
         }
         public void CarregarDadosDoBanco()
         {
@@ -367,7 +370,6 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
-            NovoAgendamento = new Agendamento();
             ItemSelecionado = null;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
@@ -382,6 +384,8 @@ namespace AgendaNovo
             
             ListaCriancas.Clear();
             ValorPacote = 0;
+            var dataAtual = DataSelecionada == default ? DateTime.Today : DataSelecionada;
+            NovoAgendamento = new Agendamento { Data = dataAtual };
             OnPropertyChanged(nameof(NovoAgendamento));
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(NovoCliente.Nome));
@@ -536,6 +540,8 @@ namespace AgendaNovo
         [RelayCommand]
         private void Agendar()
         {
+            Debug.WriteLine($"Agendar() chamado - VM Hash: {this.GetHashCode()}");
+            Debug.WriteLine("teste");
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
 
@@ -587,6 +593,7 @@ namespace AgendaNovo
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
+            NovoAgendamento.Data = DataSelecionada;
 
             if (NovoAgendamento.Id == 0)
                 _agendamentoService.Add(NovoAgendamento);
@@ -654,11 +661,11 @@ namespace AgendaNovo
                 ItemSelecionado = null;
             }), System.Windows.Threading.DispatcherPriority.Background);
 
-            if (Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is EditarAgendamento) is Window win)
+            /*if (Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is EditarAgendamento) is Window win)
             {
                 win.DialogResult = true;
                 win.Close();
-            }
+            } */
 
         }
         [RelayCommand]

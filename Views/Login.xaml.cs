@@ -66,15 +66,14 @@ namespace AgendaNovo
                 await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 await Task.Delay(350);
 
-                var main = _serviceProvider.GetRequiredService<MainWindow>();
-                var vm = ActivatorUtilities.CreateInstance<AgendaViewModel>(_serviceProvider);
+                var vm = _serviceProvider.GetRequiredService<AgendaViewModel>();
 
                 await Task.Run(() =>
                 {
                     vm.Inicializar();
                 });
 
-                var mainWindow = ActivatorUtilities.CreateInstance<MainWindow>(_serviceProvider, vm);
+                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
                 mainWindow.Visibility = Visibility.Hidden;
                 await Dispatcher.InvokeAsync(() =>
                 {

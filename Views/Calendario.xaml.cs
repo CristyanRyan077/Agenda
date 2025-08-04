@@ -51,14 +51,7 @@ namespace AgendaNovo.Views
         {
             if (DataContext is CalendarioViewModel vm && vm.AgendamentoSelecionado != null)
             {
-                // Cria instância da AgendaViewModel ou reaproveita uma já existente
-                var agendaVM = new AgendaViewModel(
-                    vm.AgendamentoService,
-                    vm.ClienteService,
-                    vm.CriancaService,
-                    vm.PacoteService,
-                    vm.ServicoService);
-
+                var agendaVM = vm.AgendaViewModel;
                 agendaVM.Inicializar();
                 var agendamentoCompleto = vm.AgendamentoService.GetById(vm.AgendamentoSelecionado.Id);
                 if (agendamentoCompleto == null) return;
@@ -78,6 +71,8 @@ namespace AgendaNovo.Views
 
                 agendaVM.Pacoteselecionado = agendaVM.ListaPacotes
                     .FirstOrDefault(p => p.Id == agendamentoCompleto.PacoteId);
+
+                agendaVM.DataSelecionada = agendamentoCompleto.Data;
 
                 var janela = new EditarAgendamento
                 {

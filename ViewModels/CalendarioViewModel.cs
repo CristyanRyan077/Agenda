@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace AgendaNovo.ViewModels
 {
     public partial class CalendarioViewModel : ObservableObject
     {
-
+        public AgendaViewModel AgendaViewModel { get; }
         private readonly AgendaViewModel _agenda;
         private readonly IClienteService _clienteService;
         private readonly ICriancaService _criancaService;
@@ -23,12 +24,13 @@ namespace AgendaNovo.ViewModels
         private readonly IPacoteService _pacoteService;
 
 
-        public CalendarioViewModel(IAgendamentoService agendamentoService,
+        public CalendarioViewModel(AgendaViewModel agendaViewModel, IAgendamentoService agendamentoService,
         IClienteService clienteService,
         ICriancaService criancaService,
         IPacoteService pacoteService,
         IServicoService servicoService)
         {
+            AgendaViewModel = agendaViewModel;
             _agendamentoService = agendamentoService;
             _clienteService = clienteService;
             _criancaService = criancaService;
@@ -38,7 +40,7 @@ namespace AgendaNovo.ViewModels
             MesAtual = DateTime.Today;
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();
-
+            Debug.WriteLine($"CalendarioViewModel Agenda ID: {AgendaViewModel.GetHashCode()}");
         }
         public IAgendamentoService AgendamentoService => _agendamentoService;
         public IClienteService ClienteService => _clienteService;
@@ -162,6 +164,6 @@ namespace AgendaNovo.ViewModels
 
         private Brush VerCor(DateTime data) =>
             VerificarSeTemEvento(data) ? Brushes.LightGreen : Brushes.Transparent;
-    }
+    } 
 
-}
+} 
