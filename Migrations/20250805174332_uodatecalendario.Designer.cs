@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250728231220_Paginacaogrid")]
-    partial class Paginacaogrid
+    [Migration("20250805174332_uodatecalendario")]
+    partial class uodatecalendario
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,9 @@ namespace AgendaNovo.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int?>("ServicoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Tema")
@@ -105,6 +108,12 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Telefone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalPagoHistorico")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPagoMesAtual")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Clientes");
@@ -135,6 +144,9 @@ namespace AgendaNovo.Migrations
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UltimaAtualizacaoIdade")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
