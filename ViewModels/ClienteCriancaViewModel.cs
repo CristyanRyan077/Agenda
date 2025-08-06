@@ -67,17 +67,17 @@ namespace AgendaNovo.ViewModels
         private List<ClienteCriancaView> _todosClientes = new();
         [ObservableProperty] private string filtroSelecionado;
         private List<ClienteCriancaView> _clientesFiltrados = new();
-        public ObservableCollection<(int Numero, string Nome)> Meses { get; } = new(
+        public ObservableCollection<MesItem> Meses { get; } = new(
         System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat
         .MonthNames
         .Where(nome => !string.IsNullOrEmpty(nome))
-        .Select((nome, index) => (index + 1, nome))
+        .Select((nome, index) => new MesItem { Numero = index + 1, Nome = nome })
         .ToList()
-            );
+);
         public ObservableCollection<int> Anos { get; } = new(
         Enumerable.Range(DateTime.Now.Year - 5, 6).Reverse().ToList()
         );
-        [ObservableProperty] private int mesSelecionado = DateTime.Now.Month;
+        [ObservableProperty] private MesItem mesSelecionado;
         [ObservableProperty] private int anoSelecionado = DateTime.Now.Year;
 
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
@@ -124,10 +124,11 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void FiltrarPorMes()
         {
+            var mes = MesSelecionado?.Numero ?? DateTime.Now.Month;
             _clientesFiltrados = _todosClientes
                 .Where(cli => cli.Agendamentos.Any(a =>
                     a.Status == StatusAgendamento.Concluido &&
-                    a.Data.Month == MesSelecionado &&
+                    a.Data.Month == mes &&
                     a.Data.Year == AnoSelecionado))
                 .ToList();
 

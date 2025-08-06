@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AgendaNovo.Views.Controles
+namespace AgendaNovo.Controles
 {
     /// <summary>
     /// Interação lógica para ClienteAutoComplete.xam

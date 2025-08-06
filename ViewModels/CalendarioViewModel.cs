@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Controles;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace AgendaNovo.ViewModels
@@ -53,6 +55,9 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
 
+        [ObservableProperty] private object telaEditarAgendamento;
+        [ObservableProperty] private bool mostrarEditarAgendamento;
+
 
         [ObservableProperty]
         private DateTime mesAtual = DateTime.Today;
@@ -62,7 +67,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Cliente clienteSelecionado;
         [ObservableProperty] private Agendamento agendamentoSelecionado;
         [ObservableProperty] private bool detalhesVisiveis;
-
+        
         [RelayCommand]
         private void Buscar()
         {
@@ -84,6 +89,44 @@ namespace AgendaNovo.ViewModels
                 DetalhesVisiveis = false;
             }
         }
+        [RelayCommand]
+        private void FecharEdicao()
+        {
+            MostrarEditarAgendamento = false;
+            TelaEditarAgendamento = null;
+        }
+            public void EditarAgendamentoSelecionado()
+            {
+                if (AgendamentoSelecionado == null) return;
+
+                var agendaVM = AgendaViewModel;
+                agendaVM.Inicializar();
+
+                var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
+                if (agendamentoCompleto == null) return;
+                agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
+                agendaVM.ItemSelecionado = agendamentoCompleto;
+                agendaVM.NovoAgendamento = agendamentoCompleto;
+                agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
+                agendaVM.CarregarServicos();
+                agendaVM.CarregarPacotes();
+            if (agendamentoCompleto.ServicoId.HasValue)
+                agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
+                agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
+
+            agendaVM.ForcarAtualizacaoCampos();
+
+                Debug.WriteLine($"NovoCliente: {agendaVM.NovoCliente?.Nome}");
+                var view = new EditarAgendamentoView();
+                view.DataContext = agendaVM;
+                view.FecharSolicitado += (s, e) =>
+                {
+                    MostrarEditarAgendamento = false;
+                    TelaEditarAgendamento = null;
+                };
+                TelaEditarAgendamento = view;
+                MostrarEditarAgendamento = true;
+            }
         public void SelecionarDia(DateTime data)
         {
             var agendamentos = _agendamentoService.GetByDate(data);

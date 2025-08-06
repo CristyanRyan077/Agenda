@@ -23,6 +23,7 @@
             <conv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
             <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <conv:MesAnoPtBrConverter x:Key="MesAnoPtBrConverter"/>
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -254,9 +254,7 @@
             <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
                 <ComboBox Width="120" Margin="5,0"
               ItemsSource="{Binding Meses}"
-              SelectedItem="{Binding MesSelecionado}" 
-              DisplayMemberPath="Nome"
-              SelectedValuePath="Numero" />
+              SelectedItem="{Binding MesSelecionado}"/>
 
                 <ComboBox Width="100" Margin="5,0"
               ItemsSource="{Binding Anos}"

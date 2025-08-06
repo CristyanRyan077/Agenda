@@ -1,4 +1,5 @@
 ﻿
+using AgendaNovo.Controles;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
@@ -35,6 +36,8 @@ namespace AgendaNovo
     public partial class AgendaViewModel : ObservableObject
     {
         //Agendamento
+        [ObservableProperty]
+        private bool mostrarEditarAgendamento;
         private bool _suspendendoDataChanged = false;
         private bool _selecionandoDaGrid = false;
         [ObservableProperty] private Agendamento novoAgendamento = new();
@@ -81,6 +84,7 @@ namespace AgendaNovo
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
+        public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
 
 
         private readonly IAgendamentoService _agendamentoService;
@@ -233,7 +237,7 @@ namespace AgendaNovo
                 }
             });
         }
-        private void FiltrarPacotesPorServico(int servicoId)
+        public void FiltrarPacotesPorServico(int servicoId)
         {
             ListaPacotesFiltrada.Clear();
 
@@ -308,7 +312,7 @@ namespace AgendaNovo
         } 
 
         [RelayCommand]
-        private void CopiarHorariosLivres()
+        private async void CopiarHorariosLivres()
         {
             // Verifica se a data foi selecionada
             if (DataSelecionada == default)
@@ -350,7 +354,7 @@ namespace AgendaNovo
             string telefoneFormatado = $"55859{Regex.Replace(NovoCliente.Telefone, @"\D", "")}";
             string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={Uri.EscapeDataString(texto)}";
 
-            Thread.Sleep(1000); // Espera opcional
+            await Task.Delay(100);
             Process.Start(new ProcessStartInfo
             {
                 FileName = url,
@@ -397,6 +401,7 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ClienteSelecionado));
             OnPropertyChanged(nameof(ListaCriancas));
         }
+
             
         
 
@@ -437,7 +442,7 @@ namespace AgendaNovo
 
             if (!string.IsNullOrEmpty(horarioStr) && !HorariosDisponiveis.Contains(horarioStr))
             {
-                NovoAgendamento.Horario = null;
+                HorariosDisponiveis.Add(horarioStr);
             }
 
             OnPropertyChanged(nameof(HorarioTexto));
@@ -491,7 +496,11 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(NovoCliente));
             OnPropertyChanged(nameof(ListaCriancas));
             OnPropertyChanged(nameof(CriancaSelecionada));
+            OnPropertyChanged(nameof(NomeClienteSelecionado));
+            OnPropertyChanged(nameof(NovoCliente));
+            OnPropertyChanged(nameof(NovoCliente.Nome));
         }
+
 
 
         public void PreencherCamposSeClienteExistir(string? nomeDigitado, Action<Cliente> preencher)
@@ -535,7 +544,12 @@ namespace AgendaNovo
                 OnPropertyChanged(nameof(NovoAgendamento));
             }
         }
-
+        public void ForcarAtualizacaoCampos()
+        {
+            OnPropertyChanged(nameof(ClienteSelecionado));
+            OnPropertyChanged(nameof(NovoAgendamento));
+            OnPropertyChanged(nameof(HorarioTexto));
+        }
 
         [RelayCommand]
         private void Agendar()
@@ -648,7 +662,6 @@ namespace AgendaNovo
                     UseShellExecute = true
                 });
             }
-
             CarregarDadosDoBanco();
             OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
@@ -661,11 +674,6 @@ namespace AgendaNovo
                 ItemSelecionado = null;
             }), System.Windows.Threading.DispatcherPriority.Background);
 
-            /*if (Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w is EditarAgendamento) is Window win)
-            {
-                win.DialogResult = true;
-                win.Close();
-            } */
 
         }
         [RelayCommand]
@@ -802,6 +810,11 @@ namespace AgendaNovo
 
             ResetarFormulario();
             AtualizarHorariosDisponiveis();
+            OnPropertyChanged(nameof(DataReferencia));
+            AtualizarAgendamentos();
+            FiltrarAgendamentos();
+            LimparCampos();
+            OnPropertyChanged(nameof(ListaAgendamentos));
         }
 
         partial void OnTextoPesquisaChanged(string value)

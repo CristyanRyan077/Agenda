@@ -10,6 +10,7 @@
         d:DataContext="{d:DesignInstance Type=vm:CalendarioViewModel}"
         WindowState="Maximized"
         Title="Calendario" >
+
     <Grid Background="#FF333333">
         <Grid>
             <Grid.RowDefinitions>
@@ -25,7 +26,31 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
+            <Border Background="#AA000000"
+                    Visibility="{Binding MostrarEditarAgendamento, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Panel.ZIndex="10"
+                    Grid.RowSpan="4" Grid.ColumnSpan="4"
+                    HorizontalAlignment="Stretch"
+                      d:Visibility="Collapsed"
+                    VerticalAlignment="Stretch">
+                
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Content="X"
+                Width="30"
+                Height="30"
+                Background="Red"
+                FontWeight="Bold"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,-30,-10,0"
+                Command="{Binding FecharEdicaoCommand}" />
+                    <Border Background="White" Padding="10" CornerRadius="10" Width="300">
+                        <ContentControl Content="{Binding TelaEditarAgendamento}" />
+                        
+                    </Border>
+                </Grid>
+                
+            </Border>
             <Grid Grid.Row="0" HorizontalAlignment="Left">
                 <!-- Painel lateral -->
                 <Border x:Name="Drawer"
@@ -59,9 +84,9 @@
                         HorizontalAlignment="Left" VerticalAlignment="Top"
                         Margin="10" Height="40" 
                         Checked="btnToggle_Checked" Unchecked="btnToggle_Unchecked"/>
-
-
-
+            <Border Background="#222B" Visibility="{Binding MostrarEditarAgendamento, Converter={StaticResource BoolToVisibilityConverter}}">
+                <ContentControl Content="{Binding TelaEditarAgendamento}" />
+            </Border>
 
 
 

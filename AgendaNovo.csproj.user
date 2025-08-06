@@ -4,13 +4,13 @@
     <_LastSelectedProfileId>C:\Users\Foco na Arte\Source\Repos\Agenda\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Update="Controles\EditarAgendamentoView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Calendario.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\Controles\ClienteAutoComplete.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\EditarAgendamento.xaml.cs">
+    <Compile Update="Controles\ClienteAutoComplete.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\SplashScreen.xaml.cs">

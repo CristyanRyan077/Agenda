@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:AgendaNovo"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        xmlns:controles="clr-namespace:AgendaNovo.Views.Controles"
+        xmlns:controles="clr-namespace:AgendaNovo.Controles"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="Agendar"
         MinWidth="600" MinHeight="600"

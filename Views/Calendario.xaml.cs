@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Models;
+﻿using AgendaNovo.Controles;
+using AgendaNovo.Models;
 using AgendaNovo.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -49,41 +50,9 @@ namespace AgendaNovo.Views
         }
         private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is CalendarioViewModel vm && vm.AgendamentoSelecionado != null)
+            if (DataContext is CalendarioViewModel vm)
             {
-                var agendaVM = vm.AgendaViewModel;
-                agendaVM.Inicializar();
-                var agendamentoCompleto = vm.AgendamentoService.GetById(vm.AgendamentoSelecionado.Id);
-                if (agendamentoCompleto == null) return;
-
-                agendaVM.ItemSelecionado = agendamentoCompleto;
-                agendaVM.NovoAgendamento = agendamentoCompleto;
-                agendaVM.ClienteSelecionado = agendaVM.ListaClientes
-                .FirstOrDefault(c => c.Id == agendamentoCompleto.ClienteId);
-                agendaVM.NovoCliente = agendaVM.ClienteSelecionado;
-
-                agendaVM.ListaCriancas.Clear();
-                foreach (var crianca in agendaVM.ClienteSelecionado.Criancas ?? Enumerable.Empty<Crianca>())
-                    agendaVM.ListaCriancas.Add(crianca);
-
-                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
-                .FirstOrDefault(s => s.Id == agendamentoCompleto.ServicoId);
-
-                agendaVM.Pacoteselecionado = agendaVM.ListaPacotes
-                    .FirstOrDefault(p => p.Id == agendamentoCompleto.PacoteId);
-
-                agendaVM.DataSelecionada = agendamentoCompleto.Data;
-
-                var janela = new EditarAgendamento
-                {
-                    DataContext = agendaVM,
-                    Owner = this
-                };
-
-                if (janela.ShowDialog() == true)
-                {
-                    vm.SelecionarDia(vm.AgendamentoSelecionado.Data); // recarrega o dia
-                }
+                vm.EditarAgendamentoSelecionado();
             }
         }
     }
