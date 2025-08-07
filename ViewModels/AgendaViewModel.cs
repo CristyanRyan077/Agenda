@@ -85,7 +85,7 @@ namespace AgendaNovo
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
-
+        public bool _populandoCampos;
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
@@ -119,7 +119,8 @@ namespace AgendaNovo
         }
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
-            Console.WriteLine($"[{agendamentoIdAtual}] ServicoSelecionado = {value?.Id ?? 0}");
+            if (_populandoCampos) return;
+            Debug.WriteLine($"🔧 Setando IDs -> ServicoId: {(ServicoSelecionado?.Id.ToString() ?? "null")}, PacoteId: {(Pacoteselecionado?.Id.ToString() ?? "null")}");
             if (value == null)
             {
                 NovoAgendamento.ServicoId = null;
@@ -165,6 +166,7 @@ namespace AgendaNovo
         }
         partial void OnPacoteselecionadoChanged(Pacote? value)
         {
+            if (_populandoCampos) return;
             Debug.WriteLine("onpctslcchanged chamado");
             if (value == null)
             {
@@ -378,7 +380,8 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
-
+            if (NovoAgendamento?.Id != 0)
+                return;
             ItemSelecionado = null;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
@@ -392,8 +395,6 @@ namespace AgendaNovo
             
             ListaCriancas.Clear();
             ValorPacote = 0;
-            if (NovoAgendamento?.Id != 0)
-                return;
             var dataAtual = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             NovoAgendamento = new Agendamento { Data = dataAtual };
             OnPropertyChanged(nameof(NovoAgendamento));
@@ -407,9 +408,47 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ClienteSelecionado));
             OnPropertyChanged(nameof(ListaCriancas));
         }
+        [RelayCommand]
+        private void Agendar()
+        {
+            if (NovoAgendamento.Id == 0)
+                CriarAgendamento();
+            else
+                AtualizarAgendamento();
+        }
+        private void AtualizarAgendamento()
+        {
+            Debug.WriteLine($"🟡 Atualizando agendamento existente - ID: {NovoAgendamento.Id}");
 
-            
-        
+            if (!ValidarDadosBasicos()) return;
+
+            var cliente = _clienteService.GetById(NovoCliente.Id);
+            if (cliente == null) return;
+
+            Crianca criancaParaAgendar = null;
+            if (CriancaSelecionada != null)
+                criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
+
+            if (!MostrarCrianca)
+            {
+                CriancaSelecionada = null;
+                NovoAgendamento.CriancaId = null;
+                NovoAgendamento.Crianca = null;
+            }
+            Debug.WriteLine($"🔍 ServicoSelecionado: {(ServicoSelecionado != null ? ServicoSelecionado.Nome + " (ID: " + ServicoSelecionado.Id + ")" : "null")}");
+            NovoAgendamento.ClienteId = cliente.Id;
+            NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
+            NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
+            NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
+            NovoAgendamento.Data = DataSelecionada;
+
+            _agendamentoService.Update(NovoAgendamento);
+
+            FinalizarAgendamento(cliente);
+        }
+
+
+
 
         partial void OnDataSelecionadaChanged(DateTime value)
         {
@@ -562,18 +601,9 @@ namespace AgendaNovo
         {
             agendamentoIdAtual = Guid.NewGuid();
             Debug.WriteLine($"Agendamento iniciado - ID: {agendamentoIdAtual}");
-            if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
-                return;
 
-            if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario?.ToString(@"hh\:mm")))
-            {
-                MessageBox.Show(
-                    "Por favor, selecione um horário antes de agendar.",
-                    "Horário obrigatório",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
+            if (!ValidarDadosBasicos()) return;
+
             var clienteExistente = _clienteService.GetById(NovoCliente.Id);
             if (clienteExistente == null)
                 return;
@@ -582,10 +612,7 @@ namespace AgendaNovo
 
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
-            {
-                // tenta buscar no serviço
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
-            }
 
             else if (NovoAgendamento.Id == 0 &&
            NovoAgendamento.Crianca != null &&
@@ -612,84 +639,107 @@ namespace AgendaNovo
 
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
-            Debug.WriteLine($"Antes de agendar - ServicoSelecionado.Id = {(ServicoSelecionado?.Id.ToString() ?? "null")}");
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
-            if (NovoAgendamento.Id == 0)
-                _agendamentoService.Add(NovoAgendamento);
-            else
-                _agendamentoService.Update(NovoAgendamento);
+            _agendamentoService.Add(NovoAgendamento);
 
+            FinalizarAgendamento(clienteExistente);
+
+
+
+        }
+        public void EnviarMensagemWhatsapp(Cliente cliente, Crianca crianca)
+        {
+            if (MessageBox.Show("Deseja enviar o agendamento atualizado via WhatsApp?", "Confirmar envio",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+
+            var textoCrianca = crianca != null
+                ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
+                : "";
+
+            var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
+
+            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
+                            $"Cliente: {cliente.Nome} - {textoCrianca}" +
+                            $"Telefone: {cliente.Telefone}\n" +
+                            $"Tema: {NovoAgendamento.Tema}\n" +
+                            $"Serviço: {servicoNome}\n" +
+                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
+                            $"📍 *AVISOS*:\r\n- A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
+                            $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
+                            $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
+                            $"(A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
+                            $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
+
+            Clipboard.SetText(texto);
+
+            string telefoneFormatado = $"55859{Regex.Replace(cliente.Telefone, @"\D", "")}";
+            string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
+
+            Thread.Sleep(100);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        private bool ValidarDadosBasicos()
+        {
+            if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
+                return false;
+
+            if (string.IsNullOrWhiteSpace(NovoAgendamento.Horario?.ToString(@"hh\:mm")))
+            {
+                MessageBox.Show("Por favor, selecione um horário antes de agendar.", "Horário obrigatório",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+        private void FinalizarAgendamento(Cliente cliente)
+        {
             if (NovoAgendamento.Valor <= NovoAgendamento.ValorPago)
             {
-                _clienteService.AtivarSePendente(clienteExistente.Id);
+                _clienteService.AtivarSePendente(cliente.Id);
                 _agendamentoService.AtivarSePendente(NovoAgendamento.Id);
             }
+
             if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
-                _clienteService.ValorIncompleto(clienteExistente.Id);
+                _clienteService.ValorIncompleto(cliente.Id);
 
-
-            var cliente = _clienteService.GetById(NovoAgendamento.ClienteId);
             var crianca = NovoAgendamento.CriancaId.HasValue
                 ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
                 : null;
 
             NovoAgendamento.Cliente = cliente;
             NovoAgendamento.Crianca = crianca;
+
             DataReferencia = NovoAgendamento.Data;
-            if (MessageBox.Show("Deseja enviar o agendamento atualizado via WhatsApp?", "Confirmar envio",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                var textoCrianca = crianca != null
-                    ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
-                    : "";
-                var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
+            EnviarMensagemWhatsapp(cliente, crianca);
 
-                var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
-                                $"Cliente: {cliente.Nome} - {textoCrianca}" +
-                                $"Telefone: {cliente.Telefone}\n" +
-                                $"Tema: {NovoAgendamento.Tema}\n" +
-                                $"Serviço: {servicoNome}\n" +
-                                $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
-                                $"📍 *AVISOS*:\r\n- A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
-                                $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
-                                $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
-                                $"(A partir de 30 minutos de atraso não atendemos mais, será necessário agendar outra data)." +
-                                $" *PRAZO DE ENVIAR FOTOS TRATADAS DE 48HS DIAS ÚTEIS; APÓS O CLIENTE ESCOLHER NO APLICATIVO ALBOOM*");
-
-                Clipboard.SetText(texto);
-                var telefone = cliente.Telefone;
-                string telefoneFormatado = $"55859{Regex.Replace(telefone, @"\D", "")}";
-                string url = $"https://web.whatsapp.com/send?phone={telefoneFormatado}&text={texto}";
-                Thread.Sleep(100);
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
             CarregarDadosDoBanco();
-            ServicoSelecionado = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0);
-            Pacoteselecionado = _pacoteService.GetById(NovoAgendamento.PacoteId ?? 0);
-            if (ServicoSelecionado == null)
-                Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
+
+
+
+
             OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
             FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
             OnPropertyChanged(nameof(ListaAgendamentos));
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (ServicoSelecionado == null)
+                Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
+
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 ItemSelecionado = null;
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
-
-        }
-        partial void OnNovoAgendamentoChanged(Agendamento value)
-        {
-            Debug.WriteLine($"🟡 NovoAgendamento atribuído. ServicoId: {value?.ServicoId}");
+            }, System.Windows.Threading.DispatcherPriority.Background);
+            Debug.WriteLine($"🧾 Finalizando Agendamento -> ServicoId: {NovoAgendamento.ServicoId}, PacoteId:" +
+                $" {NovoAgendamento.PacoteId}, ClienteId: {NovoAgendamento.ClienteId}, CriancaId: {NovoAgendamento.CriancaId}");
         }
         [RelayCommand]
         private void Editar()
@@ -698,8 +748,7 @@ namespace AgendaNovo
             if (ag == null) return;
             try
             {
-
-
+                
 
                 var cliente = ListaClientes.FirstOrDefault(c => c.Id == ag.ClienteId);
                 if (cliente == null)

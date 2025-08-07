@@ -95,45 +95,46 @@ namespace AgendaNovo.ViewModels
             MostrarEditarAgendamento = false;
             TelaEditarAgendamento = null;
         }
-            public void EditarAgendamentoSelecionado()
-            {
-                if (AgendamentoSelecionado == null) return;
+        public void EditarAgendamentoSelecionado()
+        {
+            if (AgendamentoSelecionado == null) return;
 
-                var agendaVM = AgendaViewModel;
-                agendaVM.Inicializar();
+            var agendaVM = AgendaViewModel;
+            agendaVM._populandoCampos = true;
+            var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
+            if (agendamentoCompleto == null) return;
 
+            agendaVM.NovoAgendamento = agendamentoCompleto;
 
-                var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
-                if (agendamentoCompleto == null) return;
-                agendaVM.DataSelecionada = agendamentoCompleto.Data;
-                agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
-                agendaVM.ItemSelecionado = agendamentoCompleto;
+            agendaVM.DataSelecionada = agendamentoCompleto.Data;
+            agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
+            agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
+            agendaVM.ItemSelecionado = agendamentoCompleto;
 
-                agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
-                agendaVM.CarregarServicos();
-                agendaVM.CarregarPacotes();
-            if (agendamentoCompleto.ServicoId.HasValue)
-                agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
-                agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
+            agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
+            agendaVM.CarregarServicos();
+            agendaVM.CarregarPacotes();
+        if (agendamentoCompleto.ServicoId.HasValue)
+            agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
+            agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
 
-                agendaVM.NovoAgendamento = agendamentoCompleto;
-                agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
-                agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
-                Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
-
+            agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
+            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
+            Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
+            agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();
 
-                Debug.WriteLine($"NovoCliente: {agendaVM.NovoCliente?.Nome}");
-                var view = new EditarAgendamentoView();
-                view.DataContext = agendaVM;
-                view.FecharSolicitado += (s, e) =>
-                {
-                    MostrarEditarAgendamento = false;
-                    TelaEditarAgendamento = null;
-                };
-                TelaEditarAgendamento = view;
-                MostrarEditarAgendamento = true;
-            }
+            Debug.WriteLine($"NovoCliente: {agendaVM.NovoCliente?.Nome}");
+            var view = new EditarAgendamentoView();
+            view.DataContext = agendaVM;
+            view.FecharSolicitado += (s, e) =>
+            {
+                MostrarEditarAgendamento = false;
+                TelaEditarAgendamento = null;
+            };
+            TelaEditarAgendamento = view;
+            MostrarEditarAgendamento = true;
+        }
         public void SelecionarDia(DateTime data)
         {
             var agendamentos = _agendamentoService.GetByDate(data);
