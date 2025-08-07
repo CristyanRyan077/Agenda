@@ -102,17 +102,24 @@ namespace AgendaNovo.ViewModels
                 var agendaVM = AgendaViewModel;
                 agendaVM.Inicializar();
 
+
                 var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
                 if (agendamentoCompleto == null) return;
+                agendaVM.DataSelecionada = agendamentoCompleto.Data;
                 agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
                 agendaVM.ItemSelecionado = agendamentoCompleto;
-                agendaVM.NovoAgendamento = agendamentoCompleto;
+
                 agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
                 agendaVM.CarregarServicos();
                 agendaVM.CarregarPacotes();
             if (agendamentoCompleto.ServicoId.HasValue)
                 agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
                 agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
+
+                agendaVM.NovoAgendamento = agendamentoCompleto;
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
+                agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
+                Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
 
             agendaVM.ForcarAtualizacaoCampos();
 

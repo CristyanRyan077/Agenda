@@ -119,6 +119,7 @@ namespace AgendaNovo
         }
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
+            Console.WriteLine($"[{agendamentoIdAtual}] ServicoSelecionado = {value?.Id ?? 0}");
             if (value == null)
             {
                 NovoAgendamento.ServicoId = null;
@@ -143,6 +144,7 @@ namespace AgendaNovo
             }
 
             OnPropertyChanged(nameof(MostrarCrianca));
+            Debug.WriteLine($"ServicoSelecionado mudou para: {(value == null ? "null" : value.Id.ToString())}");
         }
 
 
@@ -163,6 +165,7 @@ namespace AgendaNovo
         }
         partial void OnPacoteselecionadoChanged(Pacote? value)
         {
+            Debug.WriteLine("onpctslcchanged chamado");
             if (value == null)
             {
                 NovoAgendamento.PacoteId = null;
@@ -172,6 +175,7 @@ namespace AgendaNovo
 
             NovoAgendamento.PacoteId = value.Id;
             NovoAgendamento.Valor = value.Valor;
+            Debug.WriteLine($"PacoteSelecionado mudou para: {(value == null ? "null" : value.Id.ToString())}");
         }
 
         public void Inicializar()
@@ -374,6 +378,7 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
+
             ItemSelecionado = null;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
@@ -382,12 +387,13 @@ namespace AgendaNovo
             NovoCliente = new Cliente();
             NovoCliente.Id = 0;
             HorarioTexto = string.Empty;
-            
 
             CriancaSelecionada = new Crianca();
             
             ListaCriancas.Clear();
             ValorPacote = 0;
+            if (NovoAgendamento?.Id != 0)
+                return;
             var dataAtual = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             NovoAgendamento = new Agendamento { Data = dataAtual };
             OnPropertyChanged(nameof(NovoAgendamento));
@@ -550,12 +556,12 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(NovoAgendamento));
             OnPropertyChanged(nameof(HorarioTexto));
         }
-
+        private Guid agendamentoIdAtual;
         [RelayCommand]
-        private void Agendar()
+        private void CriarAgendamento()
         {
-            Debug.WriteLine($"Agendar() chamado - VM Hash: {this.GetHashCode()}");
-            Debug.WriteLine("teste");
+            agendamentoIdAtual = Guid.NewGuid();
+            Debug.WriteLine($"Agendamento iniciado - ID: {agendamentoIdAtual}");
             if (NovoCliente == null || NovoCliente.Id == 0 || string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
 
@@ -603,8 +609,10 @@ namespace AgendaNovo
                 NovoAgendamento.Crianca = null;
             }
             // 4) Prepara o objeto a salvar
+
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
+            Debug.WriteLine($"Antes de agendar - ServicoSelecionado.Id = {(ServicoSelecionado?.Id.ToString() ?? "null")}");
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
@@ -663,11 +671,14 @@ namespace AgendaNovo
                 });
             }
             CarregarDadosDoBanco();
+            ServicoSelecionado = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0);
+            Pacoteselecionado = _pacoteService.GetById(NovoAgendamento.PacoteId ?? 0);
+            if (ServicoSelecionado == null)
+                Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
             OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
             FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
-            LimparCampos();
             OnPropertyChanged(nameof(ListaAgendamentos));
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -675,6 +686,10 @@ namespace AgendaNovo
             }), System.Windows.Threading.DispatcherPriority.Background);
 
 
+        }
+        partial void OnNovoAgendamentoChanged(Agendamento value)
+        {
+            Debug.WriteLine($"🟡 NovoAgendamento atribuído. ServicoId: {value?.ServicoId}");
         }
         [RelayCommand]
         private void Editar()

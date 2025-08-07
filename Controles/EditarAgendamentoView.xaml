@@ -28,21 +28,21 @@
                          IsEditable="True" IsTextSearchEnabled="True"
                         hc:InfoElement.Placeholder="Servico" Margin="10"
                          ItemsSource="{Binding ListaServicos}" DisplayMemberPath="Nome" SelectedValuePath="Id"
-                         SelectedValue="{Binding NovoAgendamento.ServicoId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                         SelectedItem="{Binding ServicoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <!-- Pacote -->
                 <hc:ComboBox ItemsSource="{Binding ListaPacotesFiltrada}"              SelectedValuePath="Id"
-                      SelectedValue="{Binding NovoAgendamento.PacoteId}" hc:InfoElement.Placeholder="Pacote"
+                      SelectedItem="{Binding Pacoteselecionado,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" hc:InfoElement.Placeholder="Pacote"
                       DisplayMemberPath="Nome"/>
 
                 <!-- Tema -->
                 <hc:TextBox Text="{Binding NovoAgendamento.Tema}" hc:InfoElement.Placeholder="Tema" Margin="10"/>
 
                 <TextBlock Text="Valor:" HorizontalAlignment="Center" Foreground="White" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding NovoAgendamento.Valor}" Width="200"/>
+                <TextBox Text="{Binding NovoAgendamento.Valor, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="200"/>
                 <!-- Valor -->
                 <TextBlock Text="Valor Pago:" HorizontalAlignment="Center" Foreground="White" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding NovoAgendamento.ValorPago}" Width="200"/>
+                <TextBox Text="{Binding NovoAgendamento.ValorPago, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
                 <!-- Botões -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">

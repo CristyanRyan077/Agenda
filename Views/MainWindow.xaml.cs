@@ -88,8 +88,6 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
-
             if (_janelaClientes == null || !_janelaClientes.IsLoaded)
             {
                 _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
