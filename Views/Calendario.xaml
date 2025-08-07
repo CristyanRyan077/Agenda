@@ -3,13 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:vm="clr-namespace:AgendaNovo.ViewModels"
+                xmlns:models="clr-namespace:AgendaNovo.Models"
+        xmlns:conv="clr-namespace:AgendaNovo.Converters"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo.Views"
-        xmlns:models="clr-namespace:AgendaNovo.Models"
         mc:Ignorable="d" MinHeight="900" MinWidth="1200"
         d:DataContext="{d:DesignInstance Type=vm:CalendarioViewModel}"
         WindowState="Maximized"
-        Title="Calendario" >
+        Title="Calendario">
+
+
 
     <Grid Background="#FF333333">
         <Grid>
@@ -195,24 +198,37 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate DataType="{x:Type models:DiaCalendario}">
                         <Border Name="Dia" BorderBrush="Gray" BorderThickness="0.5" Background="{Binding CorFundo}"
                         AllowDrop="True"
+                        DragLeave="Dia_DragLeave"
+                        ToolTip="{Binding Agendamentos.Count, StringFormat={}{0} agendamentos}"
+                        DragOver="Dia_DragOver" Drop="Dia_Drop"
                         MouseDown="Dia_MouseDown">
                             <StackPanel Margin="5">
                                 <TextBlock Text="{Binding Data.Day}" FontWeight="Bold"/>
-                                <!-- Indicadores múltiplos -->
-                                <ItemsControl ItemsSource="{Binding Agendamentos}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel>
-                                               
-                                                <TextBlock Text="{Binding Cliente.Nome}" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                                                <Ellipse Width="8" Height="8" Fill="{Binding Cor}" Margin="1"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <ScrollViewer MaxHeight="70"
+                                            VerticalScrollBarVisibility="Auto"
+                                            HorizontalScrollBarVisibility="Disabled"
+                                            Margin="0,4,0,0">
+                                    <ItemsControl ItemsSource="{Binding Agendamentos}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel PreviewMouseMove="Agendamento_PreviewMouseMove"
+                                                          Cursor="Hand"
+                                                          Orientation="Horizontal"
+                                                          Margin="0,2">
+                                                    <TextBlock Text="{Binding Cliente.Nome}"
+                                                           FontSize="12"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                    <Ellipse Width="8" Height="8"
+                                                                 Fill="{Binding Cor}"
+                                                                 Margin="4,0,0,0"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

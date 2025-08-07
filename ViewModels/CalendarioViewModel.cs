@@ -32,6 +32,7 @@ namespace AgendaNovo.ViewModels
         IPacoteService pacoteService,
         IServicoService servicoService)
         {
+
             AgendaViewModel = agendaViewModel;
             _agendamentoService = agendamentoService;
             _clienteService = clienteService;
@@ -43,6 +44,17 @@ namespace AgendaNovo.ViewModels
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();
             Debug.WriteLine($"CalendarioViewModel Agenda ID: {AgendaViewModel.GetHashCode()}");
+            MoverAgendamentoCommand = new RelayCommand<(Agendamento, DateTime)>(param =>
+            {
+                var (ag, novaData) = param;
+                // mantém o horário atual:
+                TimeSpan horario = ag.Horario ?? TimeSpan.Zero;
+                ag.Data = novaData;
+                ag.Horario = horario;
+                _agendamentoService.Update(ag);
+                RefreshCalendar();
+            });
+            RefreshCalendar();
         }
         public IAgendamentoService AgendamentoService => _agendamentoService;
         public IClienteService ClienteService => _clienteService;
@@ -52,7 +64,9 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty]
         private ObservableCollection<DiaCalendario> diasDoMes = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosDoDiaSelecionado;
-
+        public ObservableCollection<Agendamento> ListaAgendamentos { get; } = new();
+        public IRelayCommand<(Agendamento ag, DateTime novaData)> MoverAgendamentoCommand { get; }
+        public ObservableCollection<Crianca> ListaCriancas { get; } = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
 
         [ObservableProperty] private object telaEditarAgendamento;
@@ -67,7 +81,31 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Cliente clienteSelecionado;
         [ObservableProperty] private Agendamento agendamentoSelecionado;
         [ObservableProperty] private bool detalhesVisiveis;
-        
+        public void RefreshCalendar()
+        {
+            // 1) Recarrega só os agendamentos
+            var todos = _agendamentoService.GetAll().OrderBy(a => a.Horario).ToList();
+            ListaAgendamentos.Clear();
+            foreach (var a in todos)
+                ListaAgendamentos.Add(a);
+
+            // 2) Atualiza cada célula DiaDoMesViewModel (só a lista de agendamentos de cada dia)
+            foreach (var diaVm in DiasDoMes)
+            {
+                var agsNoDia = todos
+                    .Where(a => a.Data.Date == diaVm.Data.Date)
+                    .ToList();
+
+                diaVm.Agendamentos.Clear();
+                foreach (var a in agsNoDia)
+                    diaVm.Agendamentos.Add(a);
+            }
+
+
+            var agendaVM = AgendaViewModel;
+            agendaVM.AtualizarAgendamentos();
+        }
+
         [RelayCommand]
         private void Buscar()
         {
@@ -95,6 +133,11 @@ namespace AgendaNovo.ViewModels
             MostrarEditarAgendamento = false;
             TelaEditarAgendamento = null;
         }
+
+        partial void OnClienteSelecionadoChanged(Cliente value)
+        {
+            AtualizarCriancasDoCliente(value);
+        }
         public void EditarAgendamentoSelecionado()
         {
             if (AgendamentoSelecionado == null) return;
@@ -105,7 +148,6 @@ namespace AgendaNovo.ViewModels
             if (agendamentoCompleto == null) return;
 
             agendaVM.NovoAgendamento = agendamentoCompleto;
-
             agendaVM.DataSelecionada = agendamentoCompleto.Data;
             agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
             agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
@@ -117,6 +159,7 @@ namespace AgendaNovo.ViewModels
         if (agendamentoCompleto.ServicoId.HasValue)
             agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
             agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
+
 
             agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
             agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
@@ -147,6 +190,17 @@ namespace AgendaNovo.ViewModels
                 TipoSelecionado = TipoBusca.Agendamento;
                 DetalhesVisiveis = true;
             }
+        }
+
+        private void AtualizarCriancasDoCliente(Cliente cliente)
+        {
+            ListaCriancas.Clear();
+            if (cliente is null) return;
+
+            // Busca de banco e adiciona ao ObservableCollection
+            var crs = _criancaService.GetByClienteId(cliente.Id);
+            foreach (var cr in crs)
+                ListaCriancas.Add(cr);
         }
         private void BuscarAgendamento()
         {
@@ -193,16 +247,19 @@ namespace AgendaNovo.ViewModels
             for (int i = 0; i < diasNoMes; i++)
             {
                 var data = primeiroDia.AddDays(i);
-                var agendamentosDoDia = agendamentosDoMes.Where(a => a.Data.Date == data.Date).ToList();
+                var itens = agendamentosDoMes.Where(a => a.Data.Date == data.Date).ToList();
 
-                DiasDoMes.Add(new DiaCalendario
+                var diaVm = new DiaCalendario(data)
                 {
-                    Data = data,
-                    Agendamentos = new ObservableCollection<Agendamento>(agendamentosDoDia),
                     TemEvento = VerificarSeTemEvento(data),
-                    DescricaoEvento = ObterDescricao(data),
-                    //CorEvento = VerCor(data)
-                });
+                    DescricaoEvento = ObterDescricao(data)
+                };
+
+                // em vez de reatribuir, preencha a coleção já existente:
+                foreach (var ag in itens)
+                    diaVm.Agendamentos.Add(ag);
+
+                DiasDoMes.Add(diaVm);
             }
         }
 

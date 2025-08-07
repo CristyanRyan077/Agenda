@@ -733,7 +733,8 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ListaAgendamentos));
             if (ServicoSelecionado == null)
                 Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
-
+            NovoAgendamento = new Agendamento { Data = DataSelecionada };
+            OnPropertyChanged(nameof(NovoAgendamento));
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 ItemSelecionado = null;

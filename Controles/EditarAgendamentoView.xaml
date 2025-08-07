@@ -20,6 +20,9 @@
                 <hc:TextBox Margin="10" hc:InfoElement.Placeholder="Cliente" Foreground="Black"
                          Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
+                <hc:TextBox Margin="10" hc:InfoElement.Placeholder="Crianca" Foreground="Black"
+                         Text="{Binding CriancaSelecionada.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
                 <!-- Horário -->
                 <hc:ComboBox ItemsSource="{Binding HorariosDisponiveis}" hc:InfoElement.Placeholder="Horario"
                       SelectedItem="{Binding HorarioTexto}" Width="150"/>

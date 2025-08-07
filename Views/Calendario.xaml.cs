@@ -55,5 +55,51 @@ namespace AgendaNovo.Views
                 vm.EditarAgendamentoSelecionado();
             }
         }
+        private void Agendamento_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+            var panel = (FrameworkElement)sender;
+            var ag = (Agendamento)panel.DataContext;
+            // inicia o drag com o próprio objeto Agendamento
+            DragDrop.DoDragDrop(panel, ag, DragDropEffects.Move);
+        }
+        private void Dia_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Agendamento)))
+            {
+                e.Effects = DragDropEffects.Move;
+                var border = (Border)sender;
+                // cor provisória enquanto está arrastando por cima
+                border.Background = Brushes.LightBlue;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            e.Handled = true;
+        }
+
+        private void Dia_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(Agendamento))) return;
+
+            var ag = (Agendamento)e.Data.GetData(typeof(Agendamento));
+            // O DataContext do Border é o "ViewModel de dia" que expõe a propriedade Data (DateTime)
+            var cellVm = (DiaCalendario)((FrameworkElement)sender).DataContext;
+            DateTime novaData = cellVm.Data;
+
+            // Dispara um comando na VM de calendário:
+            var vm = (CalendarioViewModel)DataContext;
+            vm.MoverAgendamentoCommand.Execute((ag, novaData));
+
+            var border = (Border)sender;
+            border.ClearValue(Border.BackgroundProperty);
+        }
+        private void Dia_DragLeave(object sender, DragEventArgs e)
+        {
+            var border = (Border)sender;
+            border.ClearValue(Border.BackgroundProperty);
+        }
     }
 }
