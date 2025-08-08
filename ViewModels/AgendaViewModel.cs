@@ -282,13 +282,6 @@ namespace AgendaNovo
 
 
 
-
-        [RelayCommand]
-        private void LimparAnteriores()
-        {
-            
-        }
-
         private DayOfWeek _diaAtual;
         public DayOfWeek DiaAtual
         {
@@ -382,13 +375,18 @@ namespace AgendaNovo
         {
             if (NovoAgendamento?.Id != 0)
                 return;
+            NovoAgendamento.Data = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             ItemSelecionado = null;
+            NovoAgendamento.ServicoId = 0;
+            NovoAgendamento.PacoteId = 0;
+            NovoAgendamento.Valor = 0;
+            NovoAgendamento.ValorPago = 0;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
             Pacoteselecionado = null;
             NomeDigitado = string.Empty;
             NovoCliente = new Cliente();
-            NovoCliente.Id = 0;
+            NovoAgendamento.CriancaId = null;
             HorarioTexto = string.Empty;
 
             CriancaSelecionada = new Crianca();
@@ -733,12 +731,12 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ListaAgendamentos));
             if (ServicoSelecionado == null)
                 Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
-            NovoAgendamento = new Agendamento { Data = DataSelecionada };
             OnPropertyChanged(nameof(NovoAgendamento));
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 ItemSelecionado = null;
             }, System.Windows.Threading.DispatcherPriority.Background);
+            NovoAgendamento = new Agendamento { Data = DataSelecionada };
             Debug.WriteLine($"🧾 Finalizando Agendamento -> ServicoId: {NovoAgendamento.ServicoId}, PacoteId:" +
                 $" {NovoAgendamento.PacoteId}, ClienteId: {NovoAgendamento.ClienteId}, CriancaId: {NovoAgendamento.CriancaId}");
         }

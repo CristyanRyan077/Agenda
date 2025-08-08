@@ -13,7 +13,7 @@
         Title="Calendario">
 
 
-
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
     <Grid Background="#FF333333">
         <Grid>
             <Grid.RowDefinitions>
@@ -94,7 +94,7 @@
 
 
             <DataGrid Grid.Row="3" Grid.ColumnSpan="4" Grid.Column="0"
-          Height="200"
+          Height="250"
           ItemsSource="{Binding AgendamentosDoDiaSelecionado}"
           SelectedItem="{Binding AgendamentoSelecionado, Mode=TwoWay}"
           AutoGenerateColumns="False"
@@ -138,7 +138,7 @@
                 </DataGrid.Resources>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
                     <DataGridTextColumn Header="Horário" Binding="{Binding Horario, StringFormat=\{0:hh\\:mm\}}" Width="70"/>
                     <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" Width="120"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding Cliente.Email}" Width="150"/>
@@ -170,7 +170,7 @@
 
 
             <!-- Navegação -->
-            <StackPanel Orientation="Horizontal" Grid.Column="1"  Grid.Row="0" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="0,30,0,0"  Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
                 <Button Command="{Binding VoltarMesCommand}" Content="◀" Margin="0,0,0,0"/>
                 <TextBlock Text="{Binding MesAtual,Converter={StaticResource MesAnoPtBrConverter},  StringFormat={}{0:MMMM yyyy}}"                          
                            Width="135"
@@ -180,7 +180,7 @@
             </StackPanel>
 
             <!-- Cabeçalho dos dias -->
-            <UniformGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Columns="7">
+            <UniformGrid Grid.Row="0" VerticalAlignment="Bottom" Grid.Column="0" Grid.ColumnSpan="3" Columns="7">
                 <TextBlock Text="Dom" Foreground="White" TextAlignment="Center"/>
                 <TextBlock Text="Seg" Foreground="White" TextAlignment="Center"/>
                 <TextBlock Text="Ter" Foreground="White" TextAlignment="Center"/>
@@ -191,7 +191,7 @@
             </UniformGrid>
 
             <!-- Dias do mês -->
-            <ItemsControl Grid.Row="2" Grid.ColumnSpan="3" Foreground="White" ItemsSource="{Binding DiasDoMes}">
+            <ItemsControl Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="3" Foreground="White" ItemsSource="{Binding DiasDoMes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="7"/>
@@ -199,18 +199,23 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:DiaCalendario}">
-                        <Border Name="Dia" BorderBrush="Gray" BorderThickness="0.5" Background="{Binding CorFundo}"
+                        <Border Name="Dia" Height="100" BorderBrush="Gray" BorderThickness="0.5" Background="{Binding CorFundo}"
                         AllowDrop="True"
                         DragLeave="Dia_DragLeave"
-                        ToolTip="{Binding Agendamentos.Count, StringFormat={}{0} agendamentos}"
                         DragOver="Dia_DragOver" Drop="Dia_Drop"
                         MouseDown="Dia_MouseDown">
-                            <StackPanel Margin="5">
-                                <TextBlock Text="{Binding Data.Day}" FontWeight="Bold"/>
-                                <ScrollViewer MaxHeight="70"
+                            <Grid Margin="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- Dia -->
+                                    <RowDefinition Height="*"/>
+                                    <!-- Lista de agendamentos -->
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding Data.Day}" FontWeight="Bold"/>
+                                <ScrollViewer Grid.Row="1" 
                                             VerticalScrollBarVisibility="Auto"
-                                            HorizontalScrollBarVisibility="Disabled"
-                                            Margin="0,4,0,0">
+                                            HorizontalScrollBarVisibility="Auto"
+                                            Margin="0,0,10,0">
                                     <ItemsControl ItemsSource="{Binding Agendamentos}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -218,9 +223,14 @@
                                                           Cursor="Hand"
                                                           Orientation="Horizontal"
                                                           Margin="0,2">
+                                                    <TextBlock Text="{Binding Horario,StringFormat=\{0:hh\\:mm\},
+                                                        UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <TextBlock Text="-" Margin="3,0,3,0"/>
                                                     <TextBlock Text="{Binding Cliente.Nome}"
                                                            FontSize="12"
                                                            TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text=":" Margin="3,0,3,0"/>
+                                                    <TextBlock Text="{Binding Servico.Nome}"/>
                                                     <Ellipse Width="8" Height="8"
                                                                  Fill="{Binding Cor}"
                                                                  Margin="4,0,0,0"/>
@@ -229,11 +239,12 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </ScrollViewer>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
     </Grid>
+    </ScrollViewer>
 </Window>
