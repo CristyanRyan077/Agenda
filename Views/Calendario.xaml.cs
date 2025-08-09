@@ -27,6 +27,7 @@ namespace AgendaNovo.Views
         {
             InitializeComponent();
             DataContext = vm;
+
         }
 
         private void Dia_MouseDown(object sender, MouseButtonEventArgs e)

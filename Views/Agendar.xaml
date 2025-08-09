@@ -86,14 +86,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                        <hc:ComboBox Name="txtservico" Width="310" Height="60"
-                               IsEditable="True" IsTextSearchEnabled="True"
-                     
-                  hc:InfoElement.Placeholder="Servico"
-                   ItemsSource="{Binding ListaServicos}" DisplayMemberPath="Nome" SelectedValuePath="Id"
-                   SelectedItem="{Binding ServicoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                   Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                   BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Left" Grid.ColumnSpan="3"/>
+                    <controles:ServicosAutoComplete VerticalAlignment="Center" />
 
                     <hc:ComboBox Name="txtpacote" Width="305" Height="60"
                                               IsEditable="True" IsTextSearchEnabled="True"

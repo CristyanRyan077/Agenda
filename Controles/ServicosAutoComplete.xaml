@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="AgendaNovo.Controles.ServicosAutoComplete"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AgendaNovo.Controles"
+             mc:Ignorable="d" 
+            xmlns:vm="clr-namespace:AgendaNovo"
+            d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
+            xmlns:hc="https://handyorg.github.io/handycontrol"
+             Height="auto" Width="auto">
+    <Grid>
+        <TextBox x:Name="AutoCompleteBox"
+                 Grid.Column="0" Width="310" Height="60"
+                 Text="{Binding ServicoDigitado, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalAlignment="Top"
+                 Padding="5"
+                 TextChanged="AutoCompleteBox_TextChanged"
+                 GotFocus="AutoCompleteBox_GotFocus"
+                 LostFocus="AutoCompleteBox_LostFocus"
+                 MinWidth="200"
+                 TextSearch.TextPath="Nome"
+                 Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                 BorderBrush="Black" SelectionTextBrush="Black"/>
+
+        <Popup PlacementTarget="{Binding ElementName=AutoCompleteBox}"
+               IsOpen="{Binding MostrarSugestoesServico}"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="Slide">
+            <Border Background="White" BorderBrush="Gray" BorderThickness="1" MaxHeight="150">
+                <ListBox ItemsSource="{Binding ServicosFiltrados}"
+         SelectedItem="{Binding ServicoSelecionado, Mode=TwoWay}"
+         LostFocus="AutoCompleteBox_LostFocus">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{Binding Nome}" FontWeight="Bold" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+        </Popup>
+        <TextBlock x:Name="PlaceholderText"
+               Text="Servico"
+               FontSize="24"
+               Foreground="White"
+               Opacity="0.5"
+               FontFamily="#heveltica" FontWeight="Bold"
+               VerticalAlignment="Center"
+               Padding="5"
+               IsHitTestVisible="False" 
+               Visibility="Visible"/>
+    </Grid>
+</UserControl>

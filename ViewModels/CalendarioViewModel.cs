@@ -11,7 +11,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AgendaNovo.ViewModels
 {
@@ -43,7 +45,6 @@ namespace AgendaNovo.ViewModels
             MesAtual = DateTime.Today;
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();
-            Debug.WriteLine($"CalendarioViewModel Agenda ID: {AgendaViewModel.GetHashCode()}");
             MoverAgendamentoCommand = new RelayCommand<(Agendamento, DateTime)>(param =>
             {
                 var (ag, novaData) = param;
@@ -56,6 +57,7 @@ namespace AgendaNovo.ViewModels
             });
             RefreshCalendar();
         }
+
         public IAgendamentoService AgendamentoService => _agendamentoService;
         public IClienteService ClienteService => _clienteService;
         public ICriancaService CriancaService => _criancaService;
@@ -231,14 +233,25 @@ namespace AgendaNovo.ViewModels
             MesAtual = MesAtual.AddMonths(-1);
             CarregarDias();
         }
-
+        public ObservableCollection<string> DiasSemana { get; set; } = new();
         private void CarregarDias()
         {
+            DiasSemana.Clear();
             DiasDoMes.Clear();
+
+            string[] diasSemana = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
 
             var primeiroDia = new DateTime(MesAtual.Year, MesAtual.Month, 1);
             var ultimoDia = primeiroDia.AddMonths(1).AddDays(-1);
             var diasNoMes = DateTime.DaysInMonth(MesAtual.Year, MesAtual.Month);
+
+
+            int startIndex = (int)primeiroDia.DayOfWeek;
+            var ordemDias = diasSemana.Skip(startIndex).Concat(diasSemana.Take(startIndex)).ToList();
+            foreach (var dia in ordemDias)
+                DiasSemana.Add(dia);
+
+
             var agendamentosDoMes = _agendamentoService.
                 GetAll().
                 Where(a => a.Data.Date >= primeiroDia && a.Data.Date <= ultimoDia)
@@ -255,7 +268,6 @@ namespace AgendaNovo.ViewModels
                     DescricaoEvento = ObterDescricao(data)
                 };
 
-                // em vez de reatribuir, preencha a coleção já existente:
                 foreach (var ag in itens)
                     diaVm.Agendamentos.Add(ag);
 

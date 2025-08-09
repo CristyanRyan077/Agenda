@@ -7,6 +7,9 @@
     <Compile Update="Controles\EditarAgendamentoView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Controles\ServicosAutoComplete.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Calendario.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

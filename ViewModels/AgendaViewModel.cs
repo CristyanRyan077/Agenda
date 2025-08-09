@@ -55,6 +55,7 @@ namespace AgendaNovo
         [ObservableProperty]
         private bool usuarioDigitouNome;
         public ObservableCollection<Cliente> ClientesFiltrados { get; set; } = new();
+        public ObservableCollection<Servico> ServicosFiltrados { get; set; } = new();
 
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
@@ -76,11 +77,16 @@ namespace AgendaNovo
         [ObservableProperty]
         private string nomeDigitado = string.Empty;
         [ObservableProperty]
+        private string servicoDigitado = string.Empty;
+        [ObservableProperty]
         private bool ignorarProximoTextChanged;
         [ObservableProperty] private bool mostrarCheck;
 
         [ObservableProperty]
         private bool mostrarSugestoes = false;
+
+        [ObservableProperty]
+        private bool mostrarSugestoesServico = false;
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
@@ -120,7 +126,7 @@ namespace AgendaNovo
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
             if (_populandoCampos) return;
-            Debug.WriteLine($"🔧 Setando IDs -> ServicoId: {(ServicoSelecionado?.Id.ToString() ?? "null")}, PacoteId: {(Pacoteselecionado?.Id.ToString() ?? "null")}");
+            ServicoDigitado = value?.Nome ?? string.Empty;
             if (value == null)
             {
                 NovoAgendamento.ServicoId = null;
@@ -163,6 +169,20 @@ namespace AgendaNovo
                 ClientesFiltrados.Add(cliente);
 
             MostrarSugestoes = ClientesFiltrados.Any();
+        }
+        partial void OnServicoDigitadoChanged(string value)
+        {
+            var termo = value?.ToLower() ?? "";
+            var filtrados = ListaServicos
+                .Where(c =>
+            (!string.IsNullOrEmpty(c.Nome) && c.Nome.ToLower().Contains(termo)))
+                .ToList();
+
+            ServicosFiltrados.Clear();
+            foreach (var servico in filtrados)
+                ServicosFiltrados.Add(servico);
+
+            MostrarSugestoesServico = ListaServicos.Any();
         }
         partial void OnPacoteselecionadoChanged(Pacote? value)
         {
@@ -385,6 +405,7 @@ namespace AgendaNovo
             ServicoSelecionado = null;
             Pacoteselecionado = null;
             NomeDigitado = string.Empty;
+            servicoDigitado = string.Empty;
             NovoCliente = new Cliente();
             NovoAgendamento.CriancaId = null;
             HorarioTexto = string.Empty;
