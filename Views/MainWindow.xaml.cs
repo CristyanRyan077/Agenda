@@ -67,7 +67,6 @@ namespace AgendaNovo
 
             if (DataContext is AgendaViewModel vm)
             {
-                vm.LimparCamposCommand.Execute(null);
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
                     _janelaAgenda = new Agendar(vm); 
@@ -88,8 +87,6 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
-
             if (_janelaClientes == null || !_janelaClientes.IsLoaded)
             {
                 _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
@@ -108,8 +105,6 @@ namespace AgendaNovo
         {
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
-
-            (DataContext as AgendaViewModel)?.LimparCamposCommand.Execute(null);
 
             if (_calendario == null || !_calendario.IsLoaded)
             {

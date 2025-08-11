@@ -10,23 +10,34 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AgendaNovo.Views
+namespace AgendaNovo.Controles
 {
     /// <summary>
-    /// Lógica interna para EditarAgendamento.xaml
+    /// Interação lógica para EditarAgendamentoView.xam
     /// </summary>
-    public partial class EditarAgendamento : Window
+    public partial class EditarAgendamentoView : UserControl
     {
-        public EditarAgendamento()
+        public event EventHandler? FecharSolicitado;
+        public EditarAgendamentoView()
         {
             InitializeComponent();
+        }
+        private void OnFechar()
+        {
+            FecharSolicitado?.Invoke(this, EventArgs.Empty);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            OnFechar();
+        }
 
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            OnFechar();
         }
     }
 }

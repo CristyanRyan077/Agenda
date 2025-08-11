@@ -41,6 +41,7 @@
                 <Button Name="btnCalendario" Height="60" Padding="4" Margin="10,0,0,0"
                         BorderBrush="Black" FontSize="14" Click="btnCalendario_Click">
                     <StackPanel>
+                        <materialDesign:PackIcon Kind="Calendar" Height="32" Width="69"  />
                         <TextBlock FontWeight="Bold" Foreground="Green">Calendario</TextBlock>
                     </StackPanel>
                 </Button>

@@ -33,8 +33,6 @@ namespace AgendaNovo
             _vm = vm;
             DataContext = _vm;
             Debug.WriteLine($"ViewModel ID: {_vm.GetHashCode()}");
-
-            _vm.Inicializar();
         }
      
 

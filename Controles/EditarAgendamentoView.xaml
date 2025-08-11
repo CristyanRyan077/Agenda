@@ -1,0 +1,213 @@
+﻿<UserControl x:Class="AgendaNovo.Controles.EditarAgendamentoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+                     xmlns:vm="clr-namespace:AgendaNovo"
+             xmlns:controles="clr-namespace:AgendaNovo.Controles"
+             d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
+             xmlns:agendanovo="clr-namespace:AgendaNovo"
+             mc:Ignorable="d" 
+                     MinWidth="700" MinHeight="600"
+             d:DesignHeight="650" d:DesignWidth="1200">
+    <Grid>
+        <Grid Background="#333">
+            <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Height="40">
+                    <TextBlock HorizontalAlignment="Center" FontSize="22" Foreground="White" Text="Editar Agendamento"/>
+                </StackPanel>
+
+                <!-- Linha 1: Cliente e Telefone -->
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <hc:TextBox VerticalAlignment="Center"
+                                Width="305" Height="60"
+                                IsReadOnly="True"
+                                Text="{Binding NovoCliente.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                                BorderBrush="Transparent" SelectionTextBrush="Black">
+                        
+                    </hc:TextBox>
+
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Account"
+                                             
+                                   Width="46" Height="46" VerticalAlignment="Center"
+                                   Foreground="White" Margin="248,0,0,0"/>
+
+                    <hc:TextBox Name="txtTelefone" Grid.Column="1" Width="305" Height="60"
+                       hc:InfoElement.Placeholder="Telefone"
+                       Text="{Binding NovoCliente.Telefone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                       IsReadOnly="True"
+                       Background="#88D1D3D8" Foreground="Black"   FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                       BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Grid.Column="  1" Kind="Phone"
+                                   Width="34" Height="34"
+                                   HorizontalAlignment="Right"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Linha 2: Pacote e Horário -->
+                <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <hc:ComboBox Name="txtservico"                        
+                        hc:InfoElement.Placeholder="Servico"
+                                 Width="305" Height="60"
+                         ItemsSource="{Binding ListaServicos}" DisplayMemberPath="Nome" SelectedValuePath="Id"
+                                 Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                                 BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Left"
+                         SelectedItem="{Binding ServicoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <hc:ComboBox Name="txtpacote" Width="305" Height="60"
+                                        IsEditable="True" IsTextSearchEnabled="True"
+                               DisplayMemberPath="Nome"
+                           hc:InfoElement.Placeholder="Pacote"
+                            ItemsSource="{Binding ListaPacotesFiltrada}"
+                            SelectedItem="{Binding Pacoteselecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                            BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Right" Grid.ColumnSpan="3"/>
+
+
+                </Grid>
+
+                <!-- Linha 3: Tema e Valores -->
+                <Grid Grid.Row="3" Grid.Column="0" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <hc:TextBox Grid.Column="0" Width="281" Height="60" Margin="0,0,0,0"
+                        hc:InfoElement.Placeholder="Tema" HorizontalAlignment="Left"
+                        Text="{Binding NovoAgendamento.Tema}"
+                        Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                        BorderBrush="Black" SelectionTextBrush="Black">
+                    </hc:TextBox>
+
+                    <hc:TextBox Name="txtValor" Grid.Column="1" Width="180" Height="60"
+                      hc:InfoElement.Placeholder="Valor" HorizontalAlignment="Left"
+                       Text="{Binding NovoAgendamento.Valor, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged}"
+                      IsReadOnly="True"
+                      Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                      BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" HorizontalAlignment="Right"/>
+
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPago, UpdateSourceTrigger=PropertyChanged }"
+                      Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
+                      hc:InfoElement.Placeholder="Pago"
+                        Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                        BorderBrush="Transparent" SelectionTextBrush="Black"/>
+                    <materialDesign:PackIcon Kind="CashCycle" Opacity="0.3" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Width="32" Height="32" Foreground="#FFA6FF9F"/>
+
+
+                </Grid>
+
+
+
+                <!-- Linha 4: Criança -->
+                <Grid Visibility="{Binding MostrarCrianca,
+                   Converter={StaticResource BoolToVisibilityConverter}
+                   }"  Grid.Row="4" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <!-- Criança -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Gênero -->
+                        <ColumnDefinition Width="1*"/>
+                        <!-- Idade -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Criança -->
+                    <Grid Grid.Column="0">
+                        <hc:ComboBox  Name="txtcrianca"
+                                       Height="60" Width="300"
+                                      ToolTip="obs: se cliente tiver +1 de crianca, terá que ser selecionado os dados da crianca manualmente"
+                                       hc:InfoElement.Placeholder="Criança"
+                                       IsEditable="False" Margin="0,0,10,0"
+                                       DisplayMemberPath="Nome"
+                                       ItemsSource="{Binding ListaCriancas}"     
+                                       SelectedItem="{Binding CriancaSelecionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
+                                       FontSize="24" FontWeight="Bold" BorderBrush="Black"
+                                       SelectionTextBrush="Black" />
+                        <materialDesign:PackIcon Kind="BabyFaceOutline"
+                           Width="24" Height="24"
+                           Margin="252,0,0,0"
+                           Foreground="#FF00EDFF" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Gênero -->
+                    <hc:ComboBox Grid.Column="2" Height="60"
+                   hc:InfoElement.Placeholder="Gênero" Width="100"
+                   ItemsSource="{Binding GenerosLista}"
+                   SelectedItem="{Binding CriancaSelecionada.Genero, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                   FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
+                   BorderBrush="Transparent" SelectionTextBrush="Black"
+                        />
+
+
+                    <!-- Idade -->
+                    <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Left">
+                        <hc:TextBox Width="90" Height="60" hc:InfoElement.Placeholder="Idade" Margin="0,0,5,0"
+                        Text="{Binding CriancaSelecionada.Idade, UpdateSourceTrigger=PropertyChanged}"
+                           Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Left"
+                          FontFamily="#heveltica" FontSize="17" FontWeight="Bold"
+                          BorderBrush="Transparent" SelectionTextBrush="Black"/>
+
+                        <ComboBox Width="90" Height="60"
+                                    Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Right"
+                                    FontFamily="#heveltica" FontSize="18" FontWeight="Bold"
+                                    BorderBrush="Transparent"
+                                    ItemsSource="{Binding IdadesUnidadeDisponiveis}"
+                                    SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Grid>
+                
+                <Grid Grid.Row="5">
+                <hc:ComboBox Grid.Column="0" Grid.Row="5" Width="140" Height="60" HorizontalAlignment="Left"
+                hc:InfoElement.Placeholder="Horário" Margin="0,0,0,10" VerticalAlignment="Top"
+              ItemsSource="{Binding HorariosDisponiveis}" 
+              SelectedItem="{Binding HorarioTexto,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+               IsSynchronizedWithCurrentItem="False"
+               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+               BorderBrush="Transparent" SelectionTextBrush="Black"/>
+
+                <hc:TextBox Grid.Column="0" Text="{Binding NovoCliente.Observacao,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="5" Width="330" Height="90" HorizontalAlignment="Center"
+                 TextWrapping="Wrap"
+                AcceptsReturn="True"
+                VerticalScrollBarVisibility="Auto"
+                hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
+               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"/>
+
+                </Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="6" Margin="0,20,0,0">
+                    <Button Content="Excluir" Background="Red" Width="120" Height="30" Command="{Binding ExcluirCommand}" Click="Button_Click_1" />
+                    <Button Content="Salvar" Background="Green" Width="120" Height="30" Command="{Binding AgendarCommand}" Click="Button_Click"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

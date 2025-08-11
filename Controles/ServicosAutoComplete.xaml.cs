@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AgendaNovo.Views.Controles
+namespace AgendaNovo.Controles
 {
     /// <summary>
-    /// Interação lógica para ClienteAutoComplete.xam
+    /// Interação lógica para ServicosAutoComplete.xam
     /// </summary>
-    public partial class ClienteAutoComplete : UserControl
+    public partial class ServicosAutoComplete : UserControl
     {
-        public ClienteAutoComplete()
+        public ServicosAutoComplete()
         {
             InitializeComponent();
             Loaded += (s, e) =>
@@ -38,9 +37,9 @@ namespace AgendaNovo.Views.Controles
         {
             var vm = DataContext as AgendaViewModel;
             if (vm != null)
-                vm.MostrarSugestoes = false; // Fecha o Popup
+                vm.MostrarSugestoesServico = false; // Fecha o Popup
         }
-       
+
         private void AutoCompleteBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var vm = DataContext as AgendaViewModel;
@@ -59,8 +58,8 @@ namespace AgendaNovo.Views.Controles
             if (!AutoCompleteBox.IsKeyboardFocusWithin && string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
                 PlaceholderText.Visibility = Visibility.Visible;
             var vm = DataContext as AgendaViewModel;
-            if (vm != null )
-                vm.MostrarSugestoes = false;
+            if (vm != null)
+                vm.MostrarSugestoesServico = false;
 
         }
 
@@ -75,5 +74,15 @@ namespace AgendaNovo.Views.Controles
                 : Visibility.Collapsed;
         }
 
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is AgendaViewModel vm)
+            {
+                vm.IgnorarProximoTextChanged = true; // evita refiltrar ao popular o TextBox
+                vm.MostrarSugestoesServico = false;
+            }
+        }
     }
+
+
 }
