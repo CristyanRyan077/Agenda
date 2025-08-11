@@ -37,7 +37,7 @@ namespace AgendaNovo.Controles
         {
             var vm = DataContext as AgendaViewModel;
             if (vm != null)
-                vm.MostrarSugestoes = false; // Fecha o Popup
+                vm.MostrarSugestoesServico = false; // Fecha o Popup
         }
 
         private void AutoCompleteBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -59,7 +59,7 @@ namespace AgendaNovo.Controles
                 PlaceholderText.Visibility = Visibility.Visible;
             var vm = DataContext as AgendaViewModel;
             if (vm != null)
-                vm.MostrarSugestoes = false;
+                vm.MostrarSugestoesServico = false;
 
         }
 
@@ -74,6 +74,14 @@ namespace AgendaNovo.Controles
                 : Visibility.Collapsed;
         }
 
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is AgendaViewModel vm)
+            {
+                vm.IgnorarProximoTextChanged = true; // evita refiltrar ao popular o TextBox
+                vm.MostrarSugestoesServico = false;
+            }
+        }
     }
 
 

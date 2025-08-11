@@ -27,10 +27,12 @@
                IsOpen="{Binding MostrarSugestoesServico}"
                StaysOpen="False"
                AllowsTransparency="True"
+               DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                PopupAnimation="Slide">
             <Border Background="White" BorderBrush="Gray" BorderThickness="1" MaxHeight="150">
                 <ListBox ItemsSource="{Binding ServicosFiltrados}"
-         SelectedItem="{Binding ServicoSelecionado, Mode=TwoWay}"
+                         SelectionChanged="ListBox_SelectionChanged"
+         SelectedItem="{Binding ServicoSelecionado, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
          LostFocus="AutoCompleteBox_LostFocus">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

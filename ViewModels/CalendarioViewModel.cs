@@ -63,6 +63,8 @@ namespace AgendaNovo.ViewModels
         public ICriancaService CriancaService => _criancaService;
         public IPacoteService PacoteService => _pacoteService;
         public IServicoService ServicoService => _servicoService;
+
+        public IEnumerable<ServicoLegenda> GlossarioServicos => ServicoPalette.All;
         [ObservableProperty]
         private ObservableCollection<DiaCalendario> diasDoMes = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosDoDiaSelecionado;
@@ -143,13 +145,14 @@ namespace AgendaNovo.ViewModels
         public void EditarAgendamentoSelecionado()
         {
             if (AgendamentoSelecionado == null) return;
-
             var agendaVM = AgendaViewModel;
             agendaVM._populandoCampos = true;
             var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
             if (agendamentoCompleto == null) return;
+            ListaCriancas.Clear();
 
             agendaVM.NovoAgendamento = agendamentoCompleto;
+            agendaVM.NovoCliente = agendamentoCompleto.Cliente;
             agendaVM.DataSelecionada = agendamentoCompleto.Data;
             agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
             agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
@@ -236,6 +239,18 @@ namespace AgendaNovo.ViewModels
         public ObservableCollection<string> DiasSemana { get; set; } = new();
         private void CarregarDias()
         {
+            var servicos = _servicoService.GetAll();
+
+            foreach (var servico in servicos)
+            {
+                switch (servico.Id)
+                {
+                    case 1: servico.Cor = Brushes.Red; break;
+                    case 2: servico.Cor = Brushes.DarkGreen; break;
+                    case 3: servico.Cor = Brushes.Orange; break;
+                    default: servico.Cor = Brushes.Blue; break;
+                }
+            }
             DiasSemana.Clear();
             DiasDoMes.Clear();
 

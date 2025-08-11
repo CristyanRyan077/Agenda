@@ -8,6 +8,7 @@ using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlzEx.Standard;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using System;
@@ -182,7 +183,8 @@ namespace AgendaNovo
             foreach (var servico in filtrados)
                 ServicosFiltrados.Add(servico);
 
-            MostrarSugestoesServico = ListaServicos.Any();
+            MostrarSugestoesServico = ServicosFiltrados.Any();
+            Debug.WriteLine($"Selecionado: {ServicoSelecionado?.Id} - {ServicoSelecionado?.Nome}");
         }
         partial void OnPacoteselecionadoChanged(Pacote? value)
         {
@@ -430,12 +432,13 @@ namespace AgendaNovo
         [RelayCommand]
         private void Agendar()
         {
+            Debug.WriteLine($"Vai salvar ServicoId = {NovoAgendamento.ServicoId}");
             if (NovoAgendamento.Id == 0)
                 CriarAgendamento();
             else
-                AtualizarAgendamento();
+                EditarAgendamento();
         }
-        private void AtualizarAgendamento()
+        private void EditarAgendamento()
         {
             Debug.WriteLine($"🟡 Atualizando agendamento existente - ID: {NovoAgendamento.Id}");
 
@@ -444,6 +447,7 @@ namespace AgendaNovo
             var cliente = _clienteService.GetById(NovoCliente.Id);
             if (cliente == null) return;
 
+            cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
@@ -458,9 +462,11 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = cliente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
+            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
+            _clienteService.Update(cliente);
             _agendamentoService.Update(NovoAgendamento);
 
             FinalizarAgendamento(cliente);
@@ -626,6 +632,7 @@ namespace AgendaNovo
             var clienteExistente = _clienteService.GetById(NovoCliente.Id);
             if (clienteExistente == null)
                 return;
+            clienteExistente.Observacao = NovoCliente?.Observacao ?? clienteExistente.Observacao;
 
 
 
@@ -659,6 +666,7 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
+            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
@@ -721,6 +729,7 @@ namespace AgendaNovo
         }
         private void FinalizarAgendamento(Cliente cliente)
         {
+
             if (NovoAgendamento.Valor <= NovoAgendamento.ValorPago)
             {
                 _clienteService.AtivarSePendente(cliente.Id);
@@ -749,6 +758,8 @@ namespace AgendaNovo
             AtualizarAgendamentos();
             FiltrarAgendamentos();
             AtualizarHorariosDisponiveis();
+            var a = _agendamentoService.GetById(novoAgendamento.Id);
+            Debug.WriteLine($"DB ServicoId = {a.ServicoId}, Servico?.Nome = {a?.Servico?.Nome ?? "null"}");
             OnPropertyChanged(nameof(ListaAgendamentos));
             if (ServicoSelecionado == null)
                 Debug.WriteLine($"⚠️ GetById retornou NULL para ServicoId = {NovoAgendamento.ServicoId}");
@@ -758,8 +769,12 @@ namespace AgendaNovo
                 ItemSelecionado = null;
             }, System.Windows.Threading.DispatcherPriority.Background);
             NovoAgendamento = new Agendamento { Data = DataSelecionada };
-            Debug.WriteLine($"🧾 Finalizando Agendamento -> ServicoId: {NovoAgendamento.ServicoId}, PacoteId:" +
-                $" {NovoAgendamento.PacoteId}, ClienteId: {NovoAgendamento.ClienteId}, CriancaId: {NovoAgendamento.CriancaId}");
+            ListaCriancas.Clear();
+
+            foreach (var cr in cliente.Criancas ?? Enumerable.Empty<Crianca>())
+            {
+                ListaCriancas.Add(cr);
+            }
         }
         [RelayCommand]
         private void Editar()
@@ -807,7 +822,8 @@ namespace AgendaNovo
                     Valor = ag.Valor,
                     ValorPago = ag.ValorPago,
                     ServicoId = ag.ServicoId,
-                    PacoteId = ag.PacoteId
+                    PacoteId = ag.PacoteId,
+                    
                 };
                 ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == ag.ServicoId);
                 Pacoteselecionado = ListaPacotes.FirstOrDefault(p => p.Id == ag.PacoteId);

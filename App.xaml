@@ -27,6 +27,8 @@
             <conv:MaisConverter x:Key="MaisConverter" Limit="3"/>
             <conv:MaisVisibilityConverter x:Key="MaisVisibilityConverter" Limit="3"/>
             <conv:ZeroToCollapsedConverter x:Key="ZeroToCollapsed"/>
+            <conv:PagoParaCorBrushConverter x:Key="PagoParaCor"/>
+            <conv:ServicoIdToBrushConverter x:Key="ServicoIdToBrush"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

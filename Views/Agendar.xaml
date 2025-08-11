@@ -222,7 +222,7 @@
                           VerticalScrollBarVisibility="Auto"
                        hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                            IsReadOnly="True"/>
+                            />
 
 
                 <Button Content="Limpar Campos"

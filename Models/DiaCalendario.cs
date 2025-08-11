@@ -37,20 +37,7 @@ namespace AgendaNovo.Models
         public ObservableCollection<Servico> Servicos { get; set; } = new();
         public ObservableCollection<Agendamento> Agendamentos { get; set; } = new();
         public ObservableCollection<Cliente> ClientesNovos { get; set; } = new();
-        public Brush CorFundo
-        {
-            get
-            {
-                if (Agendamentos == null || Agendamentos.Count == 0)
-                    return Brushes.Transparent;
-
-                // Exemplo: verde se todos pagos, laranja se pendente
-                if (Agendamentos.All(a => a.EstaPago))
-                    return Brushes.LightGreen;
-
-                return Brushes.Orange;
-            }
-        }
+        public Brush CorFundo = Brushes.DarkGray;
         public DiaCalendario(DateTime data)
         {
             Data = data;
