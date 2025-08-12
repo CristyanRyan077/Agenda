@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250805174332_uodatecalendario")]
-    partial class uodatecalendario
+    [Migration("20250812192318_boolpossuiacompanhamento_e_numero")]
+    partial class boolpossuiacompanhamento_e_numero
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,6 +165,9 @@ namespace AgendaNovo.Migrations
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Numero")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");

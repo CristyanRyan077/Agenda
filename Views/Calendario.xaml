@@ -7,6 +7,7 @@
         xmlns:conv="clr-namespace:AgendaNovo.Converters"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo.Views"
+
         mc:Ignorable="d" MinHeight="900" MinWidth="1200"
         d:DataContext="{d:DesignInstance Type=vm:CalendarioViewModel}"
         WindowState="Maximized"

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250801191832_initialcreate")]
-    partial class initialcreate
+    [Migration("20250812200927_corrigidobool")]
+    partial class corrigidobool
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -108,6 +108,12 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Telefone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalPagoHistorico")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPagoMesAtual")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Clientes");
@@ -139,6 +145,9 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("UltimaAtualizacaoIdade")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
@@ -157,11 +166,17 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("Numero")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("possuiAcompanhamentoMensal")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

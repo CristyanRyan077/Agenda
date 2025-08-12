@@ -3,6 +3,7 @@ using AgendaNovo.Controles;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
+using AgendaNovo.ViewModels;
 using AgendaNovo.Views;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -41,10 +42,15 @@ namespace AgendaNovo
         private bool mostrarEditarAgendamento;
         private bool _suspendendoDataChanged = false;
         private bool _selecionandoDaGrid = false;
+        [ObservableProperty]
+        private bool mostrarAdicionarServicoPacote;
+        [ObservableProperty]
+        private object? telaModalConteudo;
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
         [ObservableProperty] private decimal valorPacote;
+        [ObservableProperty] private int numero;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
 
@@ -89,10 +95,13 @@ namespace AgendaNovo
         [ObservableProperty]
         private bool mostrarSugestoesServico = false;
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
+        public bool MostrarNumero => Pacoteselecionado == null || Pacoteselecionado.possuiAcompanhamentoMensal;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
         public bool _populandoCampos;
+        public IRelayCommand AbrirAdicionarServicoCommand { get; }
+        public IRelayCommand FecharModalCommand { get; }
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
@@ -121,9 +130,22 @@ namespace AgendaNovo
             };
             mostrarCheck = true;
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
-
-
+            AbrirAdicionarServicoCommand = new RelayCommand(() =>
+            {
+                TelaModalConteudo = new AddServico()
+                {
+                    DataContext = new AdicionarServicoPacoteViewModel(_pacoteService, _servicoService)
+                };
+                MostrarAdicionarServicoPacote = true;
+            });
+            FecharModalCommand = new RelayCommand(() =>
+            {
+                MostrarAdicionarServicoPacote = false;
+                TelaModalConteudo = null;
+            });
         }
+
+
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
             if (_populandoCampos) return;
@@ -660,6 +682,10 @@ namespace AgendaNovo
                 CriancaSelecionada = null;
                 NovoAgendamento.CriancaId = null;
                 NovoAgendamento.Crianca = null;
+            }
+            if (!MostrarNumero)
+            {
+                Pacoteselecionado.Numero = null;
             }
             // 4) Prepara o objeto a salvar
 
