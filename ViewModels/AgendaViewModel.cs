@@ -8,6 +8,7 @@ using AgendaNovo.Views;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ControlzEx.Standard;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,6 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
         [ObservableProperty] private decimal valorPacote;
-        [ObservableProperty] private int numero;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
 
@@ -95,7 +95,6 @@ namespace AgendaNovo
         [ObservableProperty]
         private bool mostrarSugestoesServico = false;
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
-        public bool MostrarNumero => Pacoteselecionado == null || Pacoteselecionado.possuiAcompanhamentoMensal;
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
@@ -128,21 +127,35 @@ namespace AgendaNovo
             {
                 Servico = new Servico { PossuiCrianca = true } // Padrão inicial
             };
+            MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
             AbrirAdicionarServicoCommand = new RelayCommand(() =>
             {
                 TelaModalConteudo = new AddServico()
                 {
-                    DataContext = new AdicionarServicoPacoteViewModel(_pacoteService, _servicoService)
+                    DataContext = new AdicionarServicoPacoteViewModel(
+                          _pacoteService,
+                          _servicoService,
+                          () =>
+                        {
+                            CarregarServicos();
+                            CarregarPacotes();
+                        })
                 };
                 MostrarAdicionarServicoPacote = true;
             });
+
             FecharModalCommand = new RelayCommand(() =>
             {
                 MostrarAdicionarServicoPacote = false;
                 TelaModalConteudo = null;
             });
+            WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
+            {
+                CarregarDadosDoBanco();
+            });
+
         }
 
 
@@ -253,6 +266,7 @@ namespace AgendaNovo
                 foreach (var c in clientes)
                     foreach (var cr in _criancaService.GetByClienteId(c.Id))
                         ListaCriancas.Add(cr);
+
             });
 
             OnPropertyChanged(nameof(ListaAgendamentos));
@@ -660,11 +674,20 @@ namespace AgendaNovo
 
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
+            {
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
 
-            else if (NovoAgendamento.Id == 0 &&
-           NovoAgendamento.Crianca != null &&
-           !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+                if (criancaParaAgendar != null)
+                {
+                    // Atualiza a idade caso tenha sido modificada na tela de agendamento
+                    criancaParaAgendar.Idade = CriancaSelecionada.Idade;
+                    criancaParaAgendar.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
+
+                    _criancaService.AddOrUpdate(criancaParaAgendar);
+                }
+            }
+            else if (NovoAgendamento.Crianca != null &&
+                     !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
             {
                 criancaParaAgendar = new Crianca
                 {
@@ -682,10 +705,6 @@ namespace AgendaNovo
                 CriancaSelecionada = null;
                 NovoAgendamento.CriancaId = null;
                 NovoAgendamento.Crianca = null;
-            }
-            if (!MostrarNumero)
-            {
-                Pacoteselecionado.Numero = null;
             }
             // 4) Prepara o objeto a salvar
 

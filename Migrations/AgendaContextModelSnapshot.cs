@@ -163,17 +163,11 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Numero")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("possuiAcompanhamentoMensal")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

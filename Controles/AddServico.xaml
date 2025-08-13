@@ -17,26 +17,30 @@
         <TextBlock  Text="Adicionar Servico e Pacote" FontSize="22" Margin="0,30,0,0"
                    FontFamily="Segoe UI" Height="30" HorizontalAlignment="Center" VerticalAlignment="Top"
                    />
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-        <hc:TextBox hc:InfoElement.Placeholder="Digite o Servico"
+
+
+        <StackPanel Orientation="Horizontal" Margin="0,60,0,0" VerticalAlignment="Center">
+
+            <hc:TextBox hc:InfoElement.Placeholder="Servico"
                         Width="300" Height="60" FontFamily="#heveltica" FontSize="22"
                         Text="{Binding NovoServico}"
-                        Background="Black"
-                        Foreground="White"/>
-        <hc:TextBox hc:InfoElement.Placeholder="Digite o pacote" 
+                        Background="White"
+                        Foreground="Black"/>
+        <hc:TextBox hc:InfoElement.Placeholder="Pacote" 
                     Width="200" Height="60" FontFamily="#heveltica" FontSize="22"
                     Text="{Binding NovoPacote}"
-                    Background="Black"
-                    Foreground="White"/>
+                    Background="White"
+                    Foreground="Black"/>
                     </StackPanel>
+        <TextBlock Grid.Row="0" VerticalAlignment="Bottom" FontSize="22" Text="Digite o valor"/>
         <StackPanel Grid.Row="1" VerticalAlignment="Top" Orientation="Horizontal">
-            <hc:TextBox hc:InfoElement.Placeholder="Digite o Valor"
+            <hc:TextBox hc:InfoElement.Placeholder="Valor"
                         Width="200" Height="60" FontFamily="#heveltica" FontSize="22"
                         Text="{Binding Valor}" VerticalAlignment="Top"
-                        Background="Black" Margin="0,10,0,0"
-                        Foreground="White"/>
-            <CheckBox Command="{Binding PossuiCrianca}" Content="Possui Crianca?" Margin="10,0,0,0"/>
-            <CheckBox Command="{Binding PossuiAcompanhamentoMensal}" Content="Possui acompanhamento mensal?" Margin="20,0,0,0"/>
+                        Background="White" Margin="0,0,0,0"
+                        Foreground="Black"/>
+            <CheckBox IsChecked="{Binding PossuiCrianca}" VerticalAlignment="Center" Content="Possui Crianca?" Margin="10,0,0,0"/>
+            
 
         </StackPanel>
         <Button Grid.Row="1" Content="Salvar" Command="{Binding SalvarCommand}" Background="Green" Width="120" Height="30"/>

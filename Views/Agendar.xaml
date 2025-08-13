@@ -23,8 +23,9 @@
     </Window.Background>
 
     <!-- CONTEÚDO SCROLLÁVEL -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+
         <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -39,10 +40,25 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <hc:TextBox Name="txtIdBusca"
+              Width="150" Grid.Row="0"
+              Height="50" VerticalAlignment="Top"
+              HorizontalAlignment="Left"
+              Margin="0,0,0,0"
+              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+              BorderBrush="Black" SelectionTextBrush="Black"
+              hc:InfoElement.Placeholder="ID"
+              LostFocus="txtIdBusca_LostFocus"/>
+
+                </Grid>
 
 
                 <!-- Linha 1: Cliente e Telefone -->
-                <Grid Grid.Row="0" Grid.Column="0">
+                <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -66,15 +82,19 @@
                 </Grid>
 
                 <!-- Linha 2: Pacote e Horário -->
-                <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,0,0">
+                <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <controles:ServicosAutoComplete VerticalAlignment="Center" />
-                    <Button Content="+" Width="30" Height="30" Grid.Column="0" 
+                    <Button Content="✚" Width="35" Height="35" Grid.Column="0" Command="{Binding AbrirAdicionarServicoCommand}"
                             VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0,0,0"
-                            Command="
+                            Background="#88D1D3D8" Foreground="Black" FontSize="18" FontWeight="Bold"
+                            BorderBrush="Transparent">
+                        
+                    </Button>
+
 
                     <hc:ComboBox Name="txtpacote" Width="305" Height="60"
                                               IsEditable="True" IsTextSearchEnabled="True"
@@ -91,20 +111,12 @@
                                          Width="34" Height="34" VerticalAlignment="Center"
                                          Foreground="White" Margin="10,0,30,0"/>
 
-                    
+
                 </Grid>
 
-                <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding PossuiAcompanhamentoMensal,
-                         Converter={StaticResource BoolToVisibilityConverter}
-                         }">
-                    <hc:TextBox hc:InfoElement.Placeholder="N°"
-                                 Text="{Binding Pacoteselecionado.Numero}" Margin="0,0,0,0" Width="80" Height="60" HorizontalAlignment="Left"
-                                  Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                                    BorderBrush="Black" SelectionTextBrush="Black"/>
-                </Grid>
 
                 <!-- Linha 3: Tema e Valores -->
-                <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
+                <Grid Grid.Row="3" Grid.Column="0" Margin="0,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="1*"/>
@@ -145,7 +157,7 @@
                 <!-- Linha 4: Criança -->
                 <Grid Visibility="{Binding MostrarCrianca,
                          Converter={StaticResource BoolToVisibilityConverter}
-                         }"  Grid.Row="3" Grid.Column="0">
+                         }"  Grid.Row="4" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <!-- Criança -->
@@ -244,20 +256,20 @@
                     <Calendar Width="300" Height="300" Margin="80,0,0,0"
                           SelectedDate="{Binding DataSelecionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           Language="pt-br">
-             
+
                     </Calendar>
                 </StackPanel>
 
                 <!-- Linha 4: DataGrid e Botões -->
                 <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="0,0,10,0">
-                   <!-- <Button Content="Limpar Agendamentos Anteriores"
+                    <!-- <Button Content="Limpar Agendamentos Anteriores"
                              Width="245" Height="40" co
                              Background="Orange" Foreground="White"
                              FontWeight="Bold" FontSize="14"
                              Margin="10,10,70,10"
                             HorizontalAlignment="Right"/> -->
 
- 
+
 
 
                     <DataGrid AutoGenerateColumns="False"
@@ -325,9 +337,36 @@
 
                     </StackPanel>
                 </StackPanel>
+
             </Grid>
+        </ScrollViewer>
+
+        <!-- Modal -->
+        <Grid x:Name="ModalOverlay"
+              Visibility="{Binding MostrarAdicionarServicoPacote, Converter={StaticResource BoolToVisibilityConverter}}"
+              Background="#80000000"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+              Panel.ZIndex="999" IsHitTestVisible="True">
+
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+      Background="White" CornerRadius="12" Padding="16" Height="400" Width="900">
+                <ContentControl Content="{Binding TelaModalConteudo}"/>
+            </Border>
+            <Grid HorizontalAlignment="Center" VerticalAlignment="top">
+                <Button Content="✕"
+      Command="{Binding FecharModalCommand}"
+      Width="45" Height="39"
+      HorizontalAlignment="Right" VerticalAlignment="Center"
+      Margin="870,120,0,0"
+      Background="#E53935" Foreground="White" BorderThickness="0"/>
+            </Grid>
+
         </Grid>
-    </ScrollViewer>
+
+    </Grid>
+
+
+
 </Window>
 
 

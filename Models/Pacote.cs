@@ -16,12 +16,5 @@ namespace AgendaNovo.Models
 
         [ObservableProperty] private string? nome;
         [ObservableProperty] private decimal valor;
-        [ObservableProperty] private int? numero;
-        public bool possuiAcompanhamentoMensal { get; set; } = true;
-
-        public Pacote()
-        {
-            possuiAcompanhamentoMensal = true;
-        }
     }
 }

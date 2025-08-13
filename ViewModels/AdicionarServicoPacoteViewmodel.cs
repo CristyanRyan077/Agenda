@@ -11,18 +11,23 @@ using System.Threading.Tasks;
 
 namespace AgendaNovo.ViewModels
 {
+
     public partial class AdicionarServicoPacoteViewModel : ObservableObject
     {
         private readonly IPacoteService _pacoteService;
         private readonly IServicoService _servicoService;
+        private readonly Action _onFinalizado;
 
 
-        public AdicionarServicoPacoteViewModel(IPacoteService pacoteService, IServicoService servicoService)
+        public AdicionarServicoPacoteViewModel(IPacoteService pacoteService, IServicoService servicoService, Action onFinalizado)
         {
+            
             _pacoteService = pacoteService;
             _servicoService = servicoService;
+            _onFinalizado = onFinalizado;
 
-        SalvarCommand = new RelayCommand(Salvar, PodeSalvar);
+
+            SalvarCommand = new RelayCommand(Salvar, PodeSalvar);
         }
 
         [ObservableProperty]
@@ -36,9 +41,6 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty]
         private bool possuiCrianca = true;
-
-        [ObservableProperty]
-        private bool possuiAcompanhamentoMensal = true;
 
         public RelayCommand SalvarCommand { get; }
 
@@ -60,8 +62,8 @@ namespace AgendaNovo.ViewModels
         private bool PodeSalvar()
         {
             return !string.IsNullOrWhiteSpace(NovoServico)
-                   && !string.IsNullOrWhiteSpace(NovoPacote)
-                   && Valor > 0;
+                   && !string.IsNullOrWhiteSpace(NovoPacote);
+                   
         }
 
         private void Salvar()
@@ -79,7 +81,6 @@ namespace AgendaNovo.ViewModels
                 Nome = NovoPacote,
                 Valor = Valor,
                 ServicoId = servico.Id,
-                possuiAcompanhamentoMensal = PossuiAcompanhamentoMensal
             };
 
             _pacoteService.Add(pacote);
@@ -89,7 +90,10 @@ namespace AgendaNovo.ViewModels
             NovoPacote = string.Empty;
             Valor = 0;
             PossuiCrianca = true;
-            PossuiAcompanhamentoMensal = true;
+            _onFinalizado?.Invoke();
+
+
+
         }
     }
 }

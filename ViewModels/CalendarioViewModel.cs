@@ -42,6 +42,7 @@ namespace AgendaNovo.ViewModels
             _pacoteService = pacoteService;
             _servicoService = servicoService;
             _clienteService.ClienteInativo();
+            
             MesAtual = DateTime.Today;
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();

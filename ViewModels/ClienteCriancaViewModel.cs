@@ -6,6 +6,7 @@ using AgendaNovo.ViewModels;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using HandyControl.Controls;
 using Microsoft.EntityFrameworkCore;
@@ -424,7 +425,9 @@ namespace AgendaNovo.ViewModels
             if (string.IsNullOrWhiteSpace(NovoCliente.Nome))
                 return;
 
+
             Cliente cliente;
+            bool isNovoCliente = NovoCliente.Id == 0;
 
             if (NovoCliente.Id != 0)
             {
@@ -451,9 +454,11 @@ namespace AgendaNovo.ViewModels
                 };
                 cliente = _clienteService.Add(cliente);
 
-
-
             }
+
+            int? clienteIdNotificacao = isNovoCliente ? cliente.Id : (int?)null;
+
+            int? criancaIdNotificacao = null;
 
             // Verifica se há criança para salvar
             if (!string.IsNullOrWhiteSpace(CriancaSelecionada.Nome))
@@ -470,6 +475,9 @@ namespace AgendaNovo.ViewModels
 
                 _criancaService.AddOrUpdate(crianca);
             }
+            if (clienteIdNotificacao.HasValue || criancaIdNotificacao.HasValue)
+                WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(clienteIdNotificacao, criancaIdNotificacao));
+
             _clientesFiltrados = _todosClientes;
             AtualizarPaginacao(_clientesFiltrados);
             CarregarClientesDoBanco();

@@ -13,7 +13,7 @@ namespace AgendaNovo
         public AgendaContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AgendaContext>();
-            optionsBuilder.UseSqlServer("Data Source=2857AL17;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;");
+            optionsBuilder.UseSqlServer("Data Source=2857AL19;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;");
 
             return new AgendaContext(optionsBuilder.Options);
         }
