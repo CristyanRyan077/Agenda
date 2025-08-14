@@ -137,6 +137,14 @@ namespace AgendaNovo.ViewModels
         {
             MostrarEditarAgendamento = false;
             TelaEditarAgendamento = null;
+            var agendaVM = AgendaViewModel;
+            agendaVM.NovoAgendamento = new Agendamento();
+            agendaVM.NovoCliente = null;
+            agendaVM.ClienteSelecionado = null;
+            agendaVM.CriancaSelecionada = null;
+            agendaVM.ItemSelecionado = null;
+            agendaVM.HorarioTexto = string.Empty;
+            agendaVM._populandoCampos = false;
         }
 
         partial void OnClienteSelecionadoChanged(Cliente value)
@@ -167,8 +175,12 @@ namespace AgendaNovo.ViewModels
             agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
 
 
-            agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
-            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
+            if (agendamentoCompleto.Servico != null)
+            {
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
+                    .FirstOrDefault(s => s.Id == agendamentoCompleto.Servico.Id);
+            }
+            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendamentoCompleto.Pacote?.Id);
             Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
             agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();

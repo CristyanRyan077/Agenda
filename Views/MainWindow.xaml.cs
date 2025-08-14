@@ -50,14 +50,7 @@ namespace AgendaNovo
         {
             var vm = DataContext as AgendaViewModel;
             if (vm is null) return;
-            if (sender is Border border && border.DataContext is Agendamento agendamento)
-            {
-                if (MessageBox.Show("Agendamento confirmado e pago?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    vm.AtualizarPago(agendamento);
-                }
-
-            }
+            
         }
 
         private void btnAgenda_Click(object sender, RoutedEventArgs e)

@@ -11,7 +11,7 @@
              Height="auto" Width="auto">
     <Grid>
         <TextBox x:Name="AutoCompleteBox"
-                 Grid.Column="0" Width="310" Height="60"
+                 Grid.Column="0" Width="350" Height="60"
                  Text="{Binding ServicoDigitado, UpdateSourceTrigger=PropertyChanged}"
                  VerticalAlignment="Top"
                  Padding="5"

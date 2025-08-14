@@ -22,8 +22,8 @@ namespace AgendaNovo
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=2857AL19;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;");
-            //optionsBuilder.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True");
+            //optionsBuilder.UseSqlServer("Data Source=2857AL19;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;");
+            optionsBuilder.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

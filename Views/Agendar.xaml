@@ -96,7 +96,7 @@
                     </Button>
 
 
-                    <hc:ComboBox Name="txtpacote" Width="305" Height="60"
+                    <hc:ComboBox Name="txtpacote" Width="265" Height="60"
                                               IsEditable="True" IsTextSearchEnabled="True"
                                      DisplayMemberPath="Nome" SelectionChanged="ComboBoxPacotes_SelectionChanged"
                                  hc:InfoElement.Placeholder="Pacote"
@@ -253,10 +253,12 @@
 
                 <!-- Calendário -->
                 <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <Calendar Width="300" Height="300" Margin="80,0,0,0"
+                    <Calendar Width="300" Height="300" Margin="20,0,0,0"
                           SelectedDate="{Binding DataSelecionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           Language="pt-br">
-
+                        <Calendar.LayoutTransform>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Calendar.LayoutTransform>
                     </Calendar>
                 </StackPanel>
 
@@ -273,7 +275,7 @@
 
 
                     <DataGrid AutoGenerateColumns="False"
-                          Height="200"
+                          Height="300"
                           Width="900"
                           HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
@@ -286,7 +288,7 @@
                             <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Servico" Binding="{Binding Servico.Nome}" />
-                            <DataGridTextColumn Header="Pacote" Binding="{Binding Pacote.Nome}" />
+                            <DataGridTextColumn Header="Pacote" Width="100" Binding="{Binding Pacote.Nome}" />
                             <DataGridTextColumn Header="Horário" Binding="{Binding Horario,StringFormat=\{0:hh\\:mm\}}" />
                             <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                             <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
@@ -357,7 +359,7 @@
       Command="{Binding FecharModalCommand}"
       Width="45" Height="39"
       HorizontalAlignment="Right" VerticalAlignment="Center"
-      Margin="870,120,0,0"
+      Margin="870,180,0,0"
       Background="#E53935" Foreground="White" BorderThickness="0"/>
             </Grid>
 
