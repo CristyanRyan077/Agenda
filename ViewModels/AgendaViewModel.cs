@@ -431,8 +431,7 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
-            if (NovoAgendamento?.Id != 0)
-                return;
+            NovoAgendamento = new Agendamento();
             NovoAgendamento.Data = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             ItemSelecionado = null;
             NovoAgendamento.ServicoId = 0;
