@@ -497,7 +497,6 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = cliente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
-            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
@@ -710,7 +709,6 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
-            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
@@ -781,7 +779,12 @@ namespace AgendaNovo
             }
 
             if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
+            {
                 _clienteService.ValorIncompleto(cliente.Id);
+                _agendamentoService.ValorIncompleto(NovoAgendamento.Id);
+            }
+
+
 
             var crianca = NovoAgendamento.CriancaId.HasValue
                 ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
@@ -819,6 +822,7 @@ namespace AgendaNovo
             {
                 ListaCriancas.Add(cr);
             }
+            LimparCampos();
         }
         [RelayCommand]
         private void Editar()
@@ -935,30 +939,13 @@ namespace AgendaNovo
 
             // recarrega tudo de uma vez
             CarregarDadosDoBanco();
-            FiltrarAgendamentos();
-            AtualizarAgendamentos();
-            AtualizarHorariosDisponiveis();
-
-            ListaAgendamentos.Remove(ItemSelecionado);
-            AgendamentosFiltrados.Remove(ItemSelecionado);
-
-            bool clienteAindaTemAgendamentos = ListaAgendamentos.Any(a =>
-            a.Cliente?.Nome == ClienteSelecionado?.Nome);
-
-            if (!clienteAindaTemAgendamentos && ClienteSelecionado != null)
-            {
-                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteSelecionado.Id);
-                if (cliente != null)
-                    ListaClientes.Remove(cliente);
-            }
-
             ResetarFormulario();
             AtualizarHorariosDisponiveis();
-            OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
             FiltrarAgendamentos();
             LimparCampos();
             OnPropertyChanged(nameof(ListaAgendamentos));
+            OnPropertyChanged(nameof(DataReferencia));
         }
 
         partial void OnTextoPesquisaChanged(string value)

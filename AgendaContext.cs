@@ -40,7 +40,7 @@ namespace AgendaNovo
                 .HasForeignKey(a => a.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relação entre Agendamento e Criança (caso tenha)
+            // Relação entre Agendamento e Criança 
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Crianca)
                 .WithMany()

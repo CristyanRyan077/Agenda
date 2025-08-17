@@ -139,7 +139,7 @@ namespace AgendaNovo.ViewModels
             TelaEditarAgendamento = null;
             var agendaVM = AgendaViewModel;
             agendaVM.NovoAgendamento = new Agendamento();
-            agendaVM.NovoCliente = null;
+            agendaVM.NovoCliente = new Cliente();
             agendaVM.ClienteSelecionado = null;
             agendaVM.CriancaSelecionada = null;
             agendaVM.ItemSelecionado = null;
