@@ -33,19 +33,15 @@ namespace AgendaNovo
     {
         private ICollectionView _viewClientes;
         private readonly AgendaViewModel _vm;
-        public Agendar(AgendaViewModel vm, IServiceProvider sp)
+        private WindowManager _main;
+        public Agendar(AgendaViewModel vm, WindowManager main)
         {
             InitializeComponent();
             _vm = vm;
             DataContext = _vm;
             Debug.WriteLine($"ViewModel ID: {_vm.GetHashCode()}");
-            _sp = sp;
+            _main = main;
         }
-
-        private readonly IServiceProvider _sp;
-        private GerenciarClientes _janelaClientes;
-        private MainWindow _mainwindow;
-        private Calendario _calendario;
         private bool _atualizandoCliente = false;
         private bool _preenchendoViaId = false;
 
@@ -73,36 +69,14 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            if (_mainwindow == null || !_mainwindow.IsLoaded)
-            {
-                _mainwindow = _sp.GetRequiredService<MainWindow>();
-                _mainwindow.Closed += (s, ev) => _mainwindow = null;
-                _mainwindow.Show();
-            }
-            else
-            {
-                if (_mainwindow.WindowState == WindowState.Minimized)
-                    _mainwindow.WindowState = WindowState.Normal;
-                _mainwindow.Activate();
-            }
+            _main.GetMainWindow();
         }
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            if (_janelaClientes == null || !_janelaClientes.IsLoaded)
-            {
-                _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
-                _janelaClientes.Closed += (s, ev) => _janelaClientes = null;
-                _janelaClientes.Show();
-            }
-            else
-            {
-                if (_janelaClientes.WindowState == WindowState.Minimized)
-                    _janelaClientes.WindowState = WindowState.Normal;
-                _janelaClientes.Activate();
-            }
+           _main.GetGerenciarClientes();
         }
 
         private void btnCalendario_Click(object sender, RoutedEventArgs e)
@@ -110,18 +84,7 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            if (_calendario == null || !_calendario.IsLoaded)
-            {
-                _calendario = _sp.GetRequiredService<Calendario>();
-                _calendario.Closed += (s, ev) => _calendario = null;
-                _calendario.Show();
-            }
-            else
-            {
-                if (_calendario.WindowState == WindowState.Minimized)
-                    _calendario.WindowState = WindowState.Normal;
-                _calendario.Activate();
-            }
+            _main.GetCalendario();
         }
 
 

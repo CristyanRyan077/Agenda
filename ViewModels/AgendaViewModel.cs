@@ -123,10 +123,7 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
-            NovoAgendamento = new Agendamento
-            {
-                Servico = new Servico { PossuiCrianca = true } // Padrão inicial
-            };
+            NovoAgendamento = new Agendamento();
             MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
@@ -737,7 +734,7 @@ namespace AgendaNovo
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
-
+            Debug.WriteLine($"Adicionar agendamento: ServicoId={novoAgendamento.ServicoId}, Servico={novoAgendamento.Servico?.Id}");
             _agendamentoService.Add(NovoAgendamento);
 
             FinalizarAgendamento(clienteExistente);

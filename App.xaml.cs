@@ -35,6 +35,7 @@ namespace AgendaNovo
             services.AddTransient<IServicoService, ServicoService>();
             services.AddTransient<IAgendamentoService, AgendamentoService>();
             //Views
+            services.AddSingleton<WindowManager>();
             services.AddTransient<Agendar>();
             services.AddTransient<MainWindow>();
             services.AddTransient<GerenciarClientes>();
