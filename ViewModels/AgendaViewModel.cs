@@ -69,6 +69,7 @@ namespace AgendaNovo
         [ObservableProperty] private Crianca? criancaSelecionada = new();
         [ObservableProperty]
         private int? criancaId;
+        [ObservableProperty] private bool resetandoCampos;
 
 
         //Data e horario
@@ -444,6 +445,7 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
+            ResetandoCampos = true;
             NovoAgendamento = new Agendamento();
             NovoAgendamento.Data = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             ItemSelecionado = null;
@@ -476,6 +478,15 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(CriancaSelecionada.Nome));
             OnPropertyChanged(nameof(ClienteSelecionado));
             OnPropertyChanged(nameof(ListaCriancas));
+            ResetandoCampos = false;
+            MostrarSugestoesServico = false;
+            MostrarSugestoes = false;
+            ServicoDigitado = string.Empty;
+            NomeDigitado = string.Empty;
+            OnPropertyChanged(nameof(ServicoDigitado));
+            OnPropertyChanged(nameof(NomeDigitado));
+
+
         }
         [RelayCommand]
         private void Agendar()

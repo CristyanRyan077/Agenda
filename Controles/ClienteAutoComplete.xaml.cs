@@ -46,11 +46,9 @@ namespace AgendaNovo.Controles
             var vm = DataContext as AgendaViewModel;
             if (vm == null)
                 return;
-            if (vm.IgnorarProximoTextChanged)
-            {
-                vm.IgnorarProximoTextChanged = false;
+            AtualizarPlaceholder();
+            if (vm.ResetandoCampos)
                 return;
-            }
             vm.UsuarioDigitouNome = true;
             AtualizarPlaceholder();
         }
@@ -66,13 +64,28 @@ namespace AgendaNovo.Controles
 
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)
         {
+            var vm = DataContext as AgendaViewModel;
+            if (vm.ResetandoCampos)
+                return;
             PlaceholderText.Visibility = Visibility.Collapsed;
+            if (DataContext is AgendaViewModel vm2)
+            {
+
+                vm2.MostrarSugestoes = true;
+            }
         }
         private void AtualizarPlaceholder()
         {
-            PlaceholderText.Visibility = string.IsNullOrWhiteSpace(AutoCompleteBox.Text)
-                ? Visibility.Visible
-                : Visibility.Collapsed;
+            if (string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
+            {
+                PlaceholderText.Visibility = AutoCompleteBox.IsKeyboardFocusWithin
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+            }
+            else
+            {
+                PlaceholderText.Visibility = Visibility.Collapsed;
+            }
         }
 
     }

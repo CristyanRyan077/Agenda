@@ -78,45 +78,52 @@ namespace AgendaNovo.Controles
 
         private void AutoCompleteBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+
             var vm = DataContext as AgendaViewModel;
             if (vm == null)
                 return;
-            if (vm.IgnorarProximoTextChanged)
-            {
-                vm.IgnorarProximoTextChanged = false;
-                return;
-            }
-            vm.UsuarioDigitouNome = true;
             AtualizarPlaceholder();
+            if (vm.ResetandoCampos)
+                return;
+            vm.UsuarioDigitouNome = true;
+            
         }
         private void AutoCompleteBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!AutoCompleteBox.IsKeyboardFocusWithin && string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
                 PlaceholderText.Visibility = Visibility.Visible;
-            var vm = DataContext as AgendaViewModel;
-            if (vm != null)
-                vm.MostrarSugestoesServico = false;
+            FecharPopup();
 
         }
 
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)
         {
+
+            if (DataContext is AgendaViewModel vm && vm.ResetandoCampos)
+                return;
+
             PlaceholderText.Visibility = Visibility.Collapsed;
 
-            if (DataContext is AgendaViewModel vm)
+            if (DataContext is AgendaViewModel vm2)
             {
-                if (string.IsNullOrWhiteSpace(vm.ServicoDigitado))
-                    vm.FiltrarServicos(string.Empty);
+                if (string.IsNullOrWhiteSpace(vm2.ServicoDigitado))
+                    vm2.FiltrarServicos(string.Empty);
 
-                vm.MostrarSugestoesServico = true;
-                
+                vm2.MostrarSugestoesServico = true;
             }
         }
-        private void AtualizarPlaceholder()
+        public void AtualizarPlaceholder()
         {
-            PlaceholderText.Visibility = string.IsNullOrWhiteSpace(AutoCompleteBox.Text)
-                ? Visibility.Visible
-                : Visibility.Collapsed;
+            if (string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
+            {
+                PlaceholderText.Visibility = AutoCompleteBox.IsKeyboardFocusWithin
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+            }
+            else
+            {
+                PlaceholderText.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
