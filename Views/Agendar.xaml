@@ -10,7 +10,7 @@
         xmlns:controles="clr-namespace:AgendaNovo.Controles"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="Agendar"
-        MinWidth="600" MinHeight="600"
+        MinWidth="1200" MinHeight="600"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen">
         
@@ -284,12 +284,13 @@
                           SelectedItem="{Binding ItemSelecionado, Mode=TwoWay}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario,StringFormat=\{0:hh\\:mm\}}" />
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                             <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Servico" Binding="{Binding Servico.Nome}" />
-                            <DataGridTextColumn Header="Pacote" Width="100" Binding="{Binding Pacote.Nome}" />
-                            <DataGridTextColumn Header="Horário" Binding="{Binding Horario,StringFormat=\{0:hh\\:mm\}}" />
+                            <DataGridTextColumn Header="Pacote" Width="80" Binding="{Binding Pacote.Nome}" />
+
                             <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                             <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                             <DataGridTemplateColumn Header="Pago">
@@ -344,14 +345,14 @@
         </ScrollViewer>
 
         <!-- Modal -->
-        <Grid x:Name="ModalOverlay"
+        <!-- <Grid x:Name="ModalOverlay"
               Visibility="{Binding MostrarAdicionarServicoPacote, Converter={StaticResource BoolToVisibilityConverter}}"
               Background="#80000000"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Panel.ZIndex="999" IsHitTestVisible="True">
 
-            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
-      Background="White" CornerRadius="12" Padding="16" Height="400" Width="900">
+             <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+      Background="White" CornerRadius="12" Padding="16"  Height="400" Width="900">
                 <ContentControl Content="{Binding TelaModalConteudo}"/>
             </Border>
             <Grid HorizontalAlignment="Center" VerticalAlignment="top">
@@ -363,7 +364,50 @@
       Background="#E53935" Foreground="White" BorderThickness="0"/>
             </Grid>
 
-        </Grid>
+        </Grid> -->
+        <Border x:Name="Drawer"
+        Background="#333"
+        Width="90" Height="185"
+      HorizontalAlignment="Left"
+            Margin="0,70,0,0"
+            VerticalAlignment="Top"
+            RenderTransformOrigin="0,0"
+        d:RenderTransformOrigin="0,0">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="DrawerTransform" X="-200" d:X="0"/>
+            </Border.RenderTransform>
+            <StackPanel Orientation="Vertical">
+                <Button x:Name="btnMainwindow" Padding="4" Width="70" Click="btnMainwindow_Click"
+                    Height="60" BorderBrush="Black" FontSize="14">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="BookOpenOutline" Height="32" Width="55"/>
+                        <TextBlock FontWeight="Bold" Foreground="Blue">Agenda</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnClientes" Padding="4" Width="70" Click="btnClientes_Click"
+            Height="60" BorderBrush="Black" FontSize="14">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="UserAdd" Height="32" Width="55"/>
+                        <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button Name="btnCalendario" Height="60" Width="70" Padding="4"
+            BorderBrush="Black" FontSize="14" Click="btnCalendario_Click">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="Calendar" Height="32" Width="60"  />
+                        <TextBlock FontWeight="Bold" FontSize="12"  Foreground="Green">Calendario</TextBlock>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+            
+        </Border>
+        <ToggleButton x:Name="btnToggle" Content="☰" Width="40"
+            HorizontalAlignment="Left" VerticalAlignment="Top"  
+            Margin="10" Height="40" 
+            Checked="btnToggle_Checked" Unchecked="btnToggle_Unchecked"/>
 
     </Grid>
 

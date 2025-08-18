@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:vm="clr-namespace:AgendaNovo.ViewModels"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:models="clr-namespace:AgendaNovo.Models"
         xmlns:conv="clr-namespace:AgendaNovo.Converters"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo.Views"
-
+        xmlns:controles="clr-namespace:AgendaNovo.Controles"
         mc:Ignorable="d" MinHeight="900" MinWidth="1200"
         d:DataContext="{d:DesignInstance Type=vm:CalendarioViewModel}"
         WindowState="Maximized"
@@ -32,14 +33,39 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                
 
+                <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <RadioButton Content="Todos"
+                                 GroupName="FiltroClientes" Foreground="White"
+                                 IsChecked="{Binding FiltroSelecionado, ConverterParameter=Todos,
+                                            Converter={StaticResource StringEqualsConverter}}" />
+
+                        <RadioButton Content="Concluidos" Foreground="Green"
+                                     GroupName="FiltroClientes"
+                                     Margin="10,0,0,0"
+                                     IsChecked="{Binding FiltroSelecionado, ConverterParameter=Concluido,
+                                                Converter={StaticResource StringEqualsConverter}}" />
+
+                        <RadioButton Content="Pendentes" Foreground="DarkRed"
+                                     GroupName="FiltroClientes"
+                                     Margin="10,0,0,0"
+                                     IsChecked="{Binding FiltroSelecionado, ConverterParameter=Pendente,
+                                                Converter={StaticResource StringEqualsConverter}}" />
+
+                    </StackPanel>
+     
+                    <hc:TextBox hc:InfoElement.Placeholder="Buscar por nome"
+                     Height="32" Width="350" Background="White" HorizontalAlignment="Left"
+                     Text="{Binding TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Black"
+                     />
+                </Grid>
 
 
                 <DataGrid
                     Grid.Row="3" Grid.ColumnSpan="4" Grid.Column="0"
                     Height="250"
-                    ItemsSource="{Binding AgendamentosDoDiaSelecionado}"
+                    ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}"
                     SelectedItem="{Binding AgendamentoSelecionado, Mode=TwoWay}"
                     AutoGenerateColumns="False"
                     IsReadOnly="True"
@@ -83,11 +109,14 @@
 
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
-                        <DataGridTextColumn Header="Horário" Binding="{Binding Horario, StringFormat=\{0:hh\\:mm\}}" Width="70"/>
-                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" Width="120"/>
-                        <DataGridTextColumn Header="Email" Binding="{Binding Cliente.Email}" Width="150"/>
+                        <DataGridTextColumn Header="Horário" Binding="{Binding Horario, StringFormat=\{0:hh\\:mm\}}" Width="60"/>
+                        <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}"  />
+                        <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" Width="100"/>
+                        <DataGridTextColumn Header="Email" Binding="{Binding Cliente.Email}" Width="100"/>
                         <DataGridTextColumn Header="Criança" Binding="{Binding Crianca.Nome}" Width="100"/>
                         <DataGridTextColumn Header="Serviço" Binding="{Binding Servico.Nome}" Width="100"/>
+                        <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" Width="100"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>
                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="80"/>
                         <DataGridTemplateColumn Header="Pago">
                             <DataGridTemplateColumn.CellTemplate>

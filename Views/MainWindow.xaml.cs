@@ -62,7 +62,7 @@ namespace AgendaNovo
             {
                 if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
                 {
-                    _janelaAgenda = new Agendar(vm); 
+                    _janelaAgenda = new Agendar(vm, this._sp); 
                     _janelaAgenda.Closed += (s, ev) => _janelaAgenda = null;
                     _janelaAgenda.Show();
                 }

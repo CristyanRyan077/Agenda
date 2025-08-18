@@ -485,7 +485,33 @@ namespace AgendaNovo
             cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
+            {
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
+
+                if (criancaParaAgendar != null)
+                {
+                    // Atualiza a idade caso tenha sido modificada na tela de agendamento
+                    criancaParaAgendar.Idade = CriancaSelecionada.Idade;
+                    criancaParaAgendar.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
+
+                    _criancaService.AddOrUpdate(criancaParaAgendar);
+                }
+            }
+            else if (NovoAgendamento.Crianca != null &&
+             !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+            {
+                criancaParaAgendar = new Crianca
+                {
+                    Nome = NovoAgendamento.Crianca.Nome,
+                    Genero = NovoAgendamento.Crianca.Genero,
+                    Nascimento = NovoAgendamento.Crianca.Nascimento,
+                    Idade = NovoAgendamento.Crianca.Idade,
+                    IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
+                    ClienteId = cliente.Id
+                };
+                _criancaService.AddOrUpdate(criancaParaAgendar);
+            }
+
 
             if (!MostrarCrianca)
             {
