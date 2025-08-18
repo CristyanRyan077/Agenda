@@ -88,12 +88,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <controles:ServicosAutoComplete VerticalAlignment="Center" />
-                    <Button Content="✚" Width="35" Height="35" Grid.Column="0" Command="{Binding AbrirAdicionarServicoCommand}"
-                            VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0,0,0"
-                            Background="#88D1D3D8" Foreground="Black" FontSize="18" FontWeight="Bold"
-                            BorderBrush="Transparent">
-                        
-                    </Button>
+                   
 
 
                     <hc:ComboBox Name="txtpacote" Width="265" Height="60"
@@ -345,13 +340,13 @@
         </ScrollViewer>
 
         <!-- Modal -->
-        <!-- <Grid x:Name="ModalOverlay"
+        <Grid x:Name="ModalOverlay"
               Visibility="{Binding MostrarAdicionarServicoPacote, Converter={StaticResource BoolToVisibilityConverter}}"
               Background="#80000000"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Panel.ZIndex="999" IsHitTestVisible="True">
 
-             <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
       Background="White" CornerRadius="12" Padding="16"  Height="400" Width="900">
                 <ContentControl Content="{Binding TelaModalConteudo}"/>
             </Border>
@@ -364,10 +359,10 @@
       Background="#E53935" Foreground="White" BorderThickness="0"/>
             </Grid>
 
-        </Grid> -->
+        </Grid>
         <Border x:Name="Drawer"
         Background="#333"
-        Width="90" Height="185"
+        Width="90" Height="235"
       HorizontalAlignment="Left"
             Margin="0,70,0,0"
             VerticalAlignment="Top"
@@ -399,6 +394,12 @@
                         <materialDesign:PackIcon Kind="Calendar" Height="32" Width="60"  />
                         <TextBlock FontWeight="Bold" FontSize="12"  Foreground="Green">Calendario</TextBlock>
                     </StackPanel>
+                </Button>
+                <Button Content="✚" Width="65" Height="45" Command="{Binding AbrirAdicionarServicoCommand}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,0"
+                         Background="White" Foreground="Black" FontSize="18" FontWeight="Bold"
+                         BorderBrush="Transparent">
+
                 </Button>
 
             </StackPanel>

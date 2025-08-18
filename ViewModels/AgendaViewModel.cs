@@ -154,6 +154,22 @@ namespace AgendaNovo
             });
 
         }
+        public void FiltrarServicos(string termo)
+        {
+            IEnumerable<Servico> baseList = ListaServicos; // use sempre o Property
+
+            IEnumerable<Servico> result = string.IsNullOrWhiteSpace(termo)
+           ? baseList.Take(18)
+           : baseList.Where(s => !string.IsNullOrWhiteSpace(s?.Nome) &&
+                             s.Nome.Contains(termo, StringComparison.InvariantCultureIgnoreCase))
+                 .Take(50);
+
+            ServicosFiltrados.Clear();
+            foreach (var s in result)
+                ServicosFiltrados.Add(s);
+
+            System.Diagnostics.Debug.WriteLine($"FiltrarServicos('{termo}') -> {ServicosFiltrados.Count} itens");
+        }
 
 
         partial void OnServicoSelecionadoChanged(Servico? value)
