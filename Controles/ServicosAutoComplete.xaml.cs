@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgendaNovo.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,15 +24,50 @@ namespace AgendaNovo.Controles
         public ServicosAutoComplete()
         {
             InitializeComponent();
-            Loaded += (s, e) =>
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
+        private Window? _parentWindow;
+        private void OnWindowDeactivated(object? sender, EventArgs e) => FecharPopup();
+        private void OnWindowStateChanged(object? sender, EventArgs e) => FecharPopup();
+        private void OnWindowLocationOrSizeChanged(object? sender, EventArgs e) => FecharPopup();
+        private void OnAppDeactivated(object? sender, EventArgs e) => FecharPopup();
+        private void AutoCompleteBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is AgendaViewModel vm)
             {
-                var parentWindow = Window.GetWindow(this);
-                if (parentWindow != null)
-                {
-                    parentWindow.Deactivated += (sender, args) => FecharPopup();
-                    parentWindow.StateChanged += (sender, args) => FecharPopup();
-                }
-            };
+                vm.CarregarServicos();
+                if (string.IsNullOrWhiteSpace(vm.ServicoDigitado))
+                    vm.FiltrarServicos(string.Empty);
+
+                vm.MostrarSugestoesServico = true;
+            }
+        }
+        private void OnLoaded(object s, RoutedEventArgs e)
+        {
+            _parentWindow = Window.GetWindow(this);
+            if (_parentWindow != null)
+            {
+                _parentWindow.Deactivated += OnWindowDeactivated;
+                _parentWindow.StateChanged += OnWindowStateChanged;
+                _parentWindow.LocationChanged += OnWindowLocationOrSizeChanged;
+                _parentWindow.SizeChanged += OnWindowLocationOrSizeChanged;
+            }
+
+            // Fecha quando o APP perde o foco (alt+tab, troca de app)
+            Application.Current.Deactivated += OnAppDeactivated;
+        }
+        private void OnUnloaded(object s, RoutedEventArgs e)
+        {
+            if (_parentWindow != null)
+            {
+                _parentWindow.Deactivated -= OnWindowDeactivated;
+                _parentWindow.StateChanged -= OnWindowStateChanged;
+                _parentWindow.LocationChanged -= OnWindowLocationOrSizeChanged;
+                _parentWindow.SizeChanged -= OnWindowLocationOrSizeChanged;
+                _parentWindow = null;
+            }
+            Application.Current.Deactivated -= OnAppDeactivated;
         }
         private void FecharPopup()
         {
@@ -66,6 +102,15 @@ namespace AgendaNovo.Controles
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)
         {
             PlaceholderText.Visibility = Visibility.Collapsed;
+
+            if (DataContext is AgendaViewModel vm)
+            {
+                if (string.IsNullOrWhiteSpace(vm.ServicoDigitado))
+                    vm.FiltrarServicos(string.Empty);
+
+                vm.MostrarSugestoesServico = true;
+                
+            }
         }
         private void AtualizarPlaceholder()
         {
@@ -76,12 +121,16 @@ namespace AgendaNovo.Controles
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataContext is AgendaViewModel vm)
+            if (DataContext is AgendaViewModel vm && sender is ListBox lb && lb.SelectedItem is Servico s)
             {
-                vm.IgnorarProximoTextChanged = true; // evita refiltrar ao popular o TextBox
+                vm.IgnorarProximoTextChanged = true;
+                vm.ServicoDigitado = s.Nome; // atualiza o texto visível
+                vm.ServicoSelecionado = s;
                 vm.MostrarSugestoesServico = false;
+                AutoCompleteBox.CaretIndex = AutoCompleteBox.Text?.Length ?? 0;
             }
         }
+
     }
 
 

@@ -69,6 +69,9 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty]
         private ObservableCollection<DiaCalendario> diasDoMes = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosDoDiaSelecionado;
+        [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+        [ObservableProperty] private string textoPesquisa = string.Empty;
+        [ObservableProperty] private DateTime? dataSelecionada;
         public ObservableCollection<Agendamento> ListaAgendamentos { get; } = new();
         public IRelayCommand<(Agendamento ag, DateTime novaData)> MoverAgendamentoCommand { get; }
         public ObservableCollection<Crianca> ListaCriancas { get; } = new();
@@ -80,7 +83,7 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty]
         private DateTime mesAtual = DateTime.Today;
-
+        [ObservableProperty] private string filtroSelecionado;
         [ObservableProperty] private string termoBusca;
         [ObservableProperty] private TipoBusca tipoSelecionado;
         [ObservableProperty] private Cliente clienteSelecionado;
@@ -110,33 +113,20 @@ namespace AgendaNovo.ViewModels
             var agendaVM = AgendaViewModel;
             agendaVM.AtualizarAgendamentos();
         }
-
-        [RelayCommand]
-        private void Buscar()
-        {
-            if (TipoSelecionado == TipoBusca.Cliente)
-                BuscarCliente(ClienteSelecionado);
-            else
-                BuscarAgendamento();
-        }
-        public void BuscarCliente(Cliente Cliente)
-        {
-            var clienteId = _clienteService.GetById(Cliente.Id);
-            if (clienteId != null)
-            {
-                ClienteSelecionado = clienteId;
-                DetalhesVisiveis = true;
-            }
-            else
-            {
-                DetalhesVisiveis = false;
-            }
-        }
+        
         [RelayCommand]
         private void FecharEdicao()
         {
             MostrarEditarAgendamento = false;
             TelaEditarAgendamento = null;
+            var agendaVM = AgendaViewModel;
+            agendaVM.NovoAgendamento = new Agendamento();
+            agendaVM.NovoCliente = new Cliente();
+            agendaVM.ClienteSelecionado = null;
+            agendaVM.CriancaSelecionada = null;
+            agendaVM.ItemSelecionado = null;
+            agendaVM.HorarioTexto = string.Empty;
+            agendaVM._populandoCampos = false;
         }
 
         partial void OnClienteSelecionadoChanged(Cliente value)
@@ -167,8 +157,12 @@ namespace AgendaNovo.ViewModels
             agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
 
 
-            agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendaVM.NovoAgendamento.ServicoId);
-            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendaVM.NovoAgendamento.PacoteId);
+            if (agendamentoCompleto.Servico != null)
+            {
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
+                    .FirstOrDefault(s => s.Id == agendamentoCompleto.Servico.Id);
+            }
+            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendamentoCompleto.Pacote?.Id);
             Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
             agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();
@@ -184,18 +178,57 @@ namespace AgendaNovo.ViewModels
             TelaEditarAgendamento = view;
             MostrarEditarAgendamento = true;
         }
+        partial void OnFiltroSelecionadoChanged(string value)
+        {
+            FiltrarAgendamentos();
+        }
         public void SelecionarDia(DateTime data)
         {
-            var agendamentos = _agendamentoService.GetByDate(data);
-            AgendamentosDoDiaSelecionado = new ObservableCollection<Agendamento>(agendamentos);
+            DataSelecionada = data;
         }
-        partial void OnAgendamentoSelecionadoChanged(Agendamento value)
+        partial void OnDataSelecionadaChanged(DateTime? value)
         {
-            if (value != null)
+            textoPesquisa = string.Empty;
+            FiltrarAgendamentos();
+        }
+        private void FiltrarAgendamentos()
+        {
+            IEnumerable<Agendamento> filtrado = ListaAgendamentos;
+            var agora = DateTime.Now;
+
+            if (FiltroSelecionado == "Pendente")
             {
-                TipoSelecionado = TipoBusca.Agendamento;
-                DetalhesVisiveis = true;
+                filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Pendente);
             }
+            else if (FiltroSelecionado == "Concluido")
+            {
+                filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
+            }
+
+            // filtro por texto
+            if (!string.IsNullOrWhiteSpace(TextoPesquisa))
+            {
+                filtrado = filtrado.Where(a => a.Cliente.Nome.Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // filtro por data
+            if (DataSelecionada.HasValue)
+            {
+                filtrado = filtrado.Where(a => a.Data == DataSelecionada.Value.Date);
+            }
+           
+
+            AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado);
+        }
+        partial void OnTextoPesquisaChanged(string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                DataSelecionada = null;
+                FiltroSelecionado = "Todos";
+            }
+ 
+            FiltrarAgendamentos();
         }
 
         private void AtualizarCriancasDoCliente(Cliente cliente)
@@ -207,20 +240,6 @@ namespace AgendaNovo.ViewModels
             var crs = _criancaService.GetByClienteId(cliente.Id);
             foreach (var cr in crs)
                 ListaCriancas.Add(cr);
-        }
-        private void BuscarAgendamento()
-        {
-            if (int.TryParse(TermoBusca, out int id))
-            {
-                var agendamento = _agendamentoService.GetById(id);
-                AgendamentoSelecionado = agendamento;
-                DetalhesVisiveis = agendamento != null;
-            }
-            else
-            {
-                // Mensagem: ID inválido
-                DetalhesVisiveis = false;
-            }
         }
        
 
@@ -290,8 +309,6 @@ namespace AgendaNovo.ViewModels
                 DiasDoMes.Add(diaVm);
             }
         }
-
-        // Simulações (depois substitua por consultas reais ao banco)
         private bool VerificarSeTemEvento(DateTime data) =>
             data.Day % 3 == 0;
 

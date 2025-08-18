@@ -27,6 +27,15 @@ namespace AgendaNovo.Services
                 Update(agendamento);
             }
         }
+        public void ValorIncompleto(int agendamentoid)
+        {
+            var agendamento = GetById(agendamentoid);
+            if (agendamento != null &&  agendamento.Status == StatusAgendamento.Concluido)
+            {
+                agendamento.Status = StatusAgendamento.Pendente;
+                Update(agendamento);
+            }
+        }
 
         public List<Agendamento> GetAll()
         {

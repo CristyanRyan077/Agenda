@@ -28,20 +28,18 @@ namespace AgendaNovo
 
         private readonly IServiceProvider _sp;
 
-        private GerenciarClientes _janelaClientes;
-        private Agendar _janelaAgenda;
-        private Calendario _calendario;
+        private WindowManager _main;
         public AgendaViewModel vm { get; }
 
         public GerenciarClientes Clientevm { get; }
 
-        public MainWindow(AgendaViewModel agendaVm, IServiceProvider sp)
+        public MainWindow(AgendaViewModel agendaVm, WindowManager main)
         {
             InitializeComponent();
             vm = agendaVm;
             DataContext = vm;
             Debug.WriteLine($"MainWindow ViewModel ID: {vm.GetHashCode()}");
-            _sp = sp;
+            _main = main;
             this.Closed += (s, e) => Application.Current.Shutdown();
 
 
@@ -50,14 +48,7 @@ namespace AgendaNovo
         {
             var vm = DataContext as AgendaViewModel;
             if (vm is null) return;
-            if (sender is Border border && border.DataContext is Agendamento agendamento)
-            {
-                if (MessageBox.Show("Agendamento confirmado e pago?", "Confirmação", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                {
-                    vm.AtualizarPago(agendamento);
-                }
-
-            }
+            
         }
 
         private void btnAgenda_Click(object sender, RoutedEventArgs e)
@@ -67,18 +58,7 @@ namespace AgendaNovo
 
             if (DataContext is AgendaViewModel vm)
             {
-                if (_janelaAgenda == null || !_janelaAgenda.IsLoaded)
-                {
-                    _janelaAgenda = new Agendar(vm); 
-                    _janelaAgenda.Closed += (s, ev) => _janelaAgenda = null;
-                    _janelaAgenda.Show();
-                }
-                else
-                {
-                    if (_janelaAgenda.WindowState == WindowState.Minimized)
-                        _janelaAgenda.WindowState = WindowState.Normal;
-                    _janelaAgenda.Activate();
-                }
+                _main.GetAgendar();
             }
         }
 
@@ -87,18 +67,7 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            if (_janelaClientes == null || !_janelaClientes.IsLoaded)
-            {
-                _janelaClientes = _sp.GetRequiredService<GerenciarClientes>();
-                _janelaClientes.Closed += (s, ev) => _janelaClientes = null;
-                _janelaClientes.Show();
-            }
-            else
-            {
-                if (_janelaClientes.WindowState == WindowState.Minimized)
-                    _janelaClientes.WindowState = WindowState.Normal;
-                _janelaClientes.Activate();
-            }
+           _main.GetGerenciarClientes();
         }
 
         private void btnCalendario_Click(object sender, RoutedEventArgs e)
@@ -106,18 +75,7 @@ namespace AgendaNovo
             FocusManager.SetFocusedElement(this, this);
             Keyboard.ClearFocus();
 
-            if (_calendario == null || !_calendario.IsLoaded)
-            {
-                _calendario = _sp.GetRequiredService<Calendario>();
-                _calendario.Closed += (s, ev) => _calendario = null;
-                _calendario.Show();
-            }
-            else
-            {
-                if (_calendario.WindowState == WindowState.Minimized)
-                    _calendario.WindowState = WindowState.Normal;
-                _calendario.Activate();
-            }
+           _main.GetCalendario();
         }
     }
 }

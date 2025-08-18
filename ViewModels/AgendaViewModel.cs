@@ -123,10 +123,7 @@ namespace AgendaNovo
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
-            NovoAgendamento = new Agendamento
-            {
-                Servico = new Servico { PossuiCrianca = true } // Padrão inicial
-            };
+            NovoAgendamento = new Agendamento();
             MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
@@ -156,6 +153,22 @@ namespace AgendaNovo
                 CarregarDadosDoBanco();
             });
 
+        }
+        public void FiltrarServicos(string termo)
+        {
+            IEnumerable<Servico> baseList = ListaServicos; // use sempre o Property
+
+            IEnumerable<Servico> result = string.IsNullOrWhiteSpace(termo)
+           ? baseList.Take(18)
+           : baseList.Where(s => !string.IsNullOrWhiteSpace(s?.Nome) &&
+                             s.Nome.Contains(termo, StringComparison.InvariantCultureIgnoreCase))
+                 .Take(50);
+
+            ServicosFiltrados.Clear();
+            foreach (var s in result)
+                ServicosFiltrados.Add(s);
+
+            System.Diagnostics.Debug.WriteLine($"FiltrarServicos('{termo}') -> {ServicosFiltrados.Count} itens");
         }
 
 
@@ -431,8 +444,7 @@ namespace AgendaNovo
         [RelayCommand]
         private void LimparCampos()
         {
-            if (NovoAgendamento?.Id != 0)
-                return;
+            NovoAgendamento = new Agendamento();
             NovoAgendamento.Data = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             ItemSelecionado = null;
             NovoAgendamento.ServicoId = 0;
@@ -486,7 +498,33 @@ namespace AgendaNovo
             cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
+            {
                 criancaParaAgendar = _criancaService.GetById(CriancaSelecionada.Id);
+
+                if (criancaParaAgendar != null)
+                {
+                    // Atualiza a idade caso tenha sido modificada na tela de agendamento
+                    criancaParaAgendar.Idade = CriancaSelecionada.Idade;
+                    criancaParaAgendar.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
+
+                    _criancaService.AddOrUpdate(criancaParaAgendar);
+                }
+            }
+            else if (NovoAgendamento.Crianca != null &&
+             !string.IsNullOrWhiteSpace(NovoAgendamento.Crianca.Nome))
+            {
+                criancaParaAgendar = new Crianca
+                {
+                    Nome = NovoAgendamento.Crianca.Nome,
+                    Genero = NovoAgendamento.Crianca.Genero,
+                    Nascimento = NovoAgendamento.Crianca.Nascimento,
+                    Idade = NovoAgendamento.Crianca.Idade,
+                    IdadeUnidade = NovoAgendamento.Crianca.IdadeUnidade,
+                    ClienteId = cliente.Id
+                };
+                _criancaService.AddOrUpdate(criancaParaAgendar);
+            }
+
 
             if (!MostrarCrianca)
             {
@@ -498,7 +536,6 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = cliente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
-            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
 
@@ -711,10 +748,9 @@ namespace AgendaNovo
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
-            NovoAgendamento.Servico = null;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
-
+            Debug.WriteLine($"Adicionar agendamento: ServicoId={novoAgendamento.ServicoId}, Servico={novoAgendamento.Servico?.Id}");
             _agendamentoService.Add(NovoAgendamento);
 
             FinalizarAgendamento(clienteExistente);
@@ -782,7 +818,12 @@ namespace AgendaNovo
             }
 
             if (NovoAgendamento.Valor > NovoAgendamento.ValorPago)
+            {
                 _clienteService.ValorIncompleto(cliente.Id);
+                _agendamentoService.ValorIncompleto(NovoAgendamento.Id);
+            }
+
+
 
             var crianca = NovoAgendamento.CriancaId.HasValue
                 ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
@@ -820,6 +861,7 @@ namespace AgendaNovo
             {
                 ListaCriancas.Add(cr);
             }
+            LimparCampos();
         }
         [RelayCommand]
         private void Editar()
@@ -936,30 +978,13 @@ namespace AgendaNovo
 
             // recarrega tudo de uma vez
             CarregarDadosDoBanco();
-            FiltrarAgendamentos();
-            AtualizarAgendamentos();
-            AtualizarHorariosDisponiveis();
-
-            ListaAgendamentos.Remove(ItemSelecionado);
-            AgendamentosFiltrados.Remove(ItemSelecionado);
-
-            bool clienteAindaTemAgendamentos = ListaAgendamentos.Any(a =>
-            a.Cliente?.Nome == ClienteSelecionado?.Nome);
-
-            if (!clienteAindaTemAgendamentos && ClienteSelecionado != null)
-            {
-                var cliente = ListaClientes.FirstOrDefault(c => c.Id == ClienteSelecionado.Id);
-                if (cliente != null)
-                    ListaClientes.Remove(cliente);
-            }
-
             ResetarFormulario();
             AtualizarHorariosDisponiveis();
-            OnPropertyChanged(nameof(DataReferencia));
             AtualizarAgendamentos();
             FiltrarAgendamentos();
             LimparCampos();
             OnPropertyChanged(nameof(ListaAgendamentos));
+            OnPropertyChanged(nameof(DataReferencia));
         }
 
         partial void OnTextoPesquisaChanged(string value)
