@@ -15,7 +15,6 @@
                 <hc:Theme/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <conv:MaiorQue1Converter x:Key="MaiorQue1Converter"/>
             <conv:MenorQueTotalPaginasConverter x:Key="MenorQueTotalPaginasConverter"/>
             <conv:MenorQueConverter x:Key="MenorQueConverter"/>
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

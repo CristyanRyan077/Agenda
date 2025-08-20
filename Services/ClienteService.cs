@@ -27,6 +27,8 @@ namespace AgendaNovo.Services
         {
             return _db.Clientes
                 .Include(c => c.Criancas)
+                .Include(c => c.Agendamentos)
+                    .ThenInclude(a => a.Pacote)
                 .AsNoTracking()
                 .ToList();
         }

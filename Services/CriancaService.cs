@@ -31,9 +31,8 @@ namespace AgendaNovo.Services
 
             foreach (var crianca in criancas)
             {
-                var precisaAtualizar = crianca.UltimaAtualizacaoIdade == null ||
-                    crianca.UltimaAtualizacaoIdade.Value.Year != hoje.Year ||
-                    crianca.UltimaAtualizacaoIdade.Value.Month != hoje.Month;
+                var precisaAtualizar = !crianca.UltimaAtualizacaoIdade.HasValue ||
+                DateOnly.FromDateTime(crianca.UltimaAtualizacaoIdade.Value) < hoje;
                 if (!precisaAtualizar)
                     continue;
 
@@ -80,31 +79,7 @@ namespace AgendaNovo.Services
             }
             crianca.UltimaAtualizacaoIdade = hoje.ToDateTime(TimeOnly.MinValue);
         }
-        public void AtualizarIdadeSemNascimento(Crianca crianca, DateOnly hoje)
-        {
-            Debug.WriteLine($"AtualizarIdade chamado para {crianca.Nome} em {DateTime.Now} - DataNascimento: {crianca.Nascimento} - ÚltimaAtualizacao: {crianca.UltimaAtualizacaoIdade}");
-
-            if (crianca.UltimaAtualizacaoIdade.HasValue &&
-               crianca.UltimaAtualizacaoIdade.Value.Month == hoje.Month &&
-               crianca.UltimaAtualizacaoIdade.Value.Year == hoje.Year)
-            {
-                return; // Já atualizou esse mês
-            }
-            if (crianca.IdadeUnidade == IdadeUnidade.Meses || crianca.IdadeUnidade == IdadeUnidade.Mês)
-            {
-                crianca.Idade++;
-                if (crianca.Idade >= 12)
-                {
-                    crianca.Idade = 1;
-                    crianca.IdadeUnidade = IdadeUnidade.Ano;
-                }
-            }
-            else
-            {
-                crianca.Idade++;
-            }
-            crianca.UltimaAtualizacaoIdade = hoje.ToDateTime(TimeOnly.MinValue);
-        }
+      
 
         public List<Crianca> GetByClienteId(int clienteId)
         {

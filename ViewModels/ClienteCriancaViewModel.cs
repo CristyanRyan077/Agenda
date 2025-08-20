@@ -25,6 +25,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AgendaNovo.ViewModels
 {
@@ -81,6 +82,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private MesItem mesSelecionado;
         [ObservableProperty] private int anoSelecionado = DateTime.Now.Year;
 
+
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public IEnumerable<StatusCliente> StatusLista => Enum.GetValues(typeof(StatusCliente)).Cast<StatusCliente>();
@@ -113,6 +115,16 @@ namespace AgendaNovo.ViewModels
 
 
         }
+        partial void OnMesSelecionadoChanged(MesItem value)
+        {
+            AplicarFiltrosComPesquisa();
+        }
+
+        partial void OnAnoSelecionadoChanged(int value)
+        {
+            if (MesSelecionado != null)
+                AplicarFiltrosComPesquisa();
+        }
         private void NotifyAll()
         {
             OnPropertyChanged(nameof(NovoCliente));
@@ -125,15 +137,12 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void FiltrarPorMes()
         {
-            var mes = MesSelecionado?.Numero ?? DateTime.Now.Month;
-            _clientesFiltrados = _todosClientes
-                .Where(cli => cli.Agendamentos.Any(a =>
-                    a.Status == StatusAgendamento.Concluido &&
-                    a.Data.Month == mes &&
-                    a.Data.Year == AnoSelecionado))
-                .ToList();
+            var mes = MesSelecionado?.Numero;
+            var ano = AnoSelecionado;
 
+            _clientesFiltrados = ObterClientesFiltrados(mes, ano).ToList();
             AtualizarPaginacao(_clientesFiltrados);
+            AplicarFiltrosComPesquisa();
         }
         private void CarregarClientesDoBanco()
         {
@@ -157,7 +166,7 @@ namespace AgendaNovo.ViewModels
                         NomeCliente = cliente.Nome,
                         Telefone = cliente.Telefone,
                         Email = cliente.Email,
-                        
+
                         CriancaId = crianca.Id,
                         NomeCrianca = crianca.Nome,
                         Nascimento = crianca.Nascimento,
@@ -289,15 +298,20 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void ExportarTodosClientesParaExcel()
         {
+            int? mes = MesSelecionado?.Numero;
+            int? ano = MesSelecionado != null ? AnoSelecionado : (int?)null;
+            var clientes = (mes.HasValue ? ObterClientesFiltrados(mes, ano)
+                : ObterClientesFiltrados()).ToList();
+            var sufixoFiltro = string.IsNullOrWhiteSpace(FiltroSelecionado) ? "Filtrados" : FiltroSelecionado;
+            var sufixoMes = mes.HasValue ? $"_{MesSelecionado?.Nome}_{ano}" : "";
+
             var salvar = new SaveFileDialog
             {
-                FileName = $"Todos_Clientes.xlsx",
+                FileName = $"Clientes_{sufixoFiltro}{sufixoMes}.xlsx",
                 Filter = "Arquivo Excel (*.xlsx)|*.xlsx"
             };
+            if (salvar.ShowDialog() != true) return;
 
-            if (salvar.ShowDialog() != true)
-                return;
-            var TodosClientes = _clienteService.GetAllWithChildren();
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Clientes");
 
@@ -310,27 +324,34 @@ namespace AgendaNovo.ViewModels
             ws.Cell("G1").Value = "Qtd. Agendamentos";
             ws.Cell("H1").Value = "Status";
             ws.Cell("I1").Value = "Observação";
-            int linha = 3;
+            int linha = 2;
 
-            foreach (var cliente in TodosClientes)
+            foreach (var cliente in clientes)
             {
-                var agendamentos = _clienteService.GetAgendamentos(cliente.Id) ?? new List<Agendamento>();
+                var agendamentos = cliente.Agendamentos ?? new List<Agendamento>();
+                var agora = DateTime.Now;
+                int mesRef = mes ?? agora.Month;
+                int anoRef = ano ?? agora.Year;
                 var totalMes = agendamentos
-                .Where(a => a.Data.Month == DateTime.Now.Month && a.Data.Year == DateTime.Now.Year)
-                .Sum(a => a.ValorPago);
+                    .Where(a => a.Data.Month == mesRef && a.Data.Year == anoRef)
+                    .Sum(a => a.ValorPago);
 
                 var totalHistorico = agendamentos
                     .Sum(a => a.ValorPago);
 
                 // Crianças em string separada por vírgula
-                var nomesCriancas = string.Join(", ", cliente.Criancas.Select(c => c.Nome));
+                var nomesCriancas = string.Join(", ", cliente.NomeCrianca);
 
-                ws.Cell(linha, 1).Value = cliente.Nome;
+                ws.Cell(linha, 1).Value = cliente.NomeCliente;
                 ws.Cell(linha, 2).Value = cliente.Telefone;
                 ws.Cell(linha, 3).Value = cliente.Email;
                 ws.Cell(linha, 4).Value = nomesCriancas;
-                ws.Cell(linha, 5).Value = totalMes.ToString("C"); 
-                ws.Cell(linha, 6).Value = totalHistorico.ToString("C");
+                ws.Cell(linha, 5).Value = (double)totalMes;
+                ws.Cell(linha, 6).Value = (double)totalHistorico;
+
+                ws.Cell(linha, 5).Style.NumberFormat.Format = "R$ #,##0.00";
+                ws.Cell(linha, 6).Style.NumberFormat.Format = "R$ #,##0.00";
+
                 ws.Cell(linha, 7).Value = agendamentos.Count;
                 ws.Cell(linha, 8).Value = cliente.Status.ToString();
                 ws.Cell(linha, 9).Value = cliente.Observacao;
@@ -427,7 +448,6 @@ namespace AgendaNovo.ViewModels
 
 
             Cliente cliente;
-            bool isNovoCliente = NovoCliente.Id == 0;
 
             if (NovoCliente.Id != 0)
             {
@@ -456,8 +476,7 @@ namespace AgendaNovo.ViewModels
 
             }
 
-            int? clienteIdNotificacao = isNovoCliente ? cliente.Id : (int?)null;
-
+            int? clienteIdNotificacao = cliente.Id;
             int? criancaIdNotificacao = null;
 
             // Verifica se há criança para salvar
@@ -479,7 +498,6 @@ namespace AgendaNovo.ViewModels
                 WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(clienteIdNotificacao, criancaIdNotificacao));
 
             _clientesFiltrados = _todosClientes;
-            AtualizarPaginacao(_clientesFiltrados);
             CarregarClientesDoBanco();
             LimparInputsClienteCrianca();
             NotifyAll();
@@ -507,10 +525,10 @@ namespace AgendaNovo.ViewModels
 
             var cliId = ClienteCriancaSelecionado.ClienteId;
             var criId = ClienteCriancaSelecionado.CriancaId;
-                // confirme antes de apagar tudo
-                if (System.Windows.MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
-                                    "Confirma", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-                    return;
+            // confirme antes de apagar tudo
+            if (System.Windows.MessageBox.Show($"Excluir cliente {clienteCriancaSelecionado.NomeCliente} e crianças?",
+                                "Confirma", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                return;
             if (criId != null)
             {
                 _criancaService.Delete(criId.Value);
@@ -560,13 +578,13 @@ namespace AgendaNovo.ViewModels
             //    (se quiser remover as crianças individualmente, descomente a linha abaixo)
            // _db.Criancas.RemoveRange(cliente.Criancas);
             */
-               
-                IsInEditMode = false;
-                ClienteExistenteDetectado = false;
-                NotifyAll();
-                CarregarClientesDoBanco();
-                LimparCamposClienteCrianca();
-                return;
+
+            IsInEditMode = false;
+            ClienteExistenteDetectado = false;
+            NotifyAll();
+            CarregarClientesDoBanco();
+            LimparCamposClienteCrianca();
+            return;
 
         }
         partial void OnFiltroSelecionadoChanged(string value)
@@ -575,57 +593,95 @@ namespace AgendaNovo.ViewModels
         }
         private void AplicarFiltrosComPesquisa()
         {
+
+            int? mes = MesSelecionado?.Numero;
+            int? ano = MesSelecionado != null ? AnoSelecionado : (int?)null;
+
+            _clientesFiltrados = ObterClientesFiltrados(mes, ano).ToList();
+            AtualizarPaginacao(_clientesFiltrados);
+        }
+        private bool AgendamentoAtendeFiltro(Agendamento a)
+        {
+            switch (FiltroSelecionado)
+            {
+                case "Pendente":
+                    return a.Pacote != null && a.ValorPago < a.Pacote.Valor;
+
+                case "Concluido":
+                    return a.Pacote != null && a.ValorPago >= a.Pacote.Valor;
+
+                case "S/A":
+                case "Inativo":
+                    return true;
+
+                // "Todos" (ou nulo)
+                default:
+                    return true;
+            }
+        }
+        private IEnumerable<ClienteCriancaView> ObterClientesFiltrados(int? mes = null, int? ano = null)
+        {
             var agora = DateTime.Now;
-            var clientesFiltrados = _todosClientes.AsEnumerable();
+            var clientes = _todosClientes.AsEnumerable();
 
-            if (FiltroSelecionado == "Pendente")
+            switch (FiltroSelecionado)
             {
-                clientesFiltrados = clientesFiltrados
-                    .Where(c => c.Agendamentos.Any(a => (a.Pacote != null) && a.ValorPago < a.Pacote.Valor));
-            }
-            else if (FiltroSelecionado == "Concluido")
-            {
-                clientesFiltrados = clientesFiltrados
-                    .Where(c => c.Status != StatusCliente.Inativo &&
-                                c.Agendamentos.Any() &&
-                                c.Agendamentos.All(a => (a.Pacote != null) && a.ValorPago >= a.Pacote.Valor));
-            }
-            else if (FiltroSelecionado == "Inativo")
-            {
-                clientesFiltrados = clientesFiltrados
-                    .Where(c =>
-                        c.Status == StatusCliente.Inativo ||
+                case "Pendente":
+                    clientes = clientes.Where(c =>
+                        c.Agendamentos.Any(a => a.Pacote != null && a.ValorPago < a.Pacote.Valor));
+                    break;
+
+                case "Concluido":
+                    clientes = clientes.Where(c =>
+                        c.Status != StatusCliente.Inativo &&
                         c.Agendamentos.Any() &&
-                        c.Agendamentos.Max(a => a.Data) < agora.AddDays(-60)
-                    );
-            }
-            else if (FiltroSelecionado == "S/A")
-            {
-                clientesFiltrados = clientesFiltrados
-                    .Where(c => c.Agendamentos.Count == 0);
+                        c.Agendamentos.All(a => a.Pacote != null && a.ValorPago >= a.Pacote.Valor));
+                    break;
+
+                case "Inativo":
+                    clientes = clientes.Where(c =>
+                        c.Status == StatusCliente.Inativo ||
+                        (c.Agendamentos.Any() && c.Agendamentos.Max(a => a.Data) < agora.AddDays(-60)));
+                    break;
+
+                case "S/A":
+                    clientes = clientes.Where(c => c.Agendamentos.Count == 0);
+                    break;
+
+                    // "Todos" (ou nulo) => sem filtro adicional
             }
 
-            // Filtro de pesquisa
             if (!string.IsNullOrWhiteSpace(PesquisaText))
             {
                 var filtro = PesquisaText.Trim().ToLower();
-                clientesFiltrados = clientesFiltrados
-                    .Where(c =>
-                        (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
-                        (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
-                        (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro))
-                    );
+                clientes = clientes.Where(c =>
+                    (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro)));
+            }
+            if (mes.HasValue && ano.HasValue)
+            {
+                clientes = clientes.Where(c =>
+                {
+                    // Para "S/A": manter a sem-agendamento (ignora mês, pois não há o que filtrar por mês)
+                    if (FiltroSelecionado == "S/A")
+                        return c.Agendamentos.Count == 0;
+
+                    // Para os demais: precisa ter ao menos 1 agendamento no mês/ano que também respeite o filtro por agendamento
+                    return c.Agendamentos.Any(a =>
+                        a.Data.Month == mes.Value &&
+                        a.Data.Year == ano.Value &&
+                        AgendamentoAtendeFiltro(a));
+                });
             }
 
-            _clientesFiltrados = clientesFiltrados.ToList();
-            PaginaAtual = 1;
-            AtualizarPaginacao(_clientesFiltrados);
+            return clientes;
         }
 
         partial void OnPesquisaTextChanged(string value)
         {
-            PaginaAtual = 1;
-            AplicarFiltrosComPesquisa();        
+
+            AplicarFiltrosComPesquisa();
         }
         [ObservableProperty]
         private int paginaAtual = 1;
@@ -634,7 +690,7 @@ namespace AgendaNovo.ViewModels
         public List<int> OpcoesTamanhoPagina { get; } = new() { 10, 20, 50 };
         partial void OnTamanhoPaginaChanged(int value)
         {
-            PaginaAtual = 1;
+
             AplicarFiltrosComPesquisa();
         }
 
@@ -648,7 +704,10 @@ namespace AgendaNovo.ViewModels
             var origem = listaFiltrada ?? _todosClientes;
 
             TotalPaginas = (int)Math.Ceiling(origem.Count / (double)TamanhoPagina);
-
+            if (PaginaAtual > TotalPaginas)
+                PaginaAtual = TotalPaginas == 0 ? 1 : TotalPaginas;
+            if (PaginaAtual < 1)
+                PaginaAtual = 1;
             var pagina = origem
                 .Skip((PaginaAtual - 1) * TamanhoPagina)
                 .Take(TamanhoPagina)
@@ -668,16 +727,22 @@ namespace AgendaNovo.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanIrPaginaAnterior))]
         private void PaginaAnterior()
         {
             if (PaginaAtual > 1)
             {
                 PaginaAtual--;
-                AtualizarPaginacao(_clientesFiltrados);
             }
+            else
+            {
+                // Se estiver na página 1, vai para a última página
+                PaginaAtual = TotalPaginas == 0 ? 1 : TotalPaginas;
+            }
+
+            AtualizarPaginacao(_clientesFiltrados);
         }
+        private bool CanIrPaginaAnterior() => TotalPaginas > 1;
 
     }
-
 }

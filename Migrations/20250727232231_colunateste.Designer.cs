@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250818191249_initial-create")]
-    partial class initialcreate
+    [Migration("20250727232231_colunateste")]
+    partial class colunateste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,9 +54,6 @@ namespace AgendaNovo.Migrations
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("Tema")
                         .HasColumnType("nvarchar(max)");
 
@@ -65,6 +62,9 @@ namespace AgendaNovo.Migrations
 
                     b.Property<decimal>("ValorPago")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("teste")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -108,12 +108,6 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Telefone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("TotalPagoHistorico")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalPagoMesAtual")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Clientes");
@@ -144,9 +138,6 @@ namespace AgendaNovo.Migrations
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UltimaAtualizacaoIdade")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -190,10 +181,8 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("PossuiCrianca")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                    b.Property<bool?>("PossuiCrianca")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
