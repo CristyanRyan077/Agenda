@@ -125,22 +125,22 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Background="AliceBlue" Margin="0,5">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Data, StringFormat='dd/MM/yyyy'}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Horario, StringFormat='{}{0:hh\\:mm}'}" Margin="5,0,0,0"/>
+                                        <TextBlock Text="{Binding Agendamento.Data, StringFormat='dd/MM/yyyy'}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Agendamento.Horario, StringFormat='{}{0:hh\\:mm}'}" Margin="5,0,0,0"/>
                                     </StackPanel>
 
-                                    <TextBlock FontFamily="Helvetica" FontWeight="Bold" FontSize="14" Text="{Binding Cliente.Nome}"/>
-                                    <TextBlock FontWeight="Bold" Margin="0,0,0,0" FontSize="15" Text="{Binding Status}" FontStyle="Italic">
+                                    <TextBlock FontFamily="Helvetica" FontWeight="Bold" FontSize="14" Text="{Binding Agenamento.Cliente.Nome}"/>
+                                    <TextBlock FontWeight="Bold" Margin="0,0,0,0" FontSize="15" Text="{Binding Agendamento.Status}" FontStyle="Italic">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Cancelado">
+                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Cancelado">
                                                         <Setter Property="Foreground" Value="Red"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Concluido">
+                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Concluido">
                                                         <Setter Property="Foreground" Value="Green"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Pendente">
+                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Pendente">
                                                         <Setter Property="Foreground" Value="Orange"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -149,25 +149,30 @@
                                     </TextBlock>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica"/>
-                                        <TextBlock Text="{Binding Pacote.Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" FontFamily="Helvetica"/>
+                                        <TextBlock Text="{Binding Agendamento.Servico.Nome}" FontWeight="Bold" FontSize="13" Margin="0 0 5 0" FontFamily="Helvetica"/>
+                                        <TextBlock Text="{Binding NumeroMes, StringFormat='Mês {0}'}"
+                                                   Foreground="Gray"
+                                                   Visibility="{Binding NumeroMes, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                        <TextBlock Text="{Binding Agendamento.Pacote.Valor, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="13" FontFamily="Helvetica"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
 
                                         <TextBlock Text="Pago:" Margin="0,0,4,0" FontSize="15"/>
-                                        <TextBlock Text="{Binding ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="14" Margin="0 3 0 0" FontFamily="Helvetica">
+                                        <TextBlock Text="{Binding Agendamento.ValorPago, StringFormat=R$ {0:N2}}" FontWeight="Bold" FontSize="14" Margin="0 3 0 0" FontFamily="Helvetica">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="Red"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EstaPago}" Value="True">
+                                                        <DataTrigger Binding="{Binding Agendamento.EstaPago}" Value="True">
                                                             <Setter Property="Foreground" Value="Green"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
+                                        
                                     </StackPanel>
+                                    
 
                                 </StackPanel>
                             </DataTemplate>
@@ -344,5 +349,47 @@
 
             </DataGrid.Columns>
         </DataGrid>
+        <Border x:Name="Drawer"
+          Background="#333" Grid.Row="1"
+          Width="80" Height="185"
+          HorizontalAlignment="Left"
+          VerticalAlignment="Top"
+          RenderTransformOrigin="0,0"
+      d:RenderTransformOrigin="0,0">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="DrawerTransform" X="-200" d:X="0"/>
+            </Border.RenderTransform>
+            <StackPanel Orientation="Vertical">
+                <Button x:Name="btnMainwindow" Padding="4" Width="70" Click="btnMainwindow_Click"
+              Height="60" BorderBrush="Black" FontSize="15">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="ArrowBack" Height="32" Width="55"/>
+                        <TextBlock Margin="5,0,0,0" FontWeight="Bold" Foreground="Gray">Voltar</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="btnAgenda" Padding="4" Click="btnAgenda_Click"
+             Height="60" Width="70" BorderBrush="Black" BorderThickness="1" FontSize="14">
+                    <StackPanel>
+                        <materialDesign:PackIcon Height="32" Width="55" Kind="BookAdd"/>
+                        <TextBlock FontWeight="Bold" Foreground="Blue">Agendar</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button Name="btnCalendario" Height="60" Width="70" Padding="4"
+      BorderBrush="Black" FontSize="14" Click="btnCalendario_Click">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="Calendar" Height="32" Width="60"  />
+                        <TextBlock FontWeight="Bold" FontSize="12"  Foreground="Green">Calendario</TextBlock>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+
+        </Border>
+        <ToggleButton x:Name="btnToggle" Content="☰" Width="40"
+      HorizontalAlignment="Left" VerticalAlignment="Top"  
+      Margin="10" Height="40" 
+      Checked="btnToggle_Checked" Unchecked="btnToggle_Unchecked"/>
     </Grid>
 </Window>

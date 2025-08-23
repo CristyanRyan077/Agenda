@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AgendaNovo.ViewModels;
+using AgendaNovo.Views;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,9 +12,9 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using AgendaNovo.ViewModels;
 
 namespace AgendaNovo
 {
@@ -21,10 +23,12 @@ namespace AgendaNovo
     /// </summary>
     public partial class GerenciarClientes : Window
     {
-        public GerenciarClientes(ClienteCriancaViewModel vm)
+        private WindowManager _main;
+        public GerenciarClientes(ClienteCriancaViewModel vm, WindowManager main)
         {
             InitializeComponent();
             DataContext = vm;
+            _main = main;
             txtCliente.Loaded += (s, e) =>
             {
                 if (txtCliente.Template.FindName("PART_EditableTextBox", txtCliente) is TextBox innerTextBox)
@@ -34,6 +38,38 @@ namespace AgendaNovo
                 }
             };
             Debug.WriteLine($"clientes ViewModel ID: {vm.GetHashCode()}");
+        }
+        private void btnToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(250));
+            DrawerTransform.BeginAnimation(TranslateTransform.XProperty, anim);
+        }
+
+        private void btnToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var anim = new DoubleAnimation(-200, TimeSpan.FromMilliseconds(250));
+            DrawerTransform.BeginAnimation(TranslateTransform.XProperty, anim);
+        }
+        private void btnMainwindow_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            _main.GetMainWindow();
+        }
+        private void btnAgenda_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+                _main.GetAgendar();
+        }
+
+        private void btnCalendario_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            _main.GetCalendario();
         }
 
 

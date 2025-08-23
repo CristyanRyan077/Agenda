@@ -23,11 +23,12 @@ namespace AgendaNovo.Views
     /// </summary>
     public partial class Calendario : Window
     {
-        public Calendario(CalendarioViewModel vm)
+        private WindowManager _main;
+        public Calendario(CalendarioViewModel vm, WindowManager main)
         {
             InitializeComponent();
             DataContext = vm;
-
+            _main = main;
         }
 
         private void Dia_MouseDown(object sender, MouseButtonEventArgs e)
@@ -36,6 +37,26 @@ namespace AgendaNovo.Views
             {
                 vm.SelecionarDia(dia.Data);
             }
+        }
+        private void btnMainwindow_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            _main.GetMainWindow();
+        }
+        private void btnAgenda_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+            _main.GetAgendar();
+        }
+        private void btnClientes_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            _main.GetGerenciarClientes();
         }
 
         private void btnToggle_Checked(object sender, RoutedEventArgs e)

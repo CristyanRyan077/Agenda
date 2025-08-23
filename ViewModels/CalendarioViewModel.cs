@@ -188,7 +188,6 @@ namespace AgendaNovo.ViewModels
         }
         partial void OnDataSelecionadaChanged(DateTime? value)
         {
-            textoPesquisa = string.Empty;
             FiltrarAgendamentos();
         }
         private void FiltrarAgendamentos()

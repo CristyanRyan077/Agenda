@@ -40,8 +40,7 @@ namespace AgendaNovo
             services.AddTransient<MainWindow>();
             services.AddTransient<GerenciarClientes>();
             services.AddTransient<Login>();
-            services.AddTransient<Calendario>(sp =>
-            new Calendario(sp.GetRequiredService<CalendarioViewModel>()));
+            services.AddTransient<Calendario>();
 
             //ViewModels
             services.AddTransient<CalendarioViewModel>();

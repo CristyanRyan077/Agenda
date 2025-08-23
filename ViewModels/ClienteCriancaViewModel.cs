@@ -7,6 +7,7 @@ using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using HandyControl.Controls;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
         [ObservableProperty]
-        private ObservableCollection<Agendamento> historicoAgendamentos = new();
+        private ObservableCollection<AgendamentoHistoricoVM> historicoAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancasDoCliente = new();
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
@@ -280,9 +281,23 @@ namespace AgendaNovo.ViewModels
 
             var agendamentosdocliente = _clienteService.GetAgendamentos(value.ClienteId) ?? new List<Agendamento>();
 
-            // Atualiza o histórico
-            HistoricoAgendamentos = new ObservableCollection<Agendamento>(agendamentosdocliente
-                .OrderByDescending(a => a.Data));
+            var acompanhamentos = agendamentosdocliente
+                .Where(a => a.Servico.Nome == "Acompanhamento Mensal")
+                .OrderBy(a => a.Data)
+                .Select((a, index) => new { a.Id, NumeroMes = index + 1 })
+                .ToList();
+
+            var historico = agendamentosdocliente
+                .OrderByDescending(a => a.Data)
+                .Select(a => new AgendamentoHistoricoVM
+                {
+                    Agendamento = a,
+                    NumeroMes = acompanhamentos.FirstOrDefault(x => x.Id == a.Id)?.NumeroMes
+                })
+                .ToList();
+
+
+            HistoricoAgendamentos = new ObservableCollection<AgendamentoHistoricoVM>(historico);
             OnPropertyChanged(nameof(TemHistorico));// Ordena do mais recente para o mais antigo
 
             // Se quiser calcular acompanhamento mensal completo:

@@ -372,11 +372,11 @@
                 <TranslateTransform x:Name="DrawerTransform" X="-200" d:X="0"/>
             </Border.RenderTransform>
             <StackPanel Orientation="Vertical">
-                <Button x:Name="btnMainwindow" Padding="4" Width="70" Click="btnMainwindow_Click"
-                    Height="60" BorderBrush="Black" FontSize="14">
+                <Button x:Name="btnMainwindow" Padding="2" Width="70" Click="btnMainwindow_Click"
+                    Height="60" BorderBrush="Black" FontSize="15">
                     <StackPanel>
-                        <materialDesign:PackIcon Kind="BookOpenOutline" Height="32" Width="55"/>
-                        <TextBlock FontWeight="Bold" Foreground="Blue">Agenda</TextBlock>
+                        <materialDesign:PackIcon Kind="ArrowBack" Height="32" Width="55"/>
+                        <TextBlock Margin="5,0,0,0" FontWeight="Bold" Foreground="Gray">Voltar</TextBlock>
                     </StackPanel>
                 </Button>
 

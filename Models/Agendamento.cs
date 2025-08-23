@@ -48,6 +48,7 @@ namespace AgendaNovo
             get => _mostrarCheck;
             set => SetProperty(ref _mostrarCheck, value);
         }
+        [NotMapped] public int? NumeroMes { get; set; }
 
         public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }

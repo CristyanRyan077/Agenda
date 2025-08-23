@@ -8,7 +8,7 @@
         xmlns:conv="clr-namespace:AgendaNovo.Converters"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo.Views"
-        xmlns:controles="clr-namespace:AgendaNovo.Controles"
+        xmlns:controles="clr-namespace:AgendaNovo.Controles" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d" MinHeight="900" MinWidth="1200"
         d:DataContext="{d:DesignInstance Type=vm:CalendarioViewModel}"
         WindowState="Maximized"
@@ -60,6 +60,34 @@
                      Text="{Binding TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Black"
                      />
                 </Grid>
+                <ToolBarTray Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                    <ToolBar Height="70"  Background="DarkGray">
+                        <Button x:Name="btnMainwindow" Padding="2" Margin="0,0,5,0" Width="60" Click="btnMainwindow_Click"
+                                Height="60" BorderBrush="Black" FontSize="15">
+                            <StackPanel>
+                                <materialDesign:PackIcon Kind="ArrowBack" Height="32" Width="55"/>
+                                <TextBlock Margin="5,0,0,0" FontWeight="Bold" Foreground="Gray">Voltar</TextBlock>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="btnAgenda" Padding="4" Click="btnAgenda_Click"
+                     Height="60" BorderBrush="Black" BorderThickness="1" FontSize="14">
+                            <StackPanel>
+                                <materialDesign:PackIcon Height="32" Width="55" Kind="BookAdd"/>
+                                <TextBlock FontWeight="Bold" Foreground="Blue">Agendar</TextBlock>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="btnClientes" Padding="4" Click="btnClientes_Click"
+                     Height="60" Margin="5,0,0,0" BorderBrush="Black" FontSize="14">
+                            <StackPanel>
+                                <materialDesign:PackIcon Kind="UserAdd" Height="32" Width="55"/>
+                                <TextBlock FontWeight="Bold" Foreground="Red">Clientes</TextBlock>
+                            </StackPanel>
+                        </Button>
+
+                     
+
+                    </ToolBar>
+                </ToolBarTray>
 
 
                 <DataGrid
@@ -322,5 +350,6 @@
                   HorizontalAlignment="Left" VerticalAlignment="Top"  
                   Margin="10" Height="40" 
                   Checked="btnToggle_Checked" Unchecked="btnToggle_Unchecked"/>
+        
     </Grid>
 </Window>
