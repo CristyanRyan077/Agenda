@@ -8,6 +8,95 @@
              xmlns:local="clr-namespace:AgendaNovo.Controles" xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:CalendarioViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <!-- ================== RESOURCES ================== -->
+    <UserControl.Resources>
+        <!-- Cores/tokens -->
+        <SolidColorBrush x:Key="CardBg" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#D6D9DF"/>
+        <CornerRadius   x:Key="CardRadius">12</CornerRadius>
+       
+
+        <!-- Chip base -->
+        <Style x:Key="ChipStyle" TargetType="Border">
+            <Setter Property="Padding" Value="2,0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#ECEFF1"/>
+            <Setter Property="BorderBrush" Value="#CFD8DC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="FotosChip" TargetType="Border" BasedOn="{StaticResource ChipStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="OK">
+                    <Setter Property="Background" Value="#E8F5E9"/>
+                    <Setter Property="BorderBrush" Value="#4CAF50"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="RV">
+                    <Setter Property="Background" Value="#FFEBEE"/>
+                    <Setter Property="BorderBrush" Value="#E53935"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Chip de Status com cores por estado -->
+        <Style x:Key="StatusChip" TargetType="Border" BasedOn="{StaticResource ChipStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Pendente">
+                    <Setter Property="Background" Value="#FFF8E1"/>
+                    <Setter Property="BorderBrush" Value="#FFC107"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Concluido">
+                    <Setter Property="Background" Value="#E8F5E9"/>
+                    <Setter Property="BorderBrush" Value="#4CAF50"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Cancelado">
+                    <Setter Property="Background" Value="#FFEBEE"/>
+                    <Setter Property="BorderBrush" Value="#E53935"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Card do histórico -->
+        <Style x:Key="HistoryCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{StaticResource CardRadius}"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EstaSendoEditado}" Value="True">
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Trilho colorido à esquerda, por status -->
+        <Style x:Key="StatusStripe" TargetType="Border">
+            <Setter Property="Width" Value="4"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Background" Value="#B0BEC5"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Pendente">
+                    <Setter Property="Background" Value="#FFC107"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Concluido">
+                    <Setter Property="Background" Value="#4CAF50"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Agendamento.Status}" Value="Cancelado">
+                    <Setter Property="Background" Value="#E53935"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    
+    
     <Grid Background="#333">
             <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
                 <Grid.RowDefinitions>
@@ -24,138 +113,99 @@
            Margin="10" Grid.Row="0"/>
 
             <!-- Lista (substitui ScrollViewer + ItemsControl) -->
+            <!-- ================== LISTBOX ================== -->
             <ListBox Grid.Row="1"
          ItemsSource="{Binding HistoricoAgendamentos}"
          Background="Transparent"
          BorderThickness="0"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
-         ScrollViewer.CanContentScroll="False">
-                <!-- força medição por pixel, não por item -->
-
+         VirtualizingPanel.IsVirtualizing="True"
+         VirtualizingPanel.VirtualizationMode="Recycling"
+         ScrollViewer.CanContentScroll="True">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="VerticalContentAlignment"   Value="Stretch"/>
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="Margin"  Value="0"/>
-                        <!-- zera limites impostos por temas -->
-                        <Setter Property="MinHeight" Value="0"/>
                     </Style>
                 </ListBox.ItemContainerStyle>
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border MouseLeftButtonUp="HistoricoItem_Click"
-                    Padding="0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    HorizontalAlignment="Stretch">
-                            <Border Padding="10" Margin="6"
-                        CornerRadius="8"
-                        BorderThickness="2"
-                        Background="White"
-                        BorderBrush="Gray"
-                        MinHeight="92">
-                                <!-- 👈 garante que não colapse -->
+                        <!-- Clique em qualquer lugar do card -->
+                        <Border MouseUp="HistoricoItem_Click"
+                                  Padding="0" Background="Transparent" BorderThickness="0"
+                                  Cursor="Hand" HorizontalAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="Gray"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding EstaSendoEditado}" Value="True">
-                                                <Setter Property="BorderBrush" Value="DodgerBlue"/>
-                                                <Setter Property="Background" Value="#E6F2FF"/>
-                                            </DataTrigger>
-                                            <DataTrigger Value="True">
-                                                <DataTrigger.Binding>
-                                                    <Binding Path="IsMouseOver"
-                                                 RelativeSource="{RelativeSource AncestorType=Button}"/>
-                                                </DataTrigger.Binding>
-                                                <Setter Property="BorderBrush" Value="#7AA7E9"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
+                                <!-- trilho de status -->
+                                <Border Grid.Column="0" Style="{StaticResource StatusStripe}"/>
 
-                                <StackPanel Orientation="Vertical" TextElement.Foreground="Black">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Agendamento.Data, StringFormat='dd/MM/yyyy'}"
-                                       FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Agendamento.Horario, StringFormat='{}{0:hh\\:mm}'}"
-                                       Margin="8,0,0,0"/>
-                                    </StackPanel>
+                                <!-- card -->
+                                <Border Grid.Column="1" Style="{StaticResource HistoryCard}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                    <TextBlock Text="{Binding NumeroMes, StringFormat=' Mês {0} '}"
-                                   FontSize="13" FontWeight="Bold"
-                                   Visibility="{Binding NumeroMes, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                        <!-- linha 1: data / hora -->
+                                        <Grid Grid.Row="0">
+                                            <TextBlock Text="{Binding Agendamento.Data, StringFormat='{}{0:dd/MM/yyyy}'}"
+                           FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Agendamento.Horario, StringFormat='{}{0:hh\\:mm}'}"
+                           HorizontalAlignment="Right" />
+                                        </Grid>
 
-                                    <TextBlock FontWeight="Bold" FontSize="14"
-                                   Text="{Binding Agendamento.Cliente.Nome}"
-                                   TextWrapping="Wrap"/>
-                                    <!-- 👈 permite quebrar -->
+                                        <!-- linha 2: chips -->
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0">
+                                            <!-- Mês -->
+                                            <Border Style="{StaticResource ChipStyle}"
+                                            Visibility="{Binding NumeroMes, Converter={StaticResource NullToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding NumeroMes, StringFormat=' Mês {0} '}" />
+                                            </Border>
 
-                                    <TextBlock FontWeight="Bold" Margin="0,0,0,0" FontSize="15" Text="{Binding Agendamento.Status}" FontStyle="Italic">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Cancelado">
-                                                        <Setter Property="Foreground" Value="Red"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Concluido">
-                                                        <Setter Property="Foreground" Value="Green"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Agendamento.Status}" Value="Pendente">
-                                                        <Setter Property="Foreground" Value="Orange"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontWeight="Bold" FontSize="13" Margin="0,0,2,0" Text="Fotos:"/>
-                                        <TextBlock FontWeight="Bold" FontSize="12" Margin="0,1,0,0" Text="{Binding Agendamento.Fotos}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="OK">
-                                                            <Setter Property="Foreground" Value="Green"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="RV">
-                                                            <Setter Property="Foreground" Value="Red"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                   
+                                            <!-- Status -->
+                                            <Border Style="{StaticResource StatusChip}">
+                                                <TextBlock Text="{Binding Agendamento.Status}" />
+                                            </Border>
 
-                                    <TextBlock Text="{Binding Agendamento.Servico.Nome}"
-                                   FontWeight="Bold" FontSize="13" Margin="0,4,0,0"
-                                   TextWrapping="Wrap"/>
+                                            <!-- Fotos -->
+                                            <Border Style="{StaticResource FotosChip}">
+                                                <TextBlock Text="{Binding Agendamento.Fotos, StringFormat=' Fotos: {0} '}" />
+                                            </Border>
+                                        </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                                        <TextBlock Text="Pago:" Margin="0,-1,6,0" FontSize="15"/>
-                                           <TextBlock Text="{Binding Agendamento.ValorPago, StringFormat=R$ {0:N2} /}"
-                                                      FontWeight="Bold" FontSize="15" Margin="0 2 0 0" FontFamily="Helvetica">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="Red"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Agendamento.EstaPago}" Value="True">
-                                                            <Setter Property="Foreground" Value="Green"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Agendamento.Pacote.Valor, StringFormat=R$ {0:N2}}"
-                                       FontWeight="Bold" FontSize="15" Margin="6,-1,0,0"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
+                                        <!-- linha 3: serviço + cliente -->
+                                        <StackPanel Grid.Row="2" Margin="0,6,0,0">
+                                            <TextBlock Text="{Binding Agendamento.Servico.Nome}"
+                           FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Agendamento.Cliente.Nome}"
+                           Foreground="#263238" />
+                                        </StackPanel>
+
+                                        <!-- linha 4: pagamento + progressbar -->
+                                        <StackPanel Grid.Row="3" Margin="0,8,0,0">
+                                            <ProgressBar Height="6"
+                             Maximum="{Binding Agendamento.Valor}"
+                             Value="{Binding Agendamento.ValorPago}"/>
+                                            <TextBlock Margin="0,4,0,0">
+                                                      <Run Text="Pago: "/>
+                                                      <Run Text="{Binding Agendamento.ValorPago, StringFormat=R$ {0:N2}}"/>
+                                                      <Run Text=" / "/>
+                                                      <Run Text="{Binding Agendamento.Valor, StringFormat=R$ {0:N2}}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
