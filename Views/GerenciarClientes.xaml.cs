@@ -151,5 +151,6 @@ namespace AgendaNovo
             var vm = (ClienteCriancaViewModel)this.DataContext;
             vm.VerificarClientesInativos();
         }
+
     }
 }

@@ -195,13 +195,21 @@
                BorderBrush="Transparent" SelectionTextBrush="Black"/>
 
                 <hc:TextBox Grid.Column="0" Text="{Binding NovoCliente.Observacao,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 Grid.Row="5" Width="330" Height="90" HorizontalAlignment="Center"
+                 Grid.Row="5" Width="310" Height="60" HorizontalAlignment="Center"
                  TextWrapping="Wrap"
                 AcceptsReturn="True"
                 VerticalScrollBarVisibility="Auto"
                 hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
                Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"/>
 
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,20" Grid.Row="5" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                        <RadioButton Content="RV" FontSize="20" FontFamily="Arial" Margin="0,0,20,0"
+                  Foreground="White" GroupName="FotosReveladas"
+                  IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=RV}"/>
+                        <RadioButton Content="OK" FontSize="20" FontFamily="Arial"
+                  Foreground="White" GroupName="FotosReveladas"
+                  IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=OK}"/>
+                    </StackPanel>
                 </Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="6" Margin="0,20,0,0">
                     <Button Content="Excluir" Background="Red" Width="120" Height="30" Command="{Binding ExcluirCommand}" Click="Button_Click_1" />

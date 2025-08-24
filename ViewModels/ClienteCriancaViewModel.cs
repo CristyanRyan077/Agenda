@@ -70,6 +70,7 @@ namespace AgendaNovo.ViewModels
         private List<ClienteCriancaView> _todosClientes = new();
         [ObservableProperty] private string filtroSelecionado;
         private List<ClienteCriancaView> _clientesFiltrados = new();
+
         public ObservableCollection<MesItem> Meses { get; } = new(
         System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat
         .MonthNames

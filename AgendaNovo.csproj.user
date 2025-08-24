@@ -10,6 +10,9 @@
     <Compile Update="Controles\EditarAgendamentoView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Controles\HistoricoUsuario.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Controles\ServicosAutoComplete.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -1,6 +1,7 @@
 ﻿
 using AgendaNovo.Controles;
 using AgendaNovo.Interfaces;
+using AgendaNovo.Migrations;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
@@ -50,6 +51,7 @@ namespace AgendaNovo
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+
         [ObservableProperty] private decimal valorPacote;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
@@ -77,6 +79,7 @@ namespace AgendaNovo
         [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
 
         //Outros
+        [ObservableProperty] FotosReveladas fotosreveladas;
         [ObservableProperty] private ObservableCollection<Servico> listaServicos = new();
         [ObservableProperty] private Servico? servicoSelecionado;
         [ObservableProperty] private string textoPesquisa = string.Empty;
@@ -96,6 +99,7 @@ namespace AgendaNovo
         [ObservableProperty]
         private bool mostrarSugestoesServico = false;
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
+
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
         public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
@@ -172,6 +176,7 @@ namespace AgendaNovo
             System.Diagnostics.Debug.WriteLine($"FiltrarServicos('{termo}') -> {ServicosFiltrados.Count} itens");
         }
 
+       
 
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
@@ -503,10 +508,14 @@ namespace AgendaNovo
 
             if (!ValidarDadosBasicos()) return;
 
+            var agendamento = _agendamentoService.GetById(NovoAgendamento.Id);
+            if (agendamento == null) return;
+
             var cliente = _clienteService.GetById(NovoCliente.Id);
             if (cliente == null) return;
 
             cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
+
             Crianca criancaParaAgendar = null;
             if (CriancaSelecionada != null)
             {
@@ -544,14 +553,17 @@ namespace AgendaNovo
                 NovoAgendamento.Crianca = null;
             }
             Debug.WriteLine($"🔍 ServicoSelecionado: {(ServicoSelecionado != null ? ServicoSelecionado.Nome + " (ID: " + ServicoSelecionado.Id + ")" : "null")}");
-            NovoAgendamento.ClienteId = cliente.Id;
-            NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
-            NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
-            NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
-            NovoAgendamento.Data = DataSelecionada;
+            agendamento.ClienteId = cliente.Id;
+            agendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
+            agendamento.ServicoId = ServicoSelecionado?.Id;
+            agendamento.PacoteId = Pacoteselecionado?.Id;
+            agendamento.Data = DataSelecionada;
+            agendamento.Fotos = Fotosreveladas;
+            agendamento.Tema = NovoAgendamento.Tema;
+            agendamento.Horario = NovoAgendamento.Horario;
 
             _clienteService.Update(cliente);
-            _agendamentoService.Update(NovoAgendamento);
+            _agendamentoService.Update(agendamento);
 
             FinalizarAgendamento(cliente);
         }
@@ -761,6 +773,7 @@ namespace AgendaNovo
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
+            NovoAgendamento.Fotos = Fotosreveladas;
             Debug.WriteLine($"Adicionar agendamento: ServicoId={novoAgendamento.ServicoId}, Servico={novoAgendamento.Servico?.Id}");
             _agendamentoService.Add(NovoAgendamento);
 
@@ -921,6 +934,7 @@ namespace AgendaNovo
                     ValorPago = ag.ValorPago,
                     ServicoId = ag.ServicoId,
                     PacoteId = ag.PacoteId,
+                    Fotos = ag.Fotos
                     
                 };
                 ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == ag.ServicoId);

@@ -70,13 +70,27 @@ namespace AgendaNovo.Views
             var anim = new DoubleAnimation(-200, TimeSpan.FromMilliseconds(250));
             DrawerTransform.BeginAnimation(TranslateTransform.XProperty, anim);
         }
-        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (sender is not DataGrid dg) return;
+
+            // só segue se o double-click foi numa linha
+            var depObj = e.OriginalSource as DependencyObject;
+            var row = ItemsControl.ContainerFromElement(dg, depObj) as DataGridRow;
+            if (row == null) return;
+
             if (DataContext is CalendarioViewModel vm)
             {
-                vm.EditarAgendamentoSelecionado();
+                // Se você já binda SelectedItem, pode usar o selecionado:
+                var item = vm.AgendamentoSelecionado;
+                if (item == null) return;
+
+                vm.EditarAgendamentoPorId(item.Id);  // abre/preenche a modal
+                vm.HistoricoCliente();               // abre/atualiza a coluna de histórico
+                vm.AplicarDestaqueNoHistorico();     // garante o highlight no card certo
             }
         }
+
         private void Agendamento_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;

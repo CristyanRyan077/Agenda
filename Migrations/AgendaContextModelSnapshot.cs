@@ -39,6 +39,9 @@ namespace AgendaNovo.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Fotos")
+                        .HasColumnType("int");
+
                     b.Property<TimeSpan?>("Horario")
                         .HasColumnType("time");
 
@@ -105,6 +108,12 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Telefone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalPagoHistorico")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPagoMesAtual")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Clientes");
@@ -135,6 +144,9 @@ namespace AgendaNovo.Migrations
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UltimaAtualizacaoIdade")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

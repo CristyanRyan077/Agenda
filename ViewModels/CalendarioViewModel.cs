@@ -1,5 +1,6 @@
 ﻿using AgendaNovo.Controles;
 using AgendaNovo.Interfaces;
+using AgendaNovo.Migrations;
 using AgendaNovo.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -70,6 +71,10 @@ namespace AgendaNovo.ViewModels
         private ObservableCollection<DiaCalendario> diasDoMes = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosDoDiaSelecionado;
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+        [ObservableProperty] private ObservableCollection<AgendamentoHistoricoVM> historicoAgendamentos = new();
+        [ObservableProperty]
+        private int? agendamentoEditandoId;
+        [ObservableProperty] private bool completouAcompanhamento;
         [ObservableProperty] private string textoPesquisa = string.Empty;
         [ObservableProperty] private DateTime? dataSelecionada;
         public ObservableCollection<Agendamento> ListaAgendamentos { get; } = new();
@@ -79,6 +84,8 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty] private object telaEditarAgendamento;
         [ObservableProperty] private bool mostrarEditarAgendamento;
+        [ObservableProperty] private object telaHistoricoCliente;
+        [ObservableProperty] private bool mostrarHistoricoCliente;
 
 
         [ObservableProperty]
@@ -119,6 +126,8 @@ namespace AgendaNovo.ViewModels
         {
             MostrarEditarAgendamento = false;
             TelaEditarAgendamento = null;
+            mostrarHistoricoCliente = false;
+            telaHistoricoCliente = null;
             var agendaVM = AgendaViewModel;
             agendaVM.NovoAgendamento = new Agendamento();
             agendaVM.NovoCliente = new Cliente();
@@ -133,50 +142,111 @@ namespace AgendaNovo.ViewModels
         {
             AtualizarCriancasDoCliente(value);
         }
-        public void EditarAgendamentoSelecionado()
+        public bool TemHistorico => HistoricoAgendamentos?.Any() == true;
+        public void HistoricoCliente()
         {
-            if (AgendamentoSelecionado == null) return;
+            var agendamentosdocliente = _clienteService.GetAgendamentos(AgendamentoSelecionado.ClienteId) ?? new List<Agendamento>();
+
+            var acompanhamentos = agendamentosdocliente
+                .Where(a => a.Servico.Nome == "Acompanhamento Mensal")
+                .OrderBy(a => a.Data)
+                .Select((a, index) => new { a.Id, NumeroMes = index + 1 })
+                .ToList();
+
+            var historico = agendamentosdocliente
+                .OrderByDescending(a => a.Data)
+                .Select(a => new AgendamentoHistoricoVM
+                {
+                    Agendamento = a,
+                    NumeroMes = acompanhamentos.FirstOrDefault(x => x.Id == a.Id)?.NumeroMes
+                })
+                .ToList();
+
+
+            HistoricoAgendamentos = new ObservableCollection<AgendamentoHistoricoVM>(historico);
+            OnPropertyChanged(nameof(TemHistorico));// Ordena do mais recente para o mais antigo
+            AplicarDestaqueNoHistorico();
+            // Se quiser calcular acompanhamento mensal completo:
+            var mensalcompleto = agendamentosdocliente
+                .Where(a => a.Status == StatusAgendamento.Concluido
+                            && a.Data.Year == DateTime.Now.Year
+                            && a.ServicoId == 2)
+                .Select(a => a.Data.Month)
+                .Distinct();
+
+
+            CompletouAcompanhamento = mensalcompleto.Count() == 12;
+            var view = new HistoricoUsuario();
+            view.DataContext = this;
+            TelaHistoricoCliente = view;
+            MostrarHistoricoCliente = true;
+        }
+        [RelayCommand]
+        private void EditarPeloHistorico(AgendamentoHistoricoVM item)
+        {
+            if (item?.Agendamento == null) return;
+            EditarAgendamentoPorId(item.Agendamento.Id);
+        }
+        public void AplicarDestaqueNoHistorico()
+        {
+            if (HistoricoAgendamentos == null) return;
+            foreach (var h in HistoricoAgendamentos)
+                h.EstaSendoEditado = (AgendamentoEditandoId.HasValue &&
+                                      h.Agendamento?.Id == AgendamentoEditandoId.Value);
+        }
+        public void EditarAgendamentoPorId(int id)
+        {
+            var agendamentoCompleto = _agendamentoService.GetById(id);
+            if (agendamentoCompleto == null) return;
+
+            AgendamentoEditandoId = agendamentoCompleto.Id;
+
             var agendaVM = AgendaViewModel;
             agendaVM._populandoCampos = true;
-            var agendamentoCompleto = _agendamentoService.GetById(AgendamentoSelecionado.Id);
-            if (agendamentoCompleto == null) return;
-            ListaCriancas.Clear();
 
+            ListaCriancas.Clear();
             agendaVM.NovoAgendamento = agendamentoCompleto;
             agendaVM.NovoCliente = agendamentoCompleto.Cliente;
             agendaVM.DataSelecionada = agendamentoCompleto.Data;
             agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
             agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
+            agendaVM.Fotosreveladas = agendamentoCompleto.Fotos;
             agendaVM.ItemSelecionado = agendamentoCompleto;
 
             agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
             agendaVM.CarregarServicos();
             agendaVM.CarregarPacotes();
-        if (agendamentoCompleto.ServicoId.HasValue)
-            agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
+            if (agendamentoCompleto.ServicoId.HasValue)
+                agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
             agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
 
-
             if (agendamentoCompleto.Servico != null)
-            {
-                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
-                    .FirstOrDefault(s => s.Id == agendamentoCompleto.Servico.Id);
-            }
-            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada.FirstOrDefault(p => p.Id == agendamentoCompleto.Pacote?.Id);
-            Debug.WriteLine($"ServicoId: {agendamentoCompleto.ServicoId}");
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendamentoCompleto.Servico.Id);
+
+            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada
+                .FirstOrDefault(p => p.Id == agendamentoCompleto.Pacote?.Id);
+
             agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();
 
-            Debug.WriteLine($"NovoCliente: {agendaVM.NovoCliente?.Nome}");
-            var view = new EditarAgendamentoView();
-            view.DataContext = agendaVM;
-            view.FecharSolicitado += (s, e) =>
+            // cria/mostra o modal se ainda não estiver aberto:
+            if (!MostrarEditarAgendamento || TelaEditarAgendamento is null)
             {
-                MostrarEditarAgendamento = false;
-                TelaEditarAgendamento = null;
-            };
-            TelaEditarAgendamento = view;
-            MostrarEditarAgendamento = true;
+                var view = new EditarAgendamentoView { DataContext = agendaVM };
+                view.FecharSolicitado += (s, e) =>
+                {
+                    MostrarEditarAgendamento = false;
+                    TelaEditarAgendamento = null;
+                    AgendamentoEditandoId = null;
+                    AplicarDestaqueNoHistorico();
+                };
+
+                TelaEditarAgendamento = view;
+                MostrarEditarAgendamento = true;
+            }
+
+            // atualiza destaque nos cards
+            AplicarDestaqueNoHistorico();
         }
         partial void OnFiltroSelecionadoChanged(string value)
         {

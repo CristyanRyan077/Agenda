@@ -33,6 +33,11 @@ namespace AgendaNovo.Models
         Concluido = 1,
         Cancelado = 2,
     }
+    public enum FotosReveladas
+    {
+        RV = 0,
+        OK = 1
+    }
     public enum TipoBusca
     {
         Cliente,

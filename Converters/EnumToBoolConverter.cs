@@ -12,13 +12,20 @@ namespace AgendaNovo.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || parameter == null) return false;
-            return value.Equals(parameter);
+            if (value == null || parameter == null)
+                return false;
+
+            return value.Equals(Enum.Parse(value.GetType(), parameter.ToString()));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (bool)value ? parameter : Binding.DoNothing;
+            if (value is bool b && b && parameter != null)
+            {
+                return Enum.Parse(targetType, parameter.ToString());
+            }
+
+            return Binding.DoNothing;
         }
     }
 }

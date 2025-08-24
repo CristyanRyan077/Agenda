@@ -39,6 +39,10 @@ namespace AgendaNovo
         [ObservableProperty]
         private StatusAgendamento status = StatusAgendamento.Pendente;
 
+        [ObservableProperty]
+        [Column("FotosReveladas")]
+        private FotosReveladas fotos = FotosReveladas.RV;
+
 
         private bool _mostrarCheck;
 

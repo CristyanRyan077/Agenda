@@ -220,13 +220,22 @@
                           BorderBrush="Transparent" SelectionTextBrush="Black"/>
 
                 <hc:TextBox Grid.Column="0" Text="{Binding NovoCliente.Observacao,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Grid.Row="5" Width="330" Height="80" HorizontalAlignment="Center"
+                            Grid.Row="5" Width="250" Height="60" HorizontalAlignment="Center"
                             TextWrapping="Wrap"
                           AcceptsReturn="True"
                           VerticalScrollBarVisibility="Auto"
-                       hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
+                          hc:InfoElement.Placeholder="Observacao" Margin="0,0,60,10" VerticalAlignment="Top" BorderBrush="Transparent"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                             />
+                <StackPanel Orientation="Horizontal" Margin="0,0,30,30" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <RadioButton Content="RV" FontSize="20" FontFamily="Arial" Margin="0,0,20,0"
+                                 Foreground="White" GroupName="FotosReveladas"
+                                 IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=RV}"/>
+                    <RadioButton Content="OK" FontSize="20" FontFamily="Arial"
+                                 Foreground="White" GroupName="FotosReveladas"
+                                 IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=OK}"/>
+                </StackPanel>
+
 
 
                 <Button Content="Limpar Campos"
@@ -235,15 +244,16 @@
                                 Height="40"
                                 Margin="0,0,0,10"
                                 Width="110"
+                                Grid.Column="1"
                                 Grid.Row="5"
-                                VerticalAlignment="Top"
-                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Center"
                                 />
-                <Button Content="Copiar horários livres"
+                <Button Content="Enviar Horarios livres"
                           Command="{Binding CopiarHorariosLivresCommand}"
                           FontSize="15" FontFamily="Arial"  Grid.Column="2"
                           Width="170" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center"
-                          Margin="0,0,0,10" Background="#FF00FFE2"
+                          Margin="0,0,0,60" Background="#FF00FFE2"
                           Grid.Row="5"/>
 
                 <!-- Calendário -->
@@ -310,6 +320,7 @@
                             <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
                             <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
                             <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Crianca.IdadeFormatada}" />
+                            <DataGridTextColumn Header="Fotos" Binding="{Binding Fotos}"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -343,6 +354,7 @@
         <Grid x:Name="ModalOverlay"
               Visibility="{Binding MostrarAdicionarServicoPacote, Converter={StaticResource BoolToVisibilityConverter}}"
               Background="#80000000"
+              d:Visibility="Collapsed"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Panel.ZIndex="999" IsHitTestVisible="True">
 
