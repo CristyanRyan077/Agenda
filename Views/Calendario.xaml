@@ -277,8 +277,8 @@
         Panel.ZIndex="999" IsHitTestVisible="True">
 
             <Border HorizontalAlignment="Center" VerticalAlignment="Center"
-            Background="White" CornerRadius="12" Padding="16" Width="auto">
-                <ContentControl Content="{Binding TelaEditarAgendamento}"/>
+                    Background="White" CornerRadius="12" Padding="16" Width="auto">
+                <ContentControl Grid.Column="0" Content="{Binding TelaEditarAgendamento}"/>
             </Border>
             <Grid HorizontalAlignment="Center" VerticalAlignment="top">
             <Button Content="✕"
@@ -288,6 +288,10 @@
             Margin="750,80,24,0"
             Background="#E53935" Foreground="White" BorderThickness="0"/>
             </Grid>
+           <!-- <Border HorizontalAlignment="Right" Width="300" Height="800"
+            Background="White" Visibility="{Binding MostrarHistorico}">
+                <ContentControl Content="{Binding TelaHistoricoAgendamento}"/>
+            </Border> -->
 
         </Grid>
 

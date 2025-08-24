@@ -672,17 +672,21 @@ namespace AgendaNovo.ViewModels
                 clientes = clientes.Where(c =>
                     (!string.IsNullOrEmpty(c.NomeCliente) && c.NomeCliente.ToLower().Contains(filtro)) ||
                     (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)) ||
-                    (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro)));
+                    (!string.IsNullOrEmpty(c.NomeCrianca) && c.NomeCrianca.ToLower().Contains(filtro)) ||
+                    (c.Agendamentos.Any(a =>
+                    !string.IsNullOrEmpty(a.Servico.Nome) &&
+                    a.Servico.Nome.ToLower().Contains(filtro)))
+                );
             }
             if (mes.HasValue && ano.HasValue)
             {
                 clientes = clientes.Where(c =>
                 {
-                    // Para "S/A": manter a sem-agendamento (ignora mês, pois não há o que filtrar por mês)
+                   
                     if (FiltroSelecionado == "S/A")
                         return c.Agendamentos.Count == 0;
 
-                    // Para os demais: precisa ter ao menos 1 agendamento no mês/ano que também respeite o filtro por agendamento
+                   
                     return c.Agendamentos.Any(a =>
                         a.Data.Month == mes.Value &&
                         a.Data.Year == ano.Value &&
