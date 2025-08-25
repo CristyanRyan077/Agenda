@@ -4,13 +4,14 @@
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:conv="clr-namespace:AgendaNovo.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:local="clr-namespace:AgendaNovo">
+             xmlns:local="clr-namespace:AgendaNovo" xmlns:views="clr-namespace:AgendaNovo.Views" xmlns:vm="clr-namespace:AgendaNovo.ViewModels">
 
 
     <Application.Resources>
 
         
         <ResourceDictionary>
+            
             <ResourceDictionary.MergedDictionaries>
                 <hc:Theme/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
@@ -28,6 +29,9 @@
             <conv:ZeroToCollapsedConverter x:Key="ZeroToCollapsed"/>
             <conv:PagoParaCorBrushConverter x:Key="PagoParaCor"/>
             <conv:ServicoIdToBrushConverter x:Key="ServicoIdToBrush"/>
+            <DataTemplate DataType="{x:Type vm:FinanceiroViewModel}">
+                <views:Financeiro/>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

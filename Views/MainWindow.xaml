@@ -42,12 +42,21 @@
                         BorderBrush="Black" FontSize="14" Click="btnCalendario_Click">
                     <StackPanel>
                         <materialDesign:PackIcon Kind="Calendar" Height="32" Width="69"  />
-                        <TextBlock FontWeight="Bold" Foreground="Green">Calendario</TextBlock>
+                        <TextBlock FontWeight="Bold" Foreground="Black">Calendario</TextBlock>
                     </StackPanel>
                 </Button>
 
+                <Button x:Name="btnFinanceiro" Height="60"
+                        Margin="10,0,0,0" Click="btnFinanceiro_Click">
+                    <StackPanel>
+                        <materialDesign:PackIcon Kind="AccountCash" Height="32" Width="69"/>
+                        <TextBlock FontWeight="Bold" Foreground="Green">Financeiro</TextBlock>
+                    </StackPanel>
+                </Button>
             </ToolBar>
         </ToolBarTray>
+        
+        
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.Background>

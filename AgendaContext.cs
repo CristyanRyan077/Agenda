@@ -10,9 +10,11 @@ namespace AgendaNovo
 {
     public class AgendaContext : DbContext
     {
+        public string CtxId { get; } = Guid.NewGuid().ToString("N")[..6];
         public AgendaContext(DbContextOptions<AgendaContext> options)
     : base(options)
         {
+            System.Diagnostics.Debug.WriteLine($"[CTX NEW] {CtxId} (thread {Environment.CurrentManagedThreadId})");
         }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Crianca> Criancas { get; set; }

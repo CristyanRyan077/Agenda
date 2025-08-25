@@ -41,11 +41,13 @@ namespace AgendaNovo
             services.AddTransient<GerenciarClientes>();
             services.AddTransient<Login>();
             services.AddTransient<Calendario>();
+            services.AddTransient<Financeiro>();
 
             //ViewModels
             services.AddTransient<CalendarioViewModel>();
             services.AddTransient<ClienteCriancaViewModel>();
             services.AddSingleton<AgendaViewModel>();
+            services.AddTransient<FinanceiroViewModel>();
 
             ServiceProvider = services.BuildServiceProvider();
             var login = ServiceProvider.GetRequiredService<Login>();

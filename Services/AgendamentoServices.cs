@@ -14,9 +14,12 @@ namespace AgendaNovo.Services
     public class AgendamentoService : IAgendamentoService
     {
         private readonly AgendaContext _db;
+        private readonly string _sid = Guid.NewGuid().ToString("N")[..6];
+        private static string T() => DateTime.Now.ToString("HH:mm:ss.fff");
         public AgendamentoService(AgendaContext db)
         {
             _db = db;
+            System.Diagnostics.Debug.WriteLine($"[SRV NEW] {_sid} ctx={_db.CtxId}");
         }
         public void AtivarSePendente(int agendamentoid)
         {
@@ -139,5 +142,115 @@ namespace AgendaNovo.Services
                 .AsNoTracking()
                 .ToList();
         }
+        // ========= FINANCEIRO =========
+
+        // Query base (projeção leve, 100% traduzível pelo EF)
+        public IQueryable<FinanceiroRow> QueryFinanceiro(
+            DateTime inicio, DateTime fim,
+            int? servicoId = null,
+            StatusAgendamento? status = null)
+        {
+            var fimInclusivo = fim.Date.AddDays(1).AddTicks(-1);
+
+            var q = _db.Agendamentos.AsNoTracking()
+                .Where(a => a.Data >= inicio && a.Data <= fimInclusivo);
+
+            if (servicoId.HasValue)
+                q = q.Where(a => a.ServicoId == servicoId.Value);
+
+            if (status.HasValue)
+                q = q.Where(a => a.Status == status.Value);
+
+            // sem Include: projeta apenas o necessário
+            return q.Select(a => new FinanceiroRow
+            {
+                Id = a.Id,
+                Data = a.Data,
+                ServicoId = a.ServicoId,
+                ServicoNome = a.Servico != null ? a.Servico.Nome : "—",
+                ClienteNome = a.Cliente != null ? a.Cliente.Nome : null,
+                Valor = a.Valor,
+                ValorPago = a.ValorPago,
+                Status = a.Status
+            });
+        }
+
+        public async Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        {
+            var tid = Environment.CurrentManagedThreadId;
+            System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] CalcularKpis START ctx={_db.CtxId} tid={tid}");
+            try
+            {
+                var baseQ = _db.Agendamentos.AsNoTracking()
+                    .Where(a => a.Data >= inicio && a.Data <= fim);
+                if (servicoId.HasValue) baseQ = baseQ.Where(a => a.ServicoId == servicoId.Value);
+                if (status.HasValue) baseQ = baseQ.Where(a => a.Status == status.Value);
+
+                var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
+
+                var receita = await valid.SumAsync(a => a.Valor);
+                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] depois receita ctx={_db.CtxId}");
+
+                var recebido = await valid.SumAsync(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor);
+                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] depois recebido ctx={_db.CtxId}");
+
+                var aberto = await valid.SumAsync(a => a.Valor - (a.ValorPago < a.Valor ? a.ValorPago : a.Valor));
+                var qtd = await valid.CountAsync();
+
+                var concluidos = valid.Where(a => a.Status == StatusAgendamento.Concluido);
+                var temConc = await concluidos.AnyAsync();
+                var ticket = temConc ? Math.Round(await concluidos.AverageAsync(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor), 2) : 0;
+
+                return new FinanceiroResumo { ReceitaBruta = receita, Recebido = recebido, EmAberto = Math.Max(0, aberto), QtdAgendamentos = qtd, TicketMedio = ticket };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] CalcularKpis EX: {ex.GetType().Name} - {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] CalcularKpis END ctx={_db.CtxId}");
+            }
+        }
+
+        public Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        {
+            var baseQ = QueryFinanceiro(inicio, fim, servicoId, status);
+            var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
+
+            return valid.Where(a => a.Valor > a.ValorPago)
+                .OrderBy(a => a.Data)
+                .Select(a => new RecebivelDTO
+                {
+                    Id = a.Id,
+                    Data = a.Data,
+                    Cliente = a.ClienteNome,
+                    Servico = a.ServicoNome,
+                    Valor = a.Valor,
+                    ValorPago = a.ValorPago,
+                    Status = a.Status.ToString()
+                })
+                .ToListAsync();
+        }
+
+        public Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        {
+            var baseQ = QueryFinanceiro(inicio, fim, servicoId, status);
+            var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
+
+            return valid
+                .GroupBy(a => new { a.ServicoId, a.ServicoNome })
+                .Select(g => new ServicoResumoDTO
+                {
+                    Servico = g.Key.ServicoNome,
+                    Receita = g.Sum(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor),
+                    Qtd = g.Count(),
+                    TicketMedio = g.Average(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor)
+                })
+                .OrderByDescending(x => x.Receita)
+                .ToListAsync();
+        }
     }
+
 }

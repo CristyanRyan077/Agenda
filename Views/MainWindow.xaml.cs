@@ -39,6 +39,7 @@ namespace AgendaNovo
             vm = agendaVm;
             DataContext = vm;
             Debug.WriteLine($"MainWindow ViewModel ID: {vm.GetHashCode()}");
+
             _main = main;
             this.Closed += (s, e) => Application.Current.Shutdown();
 
@@ -76,6 +77,15 @@ namespace AgendaNovo
             Keyboard.ClearFocus();
 
            _main.GetCalendario();
+        }
+
+
+        private void btnFinanceiro_Click(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, this);
+            Keyboard.ClearFocus();
+
+            _main.AbrirFinanceiroNaMainAsync();
         }
     }
 }

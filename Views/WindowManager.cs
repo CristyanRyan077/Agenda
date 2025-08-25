@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AgendaNovo.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,12 +16,44 @@ namespace AgendaNovo.Views
         private GerenciarClientes? _clientes;
         private Calendario? _calendario;
         private Agendar? _agendar;
+        private Financeiro? _finWin;
+        private IServiceScope _finScope;
         private readonly IServiceProvider _sp;
 
         public WindowManager(IServiceProvider sp)
         {
             _sp = sp;
         }
+        public async Task AbrirFinanceiroNaMainAsync()
+        {
+            var owner = GetMainWindow();
+
+            if (_finWin == null || !_finWin.IsLoaded)
+            {
+                System.Diagnostics.Debug.WriteLine("[WM] AbrirFinanceiroNaMainAsync START");
+                _finScope = _sp.CreateScope();
+                // cria janela, exibe rápido
+                _finWin = _sp.GetRequiredService<Financeiro>();
+                _finWin.Owner = owner;
+                _finWin.Closed += (_, __) => _finWin = null;
+
+                var vm = _sp.GetRequiredService<FinanceiroViewModel>();
+                _finWin.DataContext = vm;
+                _finWin.Show();
+
+                System.Diagnostics.Debug.WriteLine("[WM] calling vm.CarregarAsync()");
+                await vm.CarregarAsync();
+                System.Diagnostics.Debug.WriteLine("[WM] AbrirFinanceiroNaMainAsync END");
+            }
+            else
+            {
+                if (_finWin.WindowState == WindowState.Minimized)
+                    _finWin.WindowState = WindowState.Normal;
+                _finWin.Activate();
+            }
+        }
+
+
 
         public MainWindow GetMainWindow()
         {
