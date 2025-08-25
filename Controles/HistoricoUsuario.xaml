@@ -98,6 +98,7 @@
     
     
     <Grid Background="#333">
+        <ScrollViewer VerticalScrollBarVisibility="Visible">
             <Grid HorizontalAlignment="Center" MaxWidth="1280" Margin="10">
                 <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
@@ -119,7 +120,7 @@
          Background="Transparent"
          BorderThickness="0"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
-         VirtualizingPanel.IsVirtualizing="True"
+         VirtualizingPanel.IsVirtualizing="True" Height="1200"
          VirtualizingPanel.VirtualizationMode="Recycling"
          ScrollViewer.CanContentScroll="True">
                 <ListBox.ItemContainerStyle>
@@ -159,9 +160,9 @@
                                         <!-- linha 1: data / hora -->
                                         <Grid Grid.Row="0">
                                             <TextBlock Text="{Binding Agendamento.Data, StringFormat='{}{0:dd/MM/yyyy}'}"
-                           FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Agendamento.Horario, StringFormat='{}{0:hh\\:mm}'}"
-                           HorizontalAlignment="Right" />
+                                                FontWeight="SemiBold" />
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Agendamento.Horario, StringFormat='{}{0:hh\\:mm}'}"
+                                                HorizontalAlignment="Center" />
                                         </Grid>
 
                                         <!-- linha 2: chips -->
@@ -186,14 +187,16 @@
                                         <!-- linha 3: serviço + cliente -->
                                         <StackPanel Grid.Row="2" Margin="0,6,0,0">
                                             <TextBlock Text="{Binding Agendamento.Servico.Nome}"
-                           FontWeight="SemiBold"/>
+                                             FontSize="14"
+                                            FontWeight="SemiBold"/>
                                             <TextBlock Text="{Binding Agendamento.Cliente.Nome}"
-                           Foreground="#263238" />
+                                            FontSize="14"
+                                            Foreground="#263238" />
                                         </StackPanel>
 
                                         <!-- linha 4: pagamento + progressbar -->
                                         <StackPanel Grid.Row="3" Margin="0,8,0,0">
-                                            <ProgressBar Height="6"
+                                            <ProgressBar Height="10"
                              Maximum="{Binding Agendamento.Valor}"
                              Value="{Binding Agendamento.ValorPago}"/>
                                             <TextBlock Margin="0,4,0,0">
@@ -211,5 +214,6 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>

@@ -165,6 +165,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Fotos" Binding="{Binding Fotos}"/>
                         <DataGridTextColumn Header="Observação" Binding="{Binding Cliente.Observacao}"/>
                     </DataGrid.Columns>
                 </DataGrid>

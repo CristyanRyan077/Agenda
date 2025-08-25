@@ -853,6 +853,7 @@ namespace AgendaNovo
                 ? _criancaService.GetById(NovoAgendamento.CriancaId.Value)
                 : null;
 
+
             NovoAgendamento.Cliente = cliente;
             NovoAgendamento.Crianca = crianca;
 
