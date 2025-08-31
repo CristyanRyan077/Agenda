@@ -152,27 +152,35 @@ namespace AgendaNovo.Services
         {
             var fimInclusivo = fim.Date.AddDays(1).AddTicks(-1);
 
-            var q = _db.Agendamentos.AsNoTracking()
-                .Where(a => a.Data >= inicio && a.Data <= fimInclusivo);
-
+            var baseQ =
+                from a in _db.Agendamentos.AsNoTracking()
+                where a.Data >= inicio && a.Data <= fimInclusivo
+                select a;
             if (servicoId.HasValue)
-                q = q.Where(a => a.ServicoId == servicoId.Value);
-
+                baseQ = baseQ.Where(a => a.ServicoId == servicoId.Value);
             if (status.HasValue)
-                q = q.Where(a => a.Status == status.Value);
+                baseQ = baseQ.Where(a => a.Status == status.Value);
 
             // sem Include: projeta apenas o necessário
-            return q.Select(a => new FinanceiroRow
-            {
-                Id = a.Id,
-                Data = a.Data,
-                ServicoId = a.ServicoId,
-                ServicoNome = a.Servico != null ? a.Servico.Nome : "—",
-                ClienteNome = a.Cliente != null ? a.Cliente.Nome : null,
-                Valor = a.Valor,
-                ValorPago = a.ValorPago,
-                Status = a.Status
-            });
+            var q =
+             from a in baseQ
+             join s in _db.Servicos.AsNoTracking() on a.ServicoId equals s.Id into sj
+             from s in sj.DefaultIfEmpty()
+             join c in _db.Clientes.AsNoTracking() on a.ClienteId equals c.Id into cj
+             from c in cj.DefaultIfEmpty()
+             select new FinanceiroRow
+             {
+                 Id = a.Id,
+                 Data = a.Data,
+                 ServicoId = a.ServicoId,
+                 ServicoNome = s != null ? s.Nome : "—",
+                 ClienteNome = c != null ? c.Nome : null,
+                 Valor = a.Valor,
+                 ValorPago = a.ValorPago,
+                 Status = a.Status
+             };
+
+            return q;
         }
 
         public async Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
@@ -188,20 +196,28 @@ namespace AgendaNovo.Services
 
                 var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
 
-                var receita = await valid.SumAsync(a => a.Valor);
-                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] depois receita ctx={_db.CtxId}");
+                var kpi = await valid
+                 .GroupBy(a => 1)
+                 .Select(g => new
+                 {
+                     Receita = g.Sum(a => a.Valor),
+                     Recebido = g.Sum(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor),
+                     Aberto = g.Sum(a => a.Valor - (a.ValorPago < a.Valor ? a.ValorPago : a.Valor)),
+                     Qtd = g.Count(),
+                     TicketMedio = g.Where(a => a.Status == StatusAgendamento.Concluido)
+                       .Average(a => (decimal?)(a.ValorPago < a.Valor ? a.ValorPago : a.Valor))
+                 })
+                 .FirstOrDefaultAsync();
 
-                var recebido = await valid.SumAsync(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor);
-                System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] depois recebido ctx={_db.CtxId}");
 
-                var aberto = await valid.SumAsync(a => a.Valor - (a.ValorPago < a.Valor ? a.ValorPago : a.Valor));
-                var qtd = await valid.CountAsync();
-
-                var concluidos = valid.Where(a => a.Status == StatusAgendamento.Concluido);
-                var temConc = await concluidos.AnyAsync();
-                var ticket = temConc ? Math.Round(await concluidos.AverageAsync(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor), 2) : 0;
-
-                return new FinanceiroResumo { ReceitaBruta = receita, Recebido = recebido, EmAberto = Math.Max(0, aberto), QtdAgendamentos = qtd, TicketMedio = ticket };
+                return new FinanceiroResumo
+                {
+                    ReceitaBruta = kpi?.Receita ?? 0m,
+                    Recebido = kpi?.Recebido ?? 0m,
+                    EmAberto = Math.Max(0, kpi?.Aberto ?? 0m),
+                    QtdAgendamentos = kpi?.Qtd ?? 0,
+                    TicketMedio = Math.Round(kpi?.TicketMedio ?? 0m, 2)
+                };
             }
             catch (Exception ex)
             {
@@ -216,10 +232,12 @@ namespace AgendaNovo.Services
 
         public Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
         {
-            var baseQ = QueryFinanceiro(inicio, fim, servicoId, status);
-            var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
+            var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
+            var baseQ = QueryFinanceiro(inicio, fimIncl, servicoId, status)
+                        .Where(a => a.Status != StatusAgendamento.Cancelado);
 
-            return valid.Where(a => a.Valor > a.ValorPago)
+            return baseQ
+                .Where(a => a.Valor > a.ValorPago)
                 .OrderBy(a => a.Data)
                 .Select(a => new RecebivelDTO
                 {
@@ -234,22 +252,44 @@ namespace AgendaNovo.Services
                 .ToListAsync();
         }
 
-        public Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        public Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(
+         DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
         {
-            var baseQ = QueryFinanceiro(inicio, fim, servicoId, status);
+            var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
+
+            // Base somente de Agendamentos (sem projeção prévia), para não "poluir" o GroupBy
+            var baseQ = _db.Agendamentos.AsNoTracking()
+                .Where(a => a.Data >= inicio && a.Data <= fimIncl);
+
+            if (servicoId.HasValue) baseQ = baseQ.Where(a => a.ServicoId == servicoId.Value);
+            if (status.HasValue) baseQ = baseQ.Where(a => a.Status == status.Value);
+
             var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
 
-            return valid
-                .GroupBy(a => new { a.ServicoId, a.ServicoNome })
-                .Select(g => new ServicoResumoDTO
+            // GroupBy por ServicoId e LEFT JOIN para obter o Nome (uma única query)
+            var query =
+                from g in
+                    (from a in valid
+                     group a by a.ServicoId into grp
+                     select new
+                     {
+                         ServicoId = grp.Key,
+                         Receita = grp.Sum(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor),
+                         Qtd = grp.Count(),
+                         TicketMedio = grp.Average(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor)
+                     })
+                join s in _db.Servicos.AsNoTracking() on g.ServicoId equals s.Id into sj
+                from s in sj.DefaultIfEmpty()
+                orderby g.Receita descending
+                select new ServicoResumoDTO
                 {
-                    Servico = g.Key.ServicoNome,
-                    Receita = g.Sum(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor),
-                    Qtd = g.Count(),
-                    TicketMedio = g.Average(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor)
-                })
-                .OrderByDescending(x => x.Receita)
-                .ToListAsync();
+                    Servico = s != null ? s.Nome : "—",
+                    Receita = g.Receita,
+                    Qtd = g.Qtd,
+                    TicketMedio = g.TicketMedio
+                };
+
+            return query.ToListAsync();
         }
     }
 

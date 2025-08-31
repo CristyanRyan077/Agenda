@@ -514,6 +514,9 @@ namespace AgendaNovo
             var cliente = _clienteService.GetById(NovoCliente.Id);
             if (cliente == null) return;
 
+            int? agendamentoIdNotificacao = agendamento.Id;
+            int? clienteIdNotificacao = cliente.Id;
+            int? criancaIdNotificacao = null;
             cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
 
             Crianca criancaParaAgendar = null;
@@ -523,7 +526,7 @@ namespace AgendaNovo
 
                 if (criancaParaAgendar != null)
                 {
-                    // Atualiza a idade caso tenha sido modificada na tela de agendamento
+                    criancaIdNotificacao = criancaParaAgendar.Id;
                     criancaParaAgendar.Idade = CriancaSelecionada.Idade;
                     criancaParaAgendar.IdadeUnidade = CriancaSelecionada.IdadeUnidade;
 
@@ -552,6 +555,7 @@ namespace AgendaNovo
                 NovoAgendamento.CriancaId = null;
                 NovoAgendamento.Crianca = null;
             }
+  
             Debug.WriteLine($"🔍 ServicoSelecionado: {(ServicoSelecionado != null ? ServicoSelecionado.Nome + " (ID: " + ServicoSelecionado.Id + ")" : "null")}");
             agendamento.ClienteId = cliente.Id;
             agendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
@@ -562,8 +566,11 @@ namespace AgendaNovo
             agendamento.Tema = NovoAgendamento.Tema;
             agendamento.Horario = NovoAgendamento.Horario;
 
+
             _clienteService.Update(cliente);
             _agendamentoService.Update(agendamento);
+            if (agendamentoIdNotificacao.HasValue || criancaIdNotificacao.HasValue || clienteIdNotificacao.HasValue)
+                WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoIdNotificacao, criancaIdNotificacao, clienteIdNotificacao));
 
             FinalizarAgendamento(cliente);
         }
@@ -767,13 +774,16 @@ namespace AgendaNovo
                 NovoAgendamento.Crianca = null;
             }
             // 4) Prepara o objeto a salvar
-
+            int? agendamentoidnotificacao = NovoAgendamento.Id;
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
             NovoAgendamento.Fotos = Fotosreveladas;
+
+            if (agendamentoidnotificacao.HasValue)
+                WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoidnotificacao));
             Debug.WriteLine($"Adicionar agendamento: ServicoId={novoAgendamento.ServicoId}, Servico={novoAgendamento.Servico?.Id}");
             _agendamentoService.Add(NovoAgendamento);
 
@@ -856,6 +866,7 @@ namespace AgendaNovo
 
             NovoAgendamento.Cliente = cliente;
             NovoAgendamento.Crianca = crianca;
+
 
             DataReferencia = NovoAgendamento.Data;
             EnviarMensagemWhatsapp(cliente, crianca);

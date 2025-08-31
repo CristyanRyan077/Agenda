@@ -11,10 +11,13 @@ namespace AgendaNovo.ViewModels
         public int? ClienteId { get; }
         public int? CriancaId { get; }
 
-        public DadosAtualizadosMessage(int? clienteId = null, int? criancaId = null)
+        public int? AgendamentoId { get; }
+
+        public DadosAtualizadosMessage(int? clienteId = null, int? criancaId = null, int? agendamentoId = null)
         {
             ClienteId = clienteId;
             CriancaId = criancaId;
+            AgendamentoId = agendamentoId;
         }
     }
 }

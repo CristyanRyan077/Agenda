@@ -10,56 +10,48 @@ namespace AgendaNovo.ViewModels
     using AgendaNovo.Models;
     using CommunityToolkit.Mvvm.ComponentModel;
     using CommunityToolkit.Mvvm.Input;
+    using ControlzEx.Standard;
     using Microsoft.EntityFrameworkCore;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
+    using System.IO;
     using System.Linq;
 
     public partial class FinanceiroViewModel : ObservableObject
     {
         private readonly SemaphoreSlim _loadGate = new(1, 1);
-        private readonly AgendaContext _db;
-        public AgendaViewModel AgendaViewModel { get; }
-        private readonly AgendaViewModel _agenda;
-        private readonly IClienteService _clienteService;
-        private readonly ICriancaService _criancaService;
         private readonly IAgendamentoService _agendamentoService;
-        private readonly IServicoService _servicoService;
-        private readonly IPacoteService _pacoteService;
-        public FinanceiroViewModel(AgendaContext db, IAgendamentoService agendamentoService,
-        IClienteService clienteService,
-        ICriancaService criancaService,
-        IPacoteService pacoteService,
-        IServicoService servicoService)
-        {
-            _db = db;
-            _agendamentoService = agendamentoService;
-            _clienteService = clienteService;
-            _criancaService = criancaService;
-            _pacoteService = pacoteService;
-            _servicoService = servicoService;
 
+        public FinanceiroViewModel(IAgendamentoService agendamentoService)
+        {
+            _agendamentoService = agendamentoService;
+
+            // Período padrão = mês atual
             PeriodoInicio = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             PeriodoFim = PeriodoInicio.Value.AddMonths(1).AddDays(-1);
-
         }
-
+        // 🔹 Filtros
         [ObservableProperty] private DateTime? periodoInicio;
         [ObservableProperty] private DateTime? periodoFim;
         [ObservableProperty] private Servico servicoSelecionado;
-        [ObservableProperty] private string statusSelecionado; // "Todos", "Pendente", "Concluido", "Cancelado"
+        [ObservableProperty] private string statusSelecionado = "Todos";
 
-        // KPIs
+        // 🔹 KPIs
         [ObservableProperty] private decimal receitaBruta;
         [ObservableProperty] private decimal recebido;
         [ObservableProperty] private decimal emAberto;
-        public decimal PercRecebido => ReceitaBruta == 0 ? 0 : Math.Round(Recebido / ReceitaBruta * 100, 2);
         [ObservableProperty] private decimal ticketMedio;
         [ObservableProperty] private int qtdAgendamentos;
+        public decimal PercRecebido => ReceitaBruta == 0 ? 0 : Math.Round(Recebido / ReceitaBruta * 100, 2);
 
-        // Tabelas
-        public ObservableCollection<RecebivelVM> EmAbertoLista { get; } = new();
-        public ObservableCollection<ServicoResumoVM> ServicosResumo { get; } = new();
+        // 🔹 Listas
+        [ObservableProperty] private ObservableCollection<RecebivelVM> emAbertoLista = new();
+        [ObservableProperty] private ObservableCollection<ServicoResumoVM> servicosResumo = new();
 
+        partial void OnRecebidoChanged(decimal value) => OnPropertyChanged(nameof(PercRecebido));
+        partial void OnReceitaBrutaChanged(decimal value) => OnPropertyChanged(nameof(PercRecebido));
+
+        // 🔹 Atalhos de período
         [RelayCommand]
         public void QuickMesAtual()
         {
@@ -68,38 +60,31 @@ namespace AgendaNovo.ViewModels
             CarregarAsync();
         }
 
+        // 🔹 Método principal
         [RelayCommand]
         public async Task CarregarAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"[VM] Carregar START tid={Environment.CurrentManagedThreadId}");
+
             await _loadGate.WaitAsync();
             try
             {
+                var sw = Stopwatch.StartNew();
+                var (ini, fim, status, servicoId) = PrepararFiltros();
+                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servicoId, status);
+                Debug.WriteLine($"KPIs: {sw.Elapsed}");
+                var emAberto = await _agendamentoService.ListarEmAbertoAsync(ini, fim, servicoId, status);
+                Debug.WriteLine($"EmAberto: {sw.Elapsed}");
+                var resumo = await _agendamentoService.ResumoPorServicoAsync(ini, fim, servicoId, status);
+                Debug.WriteLine($"Resumo: {sw.Elapsed}");
 
-                var ini = PeriodoInicio ?? DateTime.MinValue;
-                var fim = (PeriodoFim?.Date.AddDays(1).AddTicks(-1)) ?? DateTime.MaxValue;
-
-                StatusAgendamento? st = null;
-                if (!string.IsNullOrWhiteSpace(StatusSelecionado) && StatusSelecionado != "Todos" &&
-                    Enum.TryParse(StatusSelecionado, out StatusAgendamento stParsed))
-                    st = stParsed;
-
-                var servId = ServicoSelecionado?.Id;
-
-                // KPIs
-                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servId, st);
                 ReceitaBruta = kpis.ReceitaBruta;
                 Recebido = kpis.Recebido;
                 EmAberto = kpis.EmAberto;
                 QtdAgendamentos = kpis.QtdAgendamentos;
                 TicketMedio = kpis.TicketMedio;
-                OnPropertyChanged(nameof(PercRecebido));
 
-                // Em aberto
-                EmAbertoLista.Clear();
-                var emAberto = await _agendamentoService.ListarEmAbertoAsync(ini, fim, servId, st);
-                foreach (var r in emAberto)
-                    EmAbertoLista.Add(new RecebivelVM
+                EmAbertoLista = new ObservableCollection<RecebivelVM>(
+                    emAberto.Select(r => new RecebivelVM
                     {
                         Id = r.Id,
                         Data = r.Data,
@@ -107,35 +92,52 @@ namespace AgendaNovo.ViewModels
                         Servico = r.Servico,
                         Valor = r.Valor,
                         ValorPago = r.ValorPago,
+                        Falta = r.Valor - Math.Min(r.ValorPago, r.Valor),
                         Status = r.Status
-                    });
+                    }));
 
-                // Resumo por serviço
-                ServicosResumo.Clear();
-                var resumo = await _agendamentoService.ResumoPorServicoAsync(ini, fim, servId, st);
-                foreach (var s in resumo)
-                    ServicosResumo.Add(new ServicoResumoVM { Servico = s.Servico, Receita = s.Receita, Qtd = s.Qtd, TicketMedio = s.TicketMedio });
+                ServicosResumo = new ObservableCollection<ServicoResumoVM>(
+                    resumo.Select(s => new ServicoResumoVM
+                    {
+                        Servico = s.Servico,
+                        Receita = s.Receita,
+                        Qtd = s.Qtd,
+                        TicketMedio = s.TicketMedio
+                    }));
             }
             finally
             {
-                System.Diagnostics.Debug.WriteLine($"[VM] Carregar END");
+                _loadGate.Release();
             }
-
-
         }
+
+        // --- MÉTODOS PRIVADOS ---
+        private (DateTime ini, DateTime fim, StatusAgendamento? status, int? servicoId) PrepararFiltros()
+        {
+            var ini = PeriodoInicio ?? DateTime.MinValue;
+            var fim = (PeriodoFim?.Date.AddDays(1).AddTicks(-1)) ?? DateTime.MaxValue;
+
+            StatusAgendamento? status = null;
+            if (!string.IsNullOrWhiteSpace(StatusSelecionado) && StatusSelecionado != "Todos" &&
+                Enum.TryParse(StatusSelecionado, out StatusAgendamento stParsed))
+                status = stParsed;
+
+            return (ini, fim, status, ServicoSelecionado?.Id);
+        }
+
+
+        // 🔹 Exportação
         public void ExportarEmAbertoParaExcel()
         {
-            // usa ClosedXML (você já tem no projeto)
             using var wb = new ClosedXML.Excel.XLWorkbook();
             var ws = wb.AddWorksheet("EmAberto");
-            ws.Cell(1, 1).Value = "Data";
-            ws.Cell(1, 2).Value = "Cliente";
-            ws.Cell(1, 3).Value = "Serviço";
-            ws.Cell(1, 4).Value = "Valor";
-            ws.Cell(1, 5).Value = "Pago";
-            ws.Cell(1, 6).Value = "Falta";
-            ws.Cell(1, 7).Value = "Status";
 
+            // cabeçalho
+            string[] headers = { "Data", "Cliente", "Serviço", "Valor", "Pago", "Falta", "Status" };
+            for (int i = 0; i < headers.Length; i++)
+                ws.Cell(1, i + 1).Value = headers[i];
+
+            // dados
             for (int i = 0; i < EmAbertoLista.Count; i++)
             {
                 var r = EmAbertoLista[i];
@@ -149,7 +151,10 @@ namespace AgendaNovo.ViewModels
             }
 
             ws.Columns().AdjustToContents();
-            var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"EmAberto_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                $"EmAberto_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+
             wb.SaveAs(path);
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
         }
@@ -157,7 +162,7 @@ namespace AgendaNovo.ViewModels
 
     public class RecebivelVM
     {
-        public int Id { get; set; } // Guid se for o caso
+        public int Id { get; set; } 
         public DateTime Data { get; set; }
         public string Cliente { get; set; }
         public string Servico { get; set; }

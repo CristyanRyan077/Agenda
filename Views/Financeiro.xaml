@@ -90,12 +90,40 @@
                         </StackPanel>
                     </Border>
                 </UniformGrid>
+                <!-- Resumo por serviço -->
+                <Border CornerRadius="12" Background="#3A3A3A" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- título -->
+                            <RowDefinition Height="*"/>
+                            <!-- DataGrid preenche -->
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                     Text="Resumo por serviço"
+                                     Foreground="White" FontWeight="Bold" FontSize="16"/>
+
+                        <DataGrid
+                            ItemsSource="{Binding ServicosResumo}"
+                            AutoGenerateColumns="False" Width="600"
+                            CanUserAddRows="False" HorizontalAlignment="Left" Grid.Row="1"
+                            Margin="0,8,0,0" RowHeaderWidth="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Serviço" Binding="{Binding Servico}"/>
+                                <DataGridTextColumn Header="Receita" Binding="{Binding Receita, StringFormat=R$ {0:N2}}"/>
+                                <DataGridTextColumn Header="Qtd" Binding="{Binding Qtd}"/>
+                                <DataGridTextColumn Header="Ticket médio" Binding="{Binding TicketMedio, StringFormat=R$ {0:N2}}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
 
                 <!-- Em aberto -->
                 <Border CornerRadius="12" Background="#3A3A3A" Padding="10" Margin="0,0,0,12">
                     <DockPanel>
                         <TextBlock Text="Em aberto (cobranças)" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
-                        <DataGrid ItemsSource="{Binding EmAbertoLista}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                        <DataGrid EnableRowVirtualization="True" EnableColumnVirtualization="True" ItemsSource="{Binding EmAbertoLista}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
                    HeadersVisibility="Column" Margin="0,8,0,0" RowHeaderWidth="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}"/>
@@ -117,34 +145,7 @@
                     </DockPanel>
                 </Border>
 
-                <!-- Resumo por serviço -->
-                <Border CornerRadius="12" Background="#3A3A3A" Padding="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <!-- título -->
-                            <RowDefinition Height="*"/>
-                            <!-- DataGrid preenche -->
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0"
-                Text="Resumo por serviço"
-                Foreground="White" FontWeight="Bold" FontSize="16"/>
-
-                        <DataGrid Grid.Row="1"
-               ItemsSource="{Binding ServicosResumo}"
-               AutoGenerateColumns="False"
-               CanUserAddRows="False"
-               Margin="0,8,0,0" RowHeaderWidth="0">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Serviço" Binding="{Binding Servico}"/>
-                                <DataGridTextColumn Header="Receita" Binding="{Binding Receita, StringFormat=R$ {0:N2}}"/>
-                                <DataGridTextColumn Header="Qtd" Binding="{Binding Qtd}"/>
-                                <DataGridTextColumn Header="Ticket médio" Binding="{Binding TicketMedio, StringFormat=R$ {0:N2}}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
+               
 
             </StackPanel>
         </ScrollViewer>

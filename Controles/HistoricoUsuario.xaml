@@ -29,13 +29,13 @@
 
         <Style x:Key="FotosChip" TargetType="Border" BasedOn="{StaticResource ChipStyle}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="OK">
+                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="Entregue">
                     <Setter Property="Background" Value="#E8F5E9"/>
                     <Setter Property="BorderBrush" Value="#4CAF50"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="RV">
+                <DataTrigger Binding="{Binding Agendamento.Fotos}" Value="Revelado">
                     <Setter Property="Background" Value="#FFEBEE"/>
-                    <Setter Property="BorderBrush" Value="#E53935"/>
+                    <Setter Property="BorderBrush" Value="Yellow"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>

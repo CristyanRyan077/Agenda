@@ -35,8 +35,9 @@ namespace AgendaNovo.Models
     }
     public enum FotosReveladas
     {
-        RV = 0,
-        OK = 1
+        Pendente = 0,
+        Revelado = 1,
+        Entregue = 2
     }
     public enum TipoBusca
     {
