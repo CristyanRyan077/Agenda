@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AgendaNovo.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AgendaNovo.Models;
-using Microsoft.EntityFrameworkCore;
+using static AgendaNovo.Agendamento;
 
 namespace AgendaNovo
 {
@@ -29,11 +30,21 @@ namespace AgendaNovo
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Pagamento>(e =>
+            {
+                e.Property(x => x.Valor).HasColumnType("decimal(18,2)");
+                e.HasOne(x => x.Agendamento)
+                 .WithMany(a => a.Pagamentos)
+                 .HasForeignKey(x => x.AgendamentoId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasIndex(x => x.AgendamentoId);
+                e.HasIndex(x => x.DataPagamento);
+            });
             modelBuilder.Entity<Agendamento>(entity =>
             {
 
                 entity.Property(a => a.Valor).HasColumnType("decimal(18,2)");
-                entity.Property(a => a.ValorPago).HasColumnType("decimal(18,2)");
             });
             // Relação entre Agendamento e Cliente
             modelBuilder.Entity<Agendamento>()

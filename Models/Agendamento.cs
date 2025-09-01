@@ -25,6 +25,9 @@ namespace AgendaNovo
         public Pacote? Pacote { get; set; }
         public int? PacoteId { get; set; }
 
+        public ICollection<Pagamento> Pagamentos { get; set; } = new List<Pagamento>();
+
+        [ObservableProperty] private DateTime data = DateTime.Today;
 
         [ObservableProperty] private TimeSpan? horario;
 
@@ -32,46 +35,37 @@ namespace AgendaNovo
 
         [ObservableProperty] private decimal valor;
 
-        [ObservableProperty] private decimal valorPago;
+        //[ObservableProperty] private decimal valorPagoLegacy;
 
-        [NotMapped]
-        public decimal ValorPagoTotal => Pagamentos?.Sum(p => p.Valor) ?? 0m;
+        [ObservableProperty] private StatusAgendamento status = StatusAgendamento.Pendente;
 
-        [ObservableProperty]
-        private StatusAgendamento status = StatusAgendamento.Pendente;
+        [ObservableProperty] private FotosReveladas fotos;
 
-        [ObservableProperty]
-        [Column("FotosReveladas")]
-        private FotosReveladas fotos;
+        [NotMapped] public decimal ValorPago => Pagamentos?.Sum(p => p.Valor) ?? 0m;
         [NotMapped] public int? NumeroMes { get; set; }
 
         public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
 
-        public ICollection<Pagamento> Pagamentos { get; set; } = new List<Pagamento>();
-        public class Pagamento
+
+        public partial class Pagamento : ObservableObject
         {
             public int Id { get; set; }
             public int AgendamentoId { get; set; }
             public Agendamento Agendamento { get; set; } = null!;
 
-            public decimal Valor { get; set; }                // valor da parcela
-            public DateTime DataPagamento { get; set; }       // quando pagou
-            public string? Metodo { get; set; }               // “PIX”, “Crédito”, etc. (opcional)
-            public string? Observacao { get; set; }           // opcional
+            [ObservableProperty] private decimal valor;            // valor da parcela
+            [ObservableProperty] private DateTime dataPagamento;   // quando pagou
+            [ObservableProperty] private string? metodo;           // “PIX”, “Crédito”, etc. (opcional)
+            [ObservableProperty] private string? observacao;       // opcional
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         }
 
-        [ObservableProperty] private DateTime data = DateTime.Today;
+
         partial void OnValorChanged(decimal oldValue, decimal newValue)
         {
             OnPropertyChanged(nameof(EstaPago));
 
-        }
-        partial void OnValorPagoChanged(decimal oldValue, decimal newValue)
-        {
-            OnPropertyChanged(nameof(EstaPago));
-            OnPropertyChanged(nameof(valorPago));
         }
     }
 }

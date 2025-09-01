@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
+using static AgendaNovo.Agendamento;
 
 namespace AgendaNovo
 {
@@ -55,7 +56,7 @@ namespace AgendaNovo
         [ObservableProperty] private decimal valorPacote;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
-
+        [ObservableProperty] private Pagamento novoPagamento = new Pagamento();
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
@@ -155,7 +156,9 @@ namespace AgendaNovo
             });
             WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
             {
+                OnDadosAtualizados(m);
                 CarregarDadosDoBanco();
+                
             });
 
         }
@@ -437,6 +440,25 @@ namespace AgendaNovo
                 UseShellExecute = true
             });
         }
+        public void OnDadosAtualizados(DadosAtualizadosMessage message)
+        {
+            if (message.AgendamentoId.HasValue)
+            {
+                var agendamentoAtualizado = _agendamentoService.GetById(message.AgendamentoId.Value);
+                if (NovoAgendamento != null && agendamentoAtualizado != null)
+                {
+                    NovoAgendamento = agendamentoAtualizado;
+                    NovoAgendamento.Valor = agendamentoAtualizado.Valor;
+                    NovoAgendamento.Pagamentos = agendamentoAtualizado.Pagamentos;
+                    NovoPagamento.Valor = NovoAgendamento.Pagamentos.Sum(p => p.Valor);
+                    RefreshAgendamento(agendamentoAtualizado);
+                    OnPropertyChanged(nameof(NovoPagamento));
+                    OnPropertyChanged(nameof(NovoAgendamento));
+                    OnPropertyChanged(nameof(NovoAgendamento.ValorPago));
+                }
+
+            }
+        }
 
 
 
@@ -457,7 +479,7 @@ namespace AgendaNovo
             NovoAgendamento.ServicoId = 0;
             NovoAgendamento.PacoteId = 0;
             NovoAgendamento.Valor = 0;
-            NovoAgendamento.ValorPago = 0;
+            novoPagamento.Valor = 0;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
             Pacoteselecionado = null;
@@ -517,6 +539,7 @@ namespace AgendaNovo
             int? agendamentoIdNotificacao = agendamento.Id;
             int? clienteIdNotificacao = cliente.Id;
             int? criancaIdNotificacao = null;
+            Debug.WriteLine($"Notificando atualização: AgendamentoId = {agendamentoIdNotificacao}");
             cliente.Observacao = NovoCliente?.Observacao ?? cliente.Observacao;
 
             Crianca criancaParaAgendar = null;
@@ -565,19 +588,36 @@ namespace AgendaNovo
             agendamento.Fotos = Fotosreveladas;
             agendamento.Tema = NovoAgendamento.Tema;
             agendamento.Horario = NovoAgendamento.Horario;
+            AdicionarPagamento();
 
 
             _clienteService.Update(cliente);
             _agendamentoService.Update(agendamento);
+            Debug.WriteLine($"Notificando atualização: AgendamentoId = {agendamentoIdNotificacao}");
             if (agendamentoIdNotificacao.HasValue || criancaIdNotificacao.HasValue || clienteIdNotificacao.HasValue)
-                WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoIdNotificacao, criancaIdNotificacao, clienteIdNotificacao));
+                WeakReferenceMessenger.Default.Send(
+                    new DadosAtualizadosMessage(
+                        clienteId: clienteIdNotificacao,
+                        criancaId: criancaIdNotificacao,
+                        agendamentoId: agendamentoIdNotificacao
+                    )
+                );
+
 
             FinalizarAgendamento(cliente);
         }
 
 
 
-
+        public void RefreshAgendamento(Agendamento agendamentoAtualizado)
+        {
+            var existente = ListaAgendamentos.FirstOrDefault(a => a.Id == agendamentoAtualizado.Id);
+            if (existente != null)
+            {
+                var index = ListaAgendamentos.IndexOf(existente);
+                ListaAgendamentos[index] = agendamentoAtualizado; // dispara atualização
+            }
+        }
         partial void OnDataSelecionadaChanged(DateTime value)
         {
             FiltrarAgendamentos();
@@ -717,6 +757,19 @@ namespace AgendaNovo
                 OnPropertyChanged(nameof(NovoAgendamento));
             }
         }
+        public void AdicionarPagamento()
+        {
+            if (NovoPagamento.Valor > 0)
+            {
+                NovoAgendamento.Pagamentos.Add(new Pagamento
+                {
+                    Valor = NovoPagamento.Valor,
+                    DataPagamento = NovoPagamento.DataPagamento != default ? NovoPagamento.DataPagamento : DateTime.Today,
+                    Metodo = NovoPagamento.Metodo,
+                    Observacao = NovoPagamento.Observacao
+                });
+            }
+        }
         public void ForcarAtualizacaoCampos()
         {
             OnPropertyChanged(nameof(ClienteSelecionado));
@@ -781,6 +834,8 @@ namespace AgendaNovo
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
             NovoAgendamento.Fotos = Fotosreveladas;
+            AdicionarPagamento();
+            
 
             if (agendamentoidnotificacao.HasValue)
                 WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoidnotificacao));
@@ -808,7 +863,7 @@ namespace AgendaNovo
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +
                             $"Serviço: {servicoNome}\n" +
-                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
+                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.Pagamentos:N2}\n" +
                             $"📍 *AVISOS*:\r\n- A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                             $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
                             $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +
@@ -909,6 +964,7 @@ namespace AgendaNovo
                 
 
                 var cliente = ListaClientes.FirstOrDefault(c => c.Id == ag.ClienteId);
+                
                 if (cliente == null)
                 {
                     MessageBox.Show("Cliente não encontrado ou inválido.");
@@ -918,6 +974,7 @@ namespace AgendaNovo
                 NovoCliente = cliente;
                 ClienteSelecionado = cliente;
                 NomeDigitado = cliente.Nome;
+                
                 OnPropertyChanged(nameof(ClienteSelecionado));
                 OnPropertyChanged(nameof(NovoCliente));
 
@@ -943,7 +1000,7 @@ namespace AgendaNovo
                     Horario = ag.Horario,
                     Tema = ag.Tema,
                     Valor = ag.Valor,
-                    ValorPago = ag.ValorPago,
+                    Pagamentos = ag.Pagamentos,
                     ServicoId = ag.ServicoId,
                     PacoteId = ag.PacoteId,
                     Fotos = ag.Fotos

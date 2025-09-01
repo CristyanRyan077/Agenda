@@ -138,6 +138,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Cliente)
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
                 .Where(a => a.ClienteId == clienteId)
                 .AsNoTracking()
                 .ToList();

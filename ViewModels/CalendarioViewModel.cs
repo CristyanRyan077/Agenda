@@ -4,6 +4,7 @@ using AgendaNovo.Migrations;
 using AgendaNovo.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using static AgendaNovo.Agendamento;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AgendaNovo.ViewModels
@@ -58,6 +60,13 @@ namespace AgendaNovo.ViewModels
                 RefreshCalendar();
             });
             RefreshCalendar();
+            WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
+            {
+
+                agendaViewModel.OnDadosAtualizados(m);
+                RefreshCalendar();
+
+            });
         }
 
         public IAgendamentoService AgendamentoService => _agendamentoService;
@@ -148,12 +157,14 @@ namespace AgendaNovo.ViewModels
             var agendamentosdocliente = _clienteService.GetAgendamentos(AgendamentoSelecionado.ClienteId) ?? new List<Agendamento>();
 
             var acompanhamentos = agendamentosdocliente
+                
                 .Where(a => a.Servico.Nome == "Acompanhamento Mensal")
                 .OrderBy(a => a.Data)
                 .Select((a, index) => new { a.Id, NumeroMes = index + 1 })
                 .ToList();
 
             var historico = agendamentosdocliente
+                
                 .OrderByDescending(a => a.Data)
                 .Select(a => new AgendamentoHistoricoVM
                 {
@@ -205,6 +216,9 @@ namespace AgendaNovo.ViewModels
             agendaVM._populandoCampos = true;
 
             ListaCriancas.Clear();
+            int? agendamentoIdNotificacao = agendamentoCompleto.Id;
+            int? clienteIdNotificacao = agendamentoCompleto.Id;
+
             agendaVM.NovoAgendamento = agendamentoCompleto;
             agendaVM.NovoCliente = agendamentoCompleto.Cliente;
             agendaVM.DataSelecionada = agendamentoCompleto.Data;
@@ -212,6 +226,7 @@ namespace AgendaNovo.ViewModels
             agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
             agendaVM.Fotosreveladas = agendamentoCompleto.Fotos;
             agendaVM.ItemSelecionado = agendamentoCompleto;
+            agendaVM.NovoPagamento = new Pagamento { Valor = agendamentoCompleto.Pagamentos.Sum(p => p.Valor) };
 
             agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
             agendaVM.CarregarServicos();
@@ -228,6 +243,12 @@ namespace AgendaNovo.ViewModels
 
             agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();
+            if (agendamentoIdNotificacao.HasValue || clienteIdNotificacao.HasValue)
+                WeakReferenceMessenger.Default.Send(
+                    new DadosAtualizadosMessage(
+                        clienteId: clienteIdNotificacao, agendamentoId: agendamentoIdNotificacao
+                    )
+                );
 
             // cria/mostra o modal se ainda não estiver aberto:
             if (!MostrarEditarAgendamento || TelaEditarAgendamento is null)
@@ -235,6 +256,9 @@ namespace AgendaNovo.ViewModels
                 var view = new EditarAgendamentoView { DataContext = agendaVM };
                 view.FecharSolicitado += (s, e) =>
                 {
+                  
+
+
                     MostrarEditarAgendamento = false;
                     TelaEditarAgendamento = null;
                     AgendamentoEditandoId = null;

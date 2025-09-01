@@ -40,16 +40,16 @@ namespace AgendaNovo.Migrations
                 table: "Pagamento",
                 column: "AgendamentoId");
             migrationBuilder.CreateIndex(
-                name: "IX_Pagamentos_DataPagamento",
-                table: "Pagamentos",
+                name: "IX_Pagamento_DataPagamento",
+                table: "Pagamento",
                 column: "DataPagamento");
             migrationBuilder.Sql(@"
-            INSERT INTO Pagamentos (AgendamentoId, Valor, DataPagamento, Metodo, Observacao, CreatedAt)
+            INSERT INTO Pagamento (AgendamentoId, Valor, DataPagamento, Metodo, Observacao, CreatedAt)
             SELECT a.Id,
                    a.ValorPago,
                    ISNULL(a.Data, GETDATE()),
                    'Migracao',
-                   'Backfill ValorPago -> Pagamentos',
+                   'Backfill ValorPago -> Pagamento',
                    GETUTCDATE()
             FROM Agendamentos a
             WHERE a.ValorPago IS NOT NULL AND a.ValorPago > 0;

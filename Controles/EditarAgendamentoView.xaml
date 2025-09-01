@@ -113,7 +113,7 @@
                       BorderBrush="Transparent" SelectionTextBrush="Black"/>
                     <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" HorizontalAlignment="Right"/>
 
-                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoAgendamento.ValorPago, UpdateSourceTrigger=PropertyChanged }"
+                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoPagamento.Valor, UpdateSourceTrigger=PropertyChanged }"
                       Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
                       hc:InfoElement.Placeholder="Pago"
                         Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"

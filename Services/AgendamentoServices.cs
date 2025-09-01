@@ -47,6 +47,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Crianca)
                 .Include (a => a.Pacote)
                 .Include (a => a.Servico)
+                .Include (a => a.Pagamentos)
                 .AsNoTracking()
                 .ToList();
         }
@@ -60,6 +61,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Crianca)
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
                 .FirstOrDefault(a => a.Id == id);
         }
 
@@ -75,7 +77,7 @@ namespace AgendaNovo.Services
             destino.Horario = origem.Horario;
             destino.Tema = origem.Tema;
             destino.Valor = origem.Valor;
-            destino.ValorPago = origem.ValorPago;
+            destino.Pagamentos = origem.Pagamentos;
             destino.PacoteId = origem.PacoteId;
             destino.ServicoId = origem.ServicoId;
             destino.ClienteId = origem.ClienteId;
@@ -89,6 +91,7 @@ namespace AgendaNovo.Services
             .Include(a => a.Crianca)
             .Include(a => a.Pacote)
             .Include(a => a.Servico)
+            .Include(a => a.Pagamentos)
             .FirstOrDefault(a => a.Id == agendamento.Id);
             if (existente != null)
             {
@@ -114,6 +117,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Crianca)
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
                 .Where(a => a.Data.Date == data.Date)
                 .AsNoTracking()
                 .ToList();
@@ -126,6 +130,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Crianca)
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
                 .Where(a => a.ClienteId == clienteId)
                 .AsNoTracking()
                 .ToList();
@@ -138,6 +143,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Crianca)
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
                 .Where(a => a.CriancaId == criancaId)
                 .AsNoTracking()
                 .ToList();
@@ -195,17 +201,22 @@ namespace AgendaNovo.Services
                 if (status.HasValue) baseQ = baseQ.Where(a => a.Status == status.Value);
 
                 var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
-
-                var kpi = await valid
+                var q = valid.Select(a => new
+                {
+                    a.Valor,
+                    Pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m,
+                    a.Status
+                });
+                var kpi = await q
                  .GroupBy(a => 1)
                  .Select(g => new
                  {
                      Receita = g.Sum(a => a.Valor),
-                     Recebido = g.Sum(a => a.ValorPago < a.Valor ? a.ValorPago : a.Valor),
-                     Aberto = g.Sum(a => a.Valor - (a.ValorPago < a.Valor ? a.ValorPago : a.Valor)),
+                     Recebido = g.Sum(a => a.Pago < a.Valor ? a.Pago : a.Valor),
+                     Aberto = g.Sum(a => a.Valor - (a.Pago < a.Valor ? a.Pago : a.Valor)),
                      Qtd = g.Count(),
                      TicketMedio = g.Where(a => a.Status == StatusAgendamento.Concluido)
-                       .Average(a => (decimal?)(a.ValorPago < a.Valor ? a.ValorPago : a.Valor))
+                       .Average(a => (decimal?)(a.Pago < a.Valor ? a.Pago : a.Valor))
                  })
                  .FirstOrDefaultAsync();
 
