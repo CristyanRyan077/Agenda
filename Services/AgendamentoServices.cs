@@ -244,31 +244,7 @@ namespace AgendaNovo.Services
         public Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
         {
             var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
-            var baseQ = QueryFinanceiro(inicio, fimIncl, servicoId, status)
-                        .Where(a => a.Status != StatusAgendamento.Cancelado);
 
-            return baseQ
-                .Where(a => a.Valor > a.ValorPago)
-                .OrderBy(a => a.Data)
-                .Select(a => new RecebivelDTO
-                {
-                    Id = a.Id,
-                    Data = a.Data,
-                    Cliente = a.ClienteNome,
-                    Servico = a.ServicoNome,
-                    Valor = a.Valor,
-                    ValorPago = a.ValorPago,
-                    Status = a.Status.ToString()
-                })
-                .ToListAsync();
-        }
-
-        public Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(
-         DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
-        {
-            var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
-
-            // Base somente de Agendamentos (sem projeção prévia), para não "poluir" o GroupBy
             var baseQ = _db.Agendamentos.AsNoTracking()
                 .Where(a => a.Data >= inicio && a.Data <= fimIncl);
 
@@ -277,17 +253,52 @@ namespace AgendaNovo.Services
 
             var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
 
-            // GroupBy por ServicoId e LEFT JOIN para obter o Nome (uma única query)
+            var q = from a in valid
+                    join s in _db.Servicos.AsNoTracking() on a.ServicoId equals s.Id into sj
+                    from s in sj.DefaultIfEmpty()
+                    join c in _db.Clientes.AsNoTracking() on a.ClienteId equals c.Id into cj
+                    from c in cj.DefaultIfEmpty()
+                    let pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m
+                    where a.Valor > pago
+                    orderby a.Data
+                    select new RecebivelDTO
+                    {
+                        Id = a.Id,
+                        Data = a.Data,
+                        Cliente = c != null ? c.Nome : null,
+                        Servico = s != null ? s.Nome : "—",
+                        Valor = a.Valor,
+                        ValorPago = pago,
+                        Status = a.Status.ToString()
+                    };
+
+            return q.ToListAsync();
+        }
+
+        public Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(
+         DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        {
+            var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
+
+            var baseQ = _db.Agendamentos.AsNoTracking()
+                .Where(a => a.Data >= inicio && a.Data <= fimIncl);
+
+            if (servicoId.HasValue) baseQ = baseQ.Where(a => a.ServicoId == servicoId.Value);
+            if (status.HasValue) baseQ = baseQ.Where(a => a.Status == status.Value);
+
+            var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
+
             var query =
                 from g in
                     (from a in valid
-                     group a by a.ServicoId into grp
+                     let pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m
+                     group new { a, pago } by a.ServicoId into grp
                      select new
                      {
                          ServicoId = grp.Key,
-                         Receita = grp.Sum(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor),
+                         Receita = grp.Sum(x => x.pago < x.a.Valor ? x.pago : x.a.Valor),
                          Qtd = grp.Count(),
-                         TicketMedio = grp.Average(x => x.ValorPago < x.Valor ? x.ValorPago : x.Valor)
+                         TicketMedio = grp.Average(x => x.pago < x.a.Valor ? x.pago : x.a.Valor)
                      })
                 join s in _db.Servicos.AsNoTracking() on g.ServicoId equals s.Id into sj
                 from s in sj.DefaultIfEmpty()

@@ -1,12 +1,14 @@
-﻿using System;
+﻿using AgendaNovo.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ControlzEx.Standard;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AgendaNovo.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
-using ControlzEx.Standard;
 
 namespace AgendaNovo
 {
@@ -25,7 +27,9 @@ namespace AgendaNovo
         public Pacote? Pacote { get; set; }
         public int? PacoteId { get; set; }
 
-        public ICollection<Pagamento> Pagamentos { get; set; } = new List<Pagamento>();
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ValorPago))]
+        public ObservableCollection<Pagamento> pagamentos = new();
 
         [ObservableProperty] private DateTime data = DateTime.Today;
 
@@ -62,10 +66,20 @@ namespace AgendaNovo
         }
 
 
-        partial void OnValorChanged(decimal oldValue, decimal newValue)
+        partial void OnPagamentosChanged(ObservableCollection<Pagamento> value)
         {
-            OnPropertyChanged(nameof(EstaPago));
+            // Desinscreve da antiga e inscreve na nova coleção
+            if (value != null)
+                value.CollectionChanged += Pagamentos_CollectionChanged;
 
+            // Trocar a referência já dispara PropertyChanged de Pagamentos (pelo atributo),
+            // aqui garantimos também o dependente:
+            OnPropertyChanged(nameof(ValorPago));
+        }
+        private void Pagamentos_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Qualquer Add/Remove/Reset na coleção reflete no ValorPago imediatamente
+            OnPropertyChanged(nameof(ValorPago));
         }
     }
 }

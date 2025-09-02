@@ -23,6 +23,8 @@ namespace AgendaNovo
         public DbSet <Servico> Servicos { get; set; }
         public DbSet <Pacote> Pacotes { get; set; }
 
+        public DbSet <Pagamento> Pagamentos { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //optionsBuilder.UseSqlServer("Data Source=2857AL17;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;");

@@ -34,6 +34,7 @@ namespace AgendaNovo
             services.AddTransient<IPacoteService, PacoteService>();
             services.AddTransient<IServicoService, ServicoService>();
             services.AddTransient<IAgendamentoService, AgendamentoService>();
+            services.AddTransient<IPagamentoService, PagamentoService>();
             //Views
             services.AddScoped<WindowManager>();
             services.AddTransient<Agendar>();
@@ -48,6 +49,7 @@ namespace AgendaNovo
             services.AddTransient<ClienteCriancaViewModel>();
             services.AddSingleton<AgendaViewModel>();
             services.AddTransient<FinanceiroViewModel>();
+            services.AddTransient<PagamentosViewModel>();
 
             ServiceProvider = services.BuildServiceProvider();
             var login = ServiceProvider.GetRequiredService<Login>();

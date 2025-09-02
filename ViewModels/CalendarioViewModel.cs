@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -29,13 +30,15 @@ namespace AgendaNovo.ViewModels
         private readonly IAgendamentoService _agendamentoService;
         private readonly IServicoService _servicoService;
         private readonly IPacoteService _pacoteService;
+        private readonly IPagamentoService _pagamentoService;
 
 
         public CalendarioViewModel(AgendaViewModel agendaViewModel, IAgendamentoService agendamentoService,
         IClienteService clienteService,
         ICriancaService criancaService,
         IPacoteService pacoteService,
-        IServicoService servicoService)
+        IServicoService servicoService,
+        IPagamentoService pagamentoService)
         {
 
             AgendaViewModel = agendaViewModel;
@@ -44,6 +47,7 @@ namespace AgendaNovo.ViewModels
             _criancaService = criancaService;
             _pacoteService = pacoteService;
             _servicoService = servicoService;
+            _pagamentoService = pagamentoService;
             _clienteService.ClienteInativo();
             
             MesAtual = DateTime.Today;
@@ -75,6 +79,8 @@ namespace AgendaNovo.ViewModels
         public IPacoteService PacoteService => _pacoteService;
         public IServicoService ServicoService => _servicoService;
 
+        public IPagamentoService PagamentoService => _pagamentoService;
+
         public IEnumerable<ServicoLegenda> GlossarioServicos => ServicoPalette.All;
         [ObservableProperty]
         private ObservableCollection<DiaCalendario> diasDoMes = new();
@@ -94,7 +100,10 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private object telaEditarAgendamento;
         [ObservableProperty] private bool mostrarEditarAgendamento;
         [ObservableProperty] private object telaHistoricoCliente;
+        [ObservableProperty] private object? pagamentosView;
         [ObservableProperty] private bool mostrarHistoricoCliente;
+        [ObservableProperty] private bool mostrarPagamentos;
+        [ObservableProperty] private PagamentosViewModel? pagamentosVM;
 
 
         [ObservableProperty]
@@ -126,17 +135,47 @@ namespace AgendaNovo.ViewModels
             }
 
 
+
             var agendaVM = AgendaViewModel;
             agendaVM.AtualizarAgendamentos();
         }
-        
+        public void RefreshAgendamento(Agendamento agendamentoAtualizado)
+        {
+            var existenteFiltrado = AgendamentosFiltrados.FirstOrDefault(a => a.Id == agendamentoAtualizado.Id);
+            if (existenteFiltrado != null)
+            {
+                var indexF = AgendamentosFiltrados.IndexOf(existenteFiltrado);
+                AgendamentosFiltrados[indexF] = agendamentoAtualizado;
+            }
+
+        }
+        partial void OnPagamentosVMChanged(PagamentosViewModel? value)
+    => System.Diagnostics.Debug.WriteLine($"PagamentosVM set: {value != null}");
+        partial void OnMostrarPagamentosChanged(bool value)
+        {
+            System.Diagnostics.Debug.WriteLine($"📌 MostrarPagamentos mudou para: {value}");
+        }
+        [RelayCommand]
+        public async Task AbrirPagamentosAsync(int agendamentoId)
+        {
+            System.Diagnostics.Debug.WriteLine($"🔵 Abrindo pagamentos para agendamento {agendamentoId}");
+            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId);
+            await PagamentosVM.CarregarAsync();
+            MostrarPagamentos = true;
+            System.Diagnostics.Debug.WriteLine($"✅ MostrarPagamentos = {MostrarPagamentos}");
+        }
+        [RelayCommand]
+        public void FecharPagamentos()
+        {
+            MostrarPagamentos = false;           
+            PagamentosView = null;
+        }
+
         [RelayCommand]
         private void FecharEdicao()
         {
-            MostrarEditarAgendamento = false;
-            TelaEditarAgendamento = null;
+            mostrarPagamentos = false;
             mostrarHistoricoCliente = false;
-            telaHistoricoCliente = null;
             var agendaVM = AgendaViewModel;
             agendaVM.NovoAgendamento = new Agendamento();
             agendaVM.NovoCliente = new Cliente();
@@ -144,7 +183,6 @@ namespace AgendaNovo.ViewModels
             agendaVM.CriancaSelecionada = null;
             agendaVM.ItemSelecionado = null;
             agendaVM.HorarioTexto = string.Empty;
-            agendaVM._populandoCampos = false;
         }
 
         partial void OnClienteSelecionadoChanged(Cliente value)

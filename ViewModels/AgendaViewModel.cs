@@ -157,7 +157,6 @@ namespace AgendaNovo
             WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
             {
                 OnDadosAtualizados(m);
-                CarregarDadosDoBanco();
                 
             });
 
@@ -450,7 +449,10 @@ namespace AgendaNovo
                     NovoAgendamento = agendamentoAtualizado;
                     NovoAgendamento.Valor = agendamentoAtualizado.Valor;
                     NovoAgendamento.Pagamentos = agendamentoAtualizado.Pagamentos;
-                    NovoPagamento.Valor = NovoAgendamento.Pagamentos.Sum(p => p.Valor);
+                    NovoPagamento = new Pagamento
+                    {
+                        Valor = agendamentoAtualizado.Pagamentos.Sum(p => p.Valor)
+                    };
                     RefreshAgendamento(agendamentoAtualizado);
                     OnPropertyChanged(nameof(NovoPagamento));
                     OnPropertyChanged(nameof(NovoAgendamento));
@@ -459,6 +461,7 @@ namespace AgendaNovo
 
             }
         }
+
 
 
 
@@ -611,12 +614,13 @@ namespace AgendaNovo
 
         public void RefreshAgendamento(Agendamento agendamentoAtualizado)
         {
-            var existente = ListaAgendamentos.FirstOrDefault(a => a.Id == agendamentoAtualizado.Id);
-            if (existente != null)
+            var existenteFiltrado = AgendamentosFiltrados.FirstOrDefault(a => a.Id == agendamentoAtualizado.Id);
+            if (existenteFiltrado != null)
             {
-                var index = ListaAgendamentos.IndexOf(existente);
-                ListaAgendamentos[index] = agendamentoAtualizado; // dispara atualização
+                var indexF = AgendamentosFiltrados.IndexOf(existenteFiltrado);
+                AgendamentosFiltrados[indexF] = agendamentoAtualizado;
             }
+            
         }
         partial void OnDataSelecionadaChanged(DateTime value)
         {

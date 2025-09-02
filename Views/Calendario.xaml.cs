@@ -85,7 +85,7 @@ namespace AgendaNovo.Views
                 var item = vm.AgendamentoSelecionado;
                 if (item == null) return;
 
-                vm.EditarAgendamentoPorId(item.Id);  // abre/preenche a modal
+                vm.AbrirPagamentosAsync(item.Id);  // abre/preenche a modal
                 vm.HistoricoCliente();               // abre/atualiza a coluna de histórico
                 vm.AplicarDestaqueNoHistorico();     // garante o highlight no card certo
             }
