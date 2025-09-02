@@ -15,11 +15,13 @@ namespace AgendaNovo.Services
     {
         private readonly AgendaContext _db;
         private readonly string _sid = Guid.NewGuid().ToString("N")[..6];
+        private readonly IDbContextFactory<AgendaContext> _dbFactory;
         private static string T() => DateTime.Now.ToString("HH:mm:ss.fff");
-        public AgendamentoService(AgendaContext db)
+        public AgendamentoService(AgendaContext db, IDbContextFactory<AgendaContext> dbFactory)
         {
             _db = db;
             System.Diagnostics.Debug.WriteLine($"[SRV NEW] {_sid} ctx={_db.CtxId}");
+            _dbFactory = dbFactory;
         }
         public void AtivarSePendente(int agendamentoid)
         {
@@ -123,6 +125,8 @@ namespace AgendaNovo.Services
                 .ToList();
         }
 
+
+
         public List<Agendamento> GetByCliente(int clienteId)
         {
             return _db.Agendamentos
@@ -147,6 +151,16 @@ namespace AgendaNovo.Services
                 .Where(a => a.CriancaId == criancaId)
                 .AsNoTracking()
                 .ToList();
+        }
+
+        public async Task AtualizarFotosAsync(int agendamentoId, FotosReveladas fotos)
+        {
+            using var db = _dbFactory.CreateDbContext();
+            var agendamento = await db.Agendamentos.FindAsync(agendamentoId);
+            if (agendamento is null) return;
+
+            agendamento.Fotos = fotos;
+            await db.SaveChangesAsync();
         }
         // ========= FINANCEIRO =========
 

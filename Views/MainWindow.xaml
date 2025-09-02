@@ -8,6 +8,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:controles="clr-namespace:AgendaNovo.Controles"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         x:Name="main"
@@ -55,8 +56,9 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        
-        
+
+
+
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.Background>
@@ -757,8 +759,12 @@
                         </Border>
                     </Grid>
                 </Grid>
+                <controles:PopupNotificacao DataContext="{Binding NotificacaoVM}" 
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Top"
+                                   />
             </Grid>
         </ScrollViewer>
     </DockPanel>
- </Window>
+</Window>
 

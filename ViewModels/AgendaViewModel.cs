@@ -114,6 +114,10 @@ namespace AgendaNovo
         private readonly IPacoteService _pacoteService;
         private readonly IServicoService _servicoService;
 
+        public NotificacaoViewModel NotificacaoVM { get; }
+
+        private readonly NotificacaoService _notificacaoService;
+
         public AgendaViewModel(IAgendamentoService agendamentoService,
         IClienteService clienteService,
         ICriancaService criancaService,
@@ -132,6 +136,8 @@ namespace AgendaNovo
             NovoAgendamento = new Agendamento();
             MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
+            NotificacaoVM = new NotificacaoViewModel( servicoService , agendamentoService );
+            _notificacaoService = new NotificacaoService(NotificacaoVM, agendamentoService);
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
             AbrirAdicionarServicoCommand = new RelayCommand(() =>
             {
@@ -156,6 +162,7 @@ namespace AgendaNovo
             });
             WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
             {
+                CarregarDadosDoBanco();
                 OnDadosAtualizados(m);
                 
             });

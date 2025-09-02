@@ -34,8 +34,29 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
+                <Grid Grid.Row="2"  Grid.Column="2"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Bottom"
+                      Margin="0,0,50,40">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Revelado" Foreground="White"
+                         GroupName="FiltroClientes"
+                         Margin="10,0,0,0"
+                         IsChecked="{Binding FiltroSelecionado,
+                         ConverterParameter=Revelado,
+                         Converter={StaticResource StringEqualsConverter}}" />
+                        <RadioButton Content="Entregue" Foreground="White"
+                         GroupName="FiltroClientes"
+                         Margin="10,0,0,0"
+                         IsChecked="{Binding FiltroSelecionado,
+                         ConverterParameter=Entregue,
+                         Converter={StaticResource StringEqualsConverter}}" />
+                    </StackPanel>
+                </Grid>
+
 
                 <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom">
+          
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <RadioButton Content="Todos"
                                  GroupName="FiltroClientes" Foreground="White"
@@ -92,8 +113,8 @@
 
 
                 <DataGrid
-                    Grid.Row="3" Grid.ColumnSpan="4" Grid.Column="0"
-                    Height="250"
+                    Grid.Row="4" Grid.ColumnSpan="4" Grid.Column="0"
+                    Height="350"
                     ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}"
                     SelectedItem="{Binding AgendamentoSelecionado, Mode=TwoWay}"
                     AutoGenerateColumns="False"
@@ -340,6 +361,7 @@
         <Grid x:Name="PagamentosOverlay"
       Visibility="{Binding MostrarPagamentos, Converter={StaticResource BoolToVisibilityConverter}}"
       Background="#80000000"
+      d:Visibility="Collapsed"
       HorizontalAlignment="Stretch"
       VerticalAlignment="Stretch"
       Panel.ZIndex="9999"
@@ -350,12 +372,12 @@
 
             <!-- Centro da modal -->
             <Border HorizontalAlignment="Left"
-          VerticalAlignment="Center"
+          VerticalAlignment="Top"
           Background="#2F2F2F"
           CornerRadius="12"
           Padding="16"
-                    Margin="30,0,0,0"
-          Width="1100"
+                    Margin="30,100,0,0"
+          Width="1000"
           MaxHeight="680">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -377,7 +399,7 @@
 
                     </DockPanel>
 
-                    <!-- Seu UserControl -->
+                    
                     <controles:PagamentosControl Grid.Row="1"  DataContext="{Binding PagamentosVM}"/>
                 </Grid>
                 

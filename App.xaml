@@ -30,6 +30,11 @@
             <conv:ZeroToCollapsedConverter x:Key="ZeroToCollapsed"/>
             <conv:PagoParaCorBrushConverter x:Key="PagoParaCor"/>
             <conv:ServicoIdToBrushConverter x:Key="ServicoIdToBrush"/>
+            <conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+            <conv:BoolToTextConverter x:Key="BoolToTextConverter" 
+                               TrueText="Salvar"
+                               FalseText=" ➕ Adicionar Pagamento"/>
+ 
             <DataTemplate DataType="{x:Type vm:FinanceiroViewModel}">
                 <views:Financeiro/>
             </DataTemplate>

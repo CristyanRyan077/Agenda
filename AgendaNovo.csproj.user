@@ -16,6 +16,12 @@
     <Compile Update="Controles\PagamentosControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Controles\PopupDetalhes.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Controles\PopupNotificacao.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Controles\ServicosAutoComplete.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

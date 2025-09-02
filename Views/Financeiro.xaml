@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgendaNovo.Views" xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:FinanceiroViewModel}"
         mc:Ignorable="d"
+        WindowState="Maximized"
         Title="Financeiro" Height="450" Width="800">
     <Grid Background="#2F2F2F">
         <Grid.ColumnDefinitions>

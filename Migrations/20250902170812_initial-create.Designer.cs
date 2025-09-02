@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250831224202_dropvalorpago")]
-    partial class dropvalorpago
+    [Migration("20250902170812_initial-create")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -111,7 +111,7 @@ namespace AgendaNovo.Migrations
 
                     b.HasIndex("DataPagamento");
 
-                    b.ToTable("Pagamento");
+                    b.ToTable("Pagamentos");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>

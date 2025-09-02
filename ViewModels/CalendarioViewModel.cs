@@ -159,7 +159,7 @@ namespace AgendaNovo.ViewModels
         public async Task AbrirPagamentosAsync(int agendamentoId)
         {
             System.Diagnostics.Debug.WriteLine($"🔵 Abrindo pagamentos para agendamento {agendamentoId}");
-            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId);
+            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId, _agendamentoService);
             await PagamentosVM.CarregarAsync();
             MostrarPagamentos = true;
             System.Diagnostics.Debug.WriteLine($"✅ MostrarPagamentos = {MostrarPagamentos}");
@@ -334,6 +334,14 @@ namespace AgendaNovo.ViewModels
             else if (FiltroSelecionado == "Concluido")
             {
                 filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
+            }
+            else if (FiltroSelecionado == "Revelado")
+            {
+                filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Revelado);
+            }
+            else if (FiltroSelecionado == "Entregue")
+            {
+                filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Entregue);
             }
 
             // filtro por texto

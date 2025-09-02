@@ -115,8 +115,14 @@ namespace AgendaNovo.ViewModels
             LimparCamposClienteCrianca();
             _criancaService.AtualizarIdadeDeTodasCriancas();
 
+            WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
+            {
+                Debug.WriteLine($"Mensagem recebida! ClienteId: {m.ClienteId}");
+            });
+
 
         }
+
         partial void OnMesSelecionadoChanged(MesItem value)
         {
             AplicarFiltrosComPesquisa();
@@ -350,10 +356,13 @@ namespace AgendaNovo.ViewModels
                 int anoRef = ano ?? agora.Year;
                 var totalMes = agendamentos
                     .Where(a => a.Data.Month == mesRef && a.Data.Year == anoRef)
-                    .Sum(a => a.ValorPago);
+                    .SelectMany(a => a.Pagamentos)             
+                    .Sum(p => p.Valor);
 
                 var totalHistorico = agendamentos
-                    .Sum(a => a.ValorPago);
+                        .SelectMany(a => a.Pagamentos)           
+                        .Sum(p => p.Valor);
+
 
                 // Crianças em string separada por vírgula
                 var nomesCriancas = string.Join(", ", cliente.NomeCrianca);

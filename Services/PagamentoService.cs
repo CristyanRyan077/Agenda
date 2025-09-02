@@ -13,25 +13,29 @@ namespace AgendaNovo.Services
     public class PagamentoService : IPagamentoService
     {
 
-        private readonly AgendaContext _db;
-        public PagamentoService(AgendaContext db) => _db = db;
+        private readonly IDbContextFactory<AgendaContext> _dbFactory;
+        public PagamentoService(IDbContextFactory<AgendaContext> dbFactory)
+        => _dbFactory = dbFactory;
 
         public async Task<ResumoAgendamentoDto> ObterResumoAgendamentoAsync(int agendamentoId)
         {
+            using var db = _dbFactory.CreateDbContext();
             var q =
-                from a in _db.Agendamentos.AsNoTracking()
-                join c in _db.Clientes.AsNoTracking() on a.ClienteId equals c.Id
-                join s in _db.Servicos.AsNoTracking() on a.ServicoId equals s.Id into sj
+                from a in db.Agendamentos.AsNoTracking()
+                join c in db.Clientes.AsNoTracking() on a.ClienteId equals c.Id
+                join s in db.Servicos.AsNoTracking() on a.ServicoId equals s.Id into sj
                 from s in sj.DefaultIfEmpty()
                 where a.Id == agendamentoId
-                select new ResumoAgendamentoDto(c.Nome, s != null ? s.Nome : "—", a.Data, a.Valor);
+                select new ResumoAgendamentoDto(c.Nome, a.Fotos, s != null ? s.Nome : "—", a.Data, a.Valor);
 
             return await q.FirstAsync();
         }
 
         public async Task<List<PagamentoDto>> ListarPagamentosAsync(int agendamentoId)
         {
-            return await _db.Pagamentos.AsNoTracking()
+            using var db = _dbFactory.CreateDbContext();
+
+            return await db.Pagamentos.AsNoTracking()
                 .Where(p => p.AgendamentoId == agendamentoId)
                 .OrderBy(p => p.DataPagamento)
                 .Select(p => new PagamentoDto(p.Id, p.DataPagamento, p.Valor, p.Metodo, p.Observacao))
@@ -40,7 +44,8 @@ namespace AgendaNovo.Services
 
         public async Task AdicionarPagamentoAsync(int agendamentoId, CriarPagamentoDto dto)
         {
-            _db.Pagamentos.Add(new Pagamento
+            using var db = _dbFactory.CreateDbContext();
+            db.Pagamentos.Add(new Pagamento
             {
                 AgendamentoId = agendamentoId,
                 Valor = dto.Valor,
@@ -48,24 +53,26 @@ namespace AgendaNovo.Services
                 Metodo = dto.Metodo,
                 Observacao = dto.Observacao
             });
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         public async Task AtualizarPagamentoAsync(AtualizarPagamentoDto dto)
         {
+            using var db = _dbFactory.CreateDbContext();
             var p = new Pagamento { Id = dto.Id }; // no-track update
-            _db.Attach(p);
+            db.Attach(p);
             p.Valor = dto.Valor;
             p.DataPagamento = dto.DataPagamento;
             p.Metodo = dto.Metodo;
             p.Observacao = dto.Observacao;
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
         public async Task RemoverPagamentoAsync(int pagamentoId)
         {
-            _db.Pagamentos.Remove(new Pagamento { Id = pagamentoId });
-            await _db.SaveChangesAsync();
+            using var db = _dbFactory.CreateDbContext();
+            db.Pagamentos.Remove(new Pagamento { Id = pagamentoId });
+            await db.SaveChangesAsync();
         }
     }
 }
