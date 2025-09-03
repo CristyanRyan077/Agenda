@@ -44,4 +44,12 @@ namespace AgendaNovo.Models
         Cliente,
         Agendamento
     }
+    public enum MetodoPagamento
+    {
+
+        Pix = 0,
+        Cartão = 1,
+        Dinheiro = 2,
+        
+    }
 }

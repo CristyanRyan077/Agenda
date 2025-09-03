@@ -43,7 +43,6 @@ namespace AgendaNovo.ViewModels
 
         [ObservableProperty] private DateTime dataPagamento;
 
-        [ObservableProperty] private string? metodo;
 
         [ObservableProperty] private string? observacao;
         public decimal ValorPago => Pagamentos.Sum(p => p.Valor);
@@ -56,9 +55,12 @@ namespace AgendaNovo.ViewModels
 
         // Novo pagamento (inputs)
         [ObservableProperty] private NovoPagamentoDto novoPagamento = new() { DataPagamento = DateTime.Now };
+        public ObservableCollection<MetodoPagamento> Metodo { get; } =
+    new ObservableCollection<MetodoPagamento>((MetodoPagamento[])Enum.GetValues(typeof(MetodoPagamento)));
 
-        // Notificar %/Falta quando ValorPago mudar
-  
+
+        public MetodoPagamento MetodoSelecionado { get; set; }
+
         partial void OnPagamentosChanged(ObservableCollection<PagamentoDto> value)
         {
             OnPropertyChanged(nameof(ValorPago));
@@ -161,8 +163,8 @@ namespace AgendaNovo.ViewModels
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }
         [RelayCommand] public void Fechar() { /* Window.Close via evento/serviço UI */ }
     }
-    public record PagamentoDto(int Id, DateTime DataPagamento, decimal Valor, string? Metodo, string? Observacao);
-    public class NovoPagamentoDto { public DateTime DataPagamento { get; set; } public decimal Valor { get; set; } public string? Metodo { get; set; } public string? Observacao { get; set; } }
+    public record PagamentoDto(int Id, DateTime DataPagamento, decimal Valor, MetodoPagamento  Metodo, string? Observacao);
+    public class NovoPagamentoDto { public DateTime DataPagamento { get; set; } public decimal Valor { get; set; } public MetodoPagamento Metodo { get; set; } public string? Observacao { get; set; } }
     public class CriarPagamentoDto : NovoPagamentoDto { }
     public class AtualizarPagamentoDto : NovoPagamentoDto { public int Id { get; set; } }
 

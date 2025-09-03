@@ -4,6 +4,7 @@ using AgendaNovo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    partial class AgendaContextModelSnapshot : ModelSnapshot
+    [Migration("20250824212919_columnfotos")]
+    partial class columnfotos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,9 @@ namespace AgendaNovo.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("ValorPago")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
@@ -74,41 +80,6 @@ namespace AgendaNovo.Migrations
                     b.HasIndex("ServicoId");
 
                     b.ToTable("Agendamentos");
-                });
-
-            modelBuilder.Entity("AgendaNovo.Agendamento+Pagamento", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AgendamentoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DataPagamento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Metodo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Observacao")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgendamentoId");
-
-                    b.HasIndex("DataPagamento");
-
-                    b.ToTable("Pagamentos");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>
@@ -264,17 +235,6 @@ namespace AgendaNovo.Migrations
                     b.Navigation("Servico");
                 });
 
-            modelBuilder.Entity("AgendaNovo.Agendamento+Pagamento", b =>
-                {
-                    b.HasOne("AgendaNovo.Agendamento", "Agendamento")
-                        .WithMany("Pagamentos")
-                        .HasForeignKey("AgendamentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Agendamento");
-                });
-
             modelBuilder.Entity("AgendaNovo.Models.Crianca", b =>
                 {
                     b.HasOne("AgendaNovo.Models.Cliente", "Cliente")
@@ -293,11 +253,6 @@ namespace AgendaNovo.Migrations
                         .HasForeignKey("ServicoId");
 
                     b.Navigation("Servico");
-                });
-
-            modelBuilder.Entity("AgendaNovo.Agendamento", b =>
-                {
-                    b.Navigation("Pagamentos");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>

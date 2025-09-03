@@ -60,7 +60,7 @@ namespace AgendaNovo
 
             [ObservableProperty] private decimal valor;            // valor da parcela
             [ObservableProperty] private DateTime dataPagamento;   // quando pagou
-            [ObservableProperty] private string? metodo;           // “PIX”, “Crédito”, etc. (opcional)
+            [ObservableProperty] private MetodoPagamento metodo;           // “PIX”, “Crédito”, etc. (opcional)
             [ObservableProperty] private string? observacao;       // opcional
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         }

@@ -46,19 +46,10 @@ namespace AgendaNovo.ViewModels
                 return;
 
             var cliente = agendamento.Cliente;
-            var crianca = agendamento.Crianca;
-
-            var textoCrianca = crianca != null
-                ? $" {crianca.Nome} ({crianca.Idade} {crianca.IdadeUnidade})\n"
-                : "";
-
-            var servicoNome = _servicoservice.GetById((int)agendamento.ServicoId)?.Nome ?? "Não informado";
 
             // Aqui você pode personalizar o texto da mensagem
             var mensagem = $"Olá {cliente.Nome}, tudo bem?\n\n" +
-                           $"Estou passando para confirmar o agendamento de amanhã ({agendamento.Data:dd/MM HH:mm}).\n" +
-                           $"Serviço: {servicoNome}\n" +
-                           $"{textoCrianca}\n" +
+                           $"Estou passando para confirmar o agendamento de amanhã ({agendamento.Data:dd/MM} às {agendamento.Horario}h).\n" +
                            $"Qualquer dúvida, me avise 🙂";
 
             var textoEscapado = Uri.EscapeDataString(mensagem);

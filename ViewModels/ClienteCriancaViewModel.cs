@@ -622,8 +622,17 @@ namespace AgendaNovo.ViewModels
             int? mes = MesSelecionado?.Numero;
             int? ano = MesSelecionado != null ? AnoSelecionado : (int?)null;
 
-            _clientesFiltrados = ObterClientesFiltrados(mes, ano).ToList();
-            AtualizarPaginacao(_clientesFiltrados);
+            var clientes = ObterClientesFiltrados(mes, ano).ToList();
+            foreach (var c in clientes)
+            {
+                c.TotalPagoMesAtual = c.Agendamentos
+                    .Where(a => mes.HasValue && ano.HasValue &&
+                                a.Data.Month == mes.Value &&
+                                a.Data.Year == ano.Value)
+                    .Sum(a => a.ValorPago);
+            }
+
+            AtualizarPaginacao(clientes);
         }
         private bool AgendamentoAtendeFiltro(Agendamento a)
         {

@@ -17,7 +17,7 @@
 
     <Grid Background="#FF333333">
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -28,7 +28,7 @@
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -37,7 +37,7 @@
                 <Grid Grid.Row="2"  Grid.Column="2"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Bottom"
-                      Margin="0,0,50,40">
+                      Margin="0,0,80,40">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton Content="Revelado" Foreground="White"
                          GroupName="FiltroClientes"
@@ -55,7 +55,7 @@
                 </Grid>
 
 
-                <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom">
+                <Grid Grid.Row="2" Margin="0,0,40,0" Grid.Column="2" VerticalAlignment="Bottom">
           
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <RadioButton Content="Todos"
@@ -82,7 +82,7 @@
                      Text="{Binding TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Black"
                      />
                 </Grid>
-                <ToolBarTray Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                <ToolBarTray Grid.Row="0" Grid.Column="2" Margin="0,0,20,0" HorizontalAlignment="Right">
                     <ToolBar Height="70"  Background="DarkGray">
                         <Button x:Name="btnMainwindow" Padding="2" Margin="0,0,5,0" Width="60" Click="btnMainwindow_Click"
                                 Height="60" BorderBrush="Black" FontSize="15">
@@ -113,7 +113,7 @@
 
 
                 <DataGrid
-                    Grid.Row="4" Grid.ColumnSpan="4" Grid.Column="0"
+                    Grid.Row="4" Grid.ColumnSpan="5" Grid.Column="0"
                     Height="350"
                     ItemsSource="{Binding AgendamentosFiltrados, Mode=TwoWay}"
                     SelectedItem="{Binding AgendamentoSelecionado, Mode=TwoWay}"
@@ -194,10 +194,10 @@
 
 
                 <!-- Navegação -->
-                <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="0,20,-100,20"  Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="300,20,0,20"  Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
                     <Button Command="{Binding VoltarMesCommand}" Content="◀" Margin="0,0,0,0"/>
                     <TextBlock Text="{Binding MesAtual,Converter={StaticResource MesAnoPtBrConverter},  StringFormat={}{0:MMMM yyyy}}"                          
-                           Width="135"
+                           Width="130"
                            Foreground="White" FontWeight="Bold"
                            FontSize="18" VerticalAlignment="Center" Margin="30,0,30,0"/>
                     <Button Command="{Binding AvancarMesCommand}" Content="▶"/>
@@ -229,7 +229,7 @@
                 </ItemsControl>
 
                 <!-- Dias do mês -->
-                <ItemsControl Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="3" Foreground="White" ItemsSource="{Binding DiasDoMes}">
+                <ItemsControl Grid.Row="2" Margin="60,0,0,0" VerticalAlignment="Center" Grid.ColumnSpan="4" Foreground="White" ItemsSource="{Binding DiasDoMes}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="7"/>
@@ -237,7 +237,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:DiaCalendario}">
-                            <Border x:Name="AgBorder" Height="100" BorderBrush="Gray" BorderThickness="0.5" Background="#FF484848"
+                            <Border x:Name="AgBorder" Height="110" BorderBrush="Gray" BorderThickness="0.5" Background="#FF484848"
                                     AllowDrop="True"
                                     DragLeave="Dia_DragLeave"
                                     DragOver="Dia_DragOver" Drop="Dia_Drop"
@@ -253,7 +253,7 @@
                                     <ScrollViewer Grid.Row="1" 
                                             VerticalScrollBarVisibility="Auto"
                                             HorizontalScrollBarVisibility="Auto"
-                                            Margin="0,0,10,0">
+                                            Margin="0,0,0,0">
                                         <ItemsControl ItemsSource="{Binding Agendamentos}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>

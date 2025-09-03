@@ -26,9 +26,8 @@ namespace AgendaNovo.Models
         [ObservableProperty] private string? nomeCrianca;
         [ObservableProperty] private Genero genero = Genero.M;
         [ObservableProperty] private int? idade;
-        public decimal TotalPagoMesAtual => Agendamentos
-        .Where(a => a.Data.Month == DateTime.Now.Month && a.Data.Year == DateTime.Now.Year)
-        .Sum(a => a.ValorPago);
+        [ObservableProperty]
+        private decimal totalPagoMesAtual;
         public decimal TotalPagoHistorico => Agendamentos.Sum(a => a.ValorPago);
         public string? IdadeFormatada =>
         Idade.HasValue ? $"{Idade} {IdadeUnidade}" : null;
@@ -36,6 +35,9 @@ namespace AgendaNovo.Models
         [ObservableProperty] private IdadeUnidade idadeUnidade = IdadeUnidade.Meses;
 
         [ObservableProperty] private DateOnly? nascimento;
+
+        public int MesFiltro { get; set; }
+        public int AnoFiltro { get; set; }
 
         public List<Agendamento> Agendamentos { get; set; } = new();
 

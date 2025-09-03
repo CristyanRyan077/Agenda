@@ -4,6 +4,7 @@ using AgendaNovo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    partial class AgendaContextModelSnapshot : ModelSnapshot
+    [Migration("20250831213308_renomeacao")]
+    partial class renomeacao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,9 @@ namespace AgendaNovo.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("ValorPagolegacy")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
@@ -93,8 +99,8 @@ namespace AgendaNovo.Migrations
                     b.Property<DateTime>("DataPagamento")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Metodo")
-                        .HasColumnType("int");
+                    b.Property<string>("Metodo")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
@@ -108,7 +114,7 @@ namespace AgendaNovo.Migrations
 
                     b.HasIndex("DataPagamento");
 
-                    b.ToTable("Pagamentos");
+                    b.ToTable("Pagamento");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>

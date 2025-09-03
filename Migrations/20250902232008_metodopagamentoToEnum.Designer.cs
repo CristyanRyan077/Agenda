@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250902170812_initial-create")]
-    partial class initialcreate
+    [Migration("20250902232008_metodopagamentoToEnum")]
+    partial class metodopagamentoToEnum
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,8 +96,8 @@ namespace AgendaNovo.Migrations
                     b.Property<DateTime>("DataPagamento")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Metodo")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Metodo")
+                        .HasColumnType("int");
 
                     b.Property<string>("Observacao")
                         .HasColumnType("nvarchar(max)");
