@@ -142,7 +142,7 @@
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <Button Content="Exportar Em Aberto (Excel)" Command="{Binding ExportarEmAbertoParaExcelCommand}" Margin="0,8,0,0" HorizontalAlignment="Right"/>
+                        <Button Content="Exportar para Excel" Background="Green" Command="{Binding ExportarParaExcelCommand}" Margin="0,8,0,0" HorizontalAlignment="Right"/>
                     </DockPanel>
                 </Border>
 

@@ -39,8 +39,6 @@ namespace AgendaNovo
 
         [ObservableProperty] private decimal valor;
 
-        //[ObservableProperty] private decimal valorPagoLegacy;
-
         [ObservableProperty] private StatusAgendamento status = StatusAgendamento.Pendente;
 
         [ObservableProperty] private FotosReveladas fotos;
@@ -63,6 +61,20 @@ namespace AgendaNovo
             [ObservableProperty] private MetodoPagamento metodo;           // “PIX”, “Crédito”, etc. (opcional)
             [ObservableProperty] private string? observacao;       // opcional
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        }
+        public class AgendamentoProduto
+        {
+            public int Id { get; set; }
+
+            public int AgendamentoId { get; set; }
+            public Agendamento Agendamento { get; set; } = null!;
+
+            public int ProdutoId { get; set; }
+            public Produto Produto { get; set; } = null!;
+
+            public int Quantidade { get; set; } = 1;
+            public decimal ValorUnitario { get; set; }
+            public decimal ValorTotal => Quantidade * ValorUnitario;
         }
 
 

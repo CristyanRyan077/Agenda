@@ -92,6 +92,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private bool completouAcompanhamento;
         [ObservableProperty] private string textoPesquisa = string.Empty;
         [ObservableProperty] private DateTime? dataSelecionada;
+        [ObservableProperty] private int? agendamentoSelecionadoIdFiltro;
         public ObservableCollection<Agendamento> ListaAgendamentos { get; } = new();
         public IRelayCommand<(Agendamento ag, DateTime novaData)> MoverAgendamentoCommand { get; }
         public ObservableCollection<Crianca> ListaCriancas { get; } = new();
@@ -139,6 +140,23 @@ namespace AgendaNovo.ViewModels
             var agendaVM = AgendaViewModel;
             agendaVM.AtualizarAgendamentos();
         }
+        public void SelecionarDia(DateTime data)
+        {
+            AgendamentoSelecionadoIdFiltro = null; // limpamos filtro por agendamento
+            DataSelecionada = data.Date;           // marca o dia
+            foreach (var d in DiasDoMes)
+                d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
+            Debug.WriteLine($"SelecionarDia: {data:dd/MM/yyyy}");
+        }
+
+        public void SelecionarAgendamento(Agendamento ag)
+        {
+            AgendamentoSelecionadoIdFiltro = ag?.Id;
+            DataSelecionada = ag?.Data.Date;       // ainda marca o dia do card
+            foreach (var d in DiasDoMes)
+                d.Selecionado = DataSelecionada.HasValue && d.Data.Date == DataSelecionada.Value.Date;
+            Debug.WriteLine($"SelecionarAgendamento: {ag?.Id}");
+        }
         public void RefreshAgendamento(Agendamento agendamentoAtualizado)
         {
             var existenteFiltrado = AgendamentosFiltrados.FirstOrDefault(a => a.Id == agendamentoAtualizado.Id);
@@ -159,7 +177,7 @@ namespace AgendaNovo.ViewModels
         public async Task AbrirPagamentosAsync(int agendamentoId)
         {
             System.Diagnostics.Debug.WriteLine($"🔵 Abrindo pagamentos para agendamento {agendamentoId}");
-            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId, _agendamentoService);
+            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId, _agendamentoService, _clienteService);
             await PagamentosVM.CarregarAsync();
             MostrarPagamentos = true;
             System.Diagnostics.Debug.WriteLine($"✅ MostrarPagamentos = {MostrarPagamentos}");
@@ -312,52 +330,57 @@ namespace AgendaNovo.ViewModels
         }
         partial void OnFiltroSelecionadoChanged(string value)
         {
+            AgendamentoSelecionadoIdFiltro = null;
+            dataSelecionada = dataSelecionada;
             FiltrarAgendamentos();
-        }
-        public void SelecionarDia(DateTime data)
-        {
-            DataSelecionada = data;
+            
         }
         partial void OnDataSelecionadaChanged(DateTime? value)
         {
+            if (value.HasValue) AgendamentoSelecionadoIdFiltro = null;
             FiltrarAgendamentos();
+            FiltroSelecionado = "Todos";
         }
         private void FiltrarAgendamentos()
         {
             IEnumerable<Agendamento> filtrado = ListaAgendamentos;
-            var agora = DateTime.Now;
+            // prioridade 1: filtro por agendamento específico
+            if (AgendamentoSelecionadoIdFiltro.HasValue)
+                filtrado = filtrado.Where(a => a.Id == AgendamentoSelecionadoIdFiltro.Value);
+            // prioridade 2: filtro por dia
+            else if (DataSelecionada.HasValue)
+                filtrado = filtrado.Where(a => a.Data.Date == DataSelecionada.Value.Date);
 
-            if (FiltroSelecionado == "Pendente")
-            {
-                filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Pendente);
-            }
-            else if (FiltroSelecionado == "Concluido")
-            {
-                filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
-            }
-            else if (FiltroSelecionado == "Revelado")
-            {
-                filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Revelado);
-            }
-            else if (FiltroSelecionado == "Entregue")
-            {
-                filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Entregue);
-            }
+            if (FiltroSelecionado == "Pendente") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Pendente);
+            else if (FiltroSelecionado == "Concluido") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
+            else if (FiltroSelecionado == "Revelado") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Revelado);
+            else if (FiltroSelecionado == "Entregue") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Entregue);
 
-            // filtro por texto
+
             if (!string.IsNullOrWhiteSpace(TextoPesquisa))
             {
+                DataSelecionada = null;
+                AgendamentoSelecionadoIdFiltro = null;
                 filtrado = filtrado.Where(a => a.Cliente.Nome.Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase));
             }
 
-            // filtro por data
-            if (DataSelecionada.HasValue)
-            {
-                filtrado = filtrado.Where(a => a.Data == DataSelecionada.Value.Date);
-            }
-           
-
             AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado);
+            Debug.WriteLine($"FiltrarAgendamentos: DataSel={DataSelecionada}, AgSel={AgendamentoSelecionadoIdFiltro}");
+        }
+        partial void OnAgendamentoSelecionadoIdFiltroChanged(int? value)
+        {
+            // Se marcou um card específico, garanta que o dia correspondente siga marcado
+            if (value.HasValue)
+            {
+                var ag = ListaAgendamentos.FirstOrDefault(a => a.Id == value.Value);
+                if (ag != null)
+                {
+                    DataSelecionada = ag.Data.Date;
+                    foreach (var d in DiasDoMes)
+                        d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
+                }
+            }
+            FiltrarAgendamentos(); // 👈 ESSENCIAL
         }
         partial void OnTextoPesquisaChanged(string value)
         {
@@ -365,6 +388,7 @@ namespace AgendaNovo.ViewModels
             {
                 DataSelecionada = null;
                 FiltroSelecionado = "Todos";
+                AgendamentoSelecionadoIdFiltro = null;
             }
  
             FiltrarAgendamentos();
@@ -446,6 +470,9 @@ namespace AgendaNovo.ViewModels
                     diaVm.Agendamentos.Add(ag);
 
                 DiasDoMes.Add(diaVm);
+                if (DataSelecionada.HasValue)
+                    foreach (var d in DiasDoMes)
+                        d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
             }
         }
         private bool VerificarSeTemEvento(DateTime data) =>

@@ -21,6 +21,9 @@ namespace AgendaNovo
         public IServiceProvider ServiceProvider { get; private set; }
         protected override void OnStartup(StartupEventArgs e)
         {
+            var cultura = new System.Globalization.CultureInfo("pt-BR");
+            System.Threading.Thread.CurrentThread.CurrentCulture = cultura;
+            System.Threading.Thread.CurrentThread.CurrentUICulture = cultura;
             ConfigHelper.Instance.SetLang("pt-br");
             base.OnStartup(e);
             var services = new ServiceCollection();

@@ -18,12 +18,14 @@ namespace AgendaNovo.ViewModels
     {
         private readonly IPagamentoService _service;
         private readonly IAgendamentoService _agendaservice;
+        private readonly IClienteService _clienteservice;
 
-        public PagamentosViewModel(IPagamentoService service, int agendamentoId, IAgendamentoService agendaservice)
+        public PagamentosViewModel(IPagamentoService service, int agendamentoId, IAgendamentoService agendaservice, IClienteService clienteservice)
         {
             _service = service;
             AgendamentoId = agendamentoId;
             _agendaservice = agendaservice;
+            _clienteservice = clienteservice;
         }
 
         public int AgendamentoId { get; }
@@ -40,6 +42,7 @@ namespace AgendaNovo.ViewModels
         // editar
         [ObservableProperty] private bool estaEditando;
         [ObservableProperty] private int id;
+        [ObservableProperty] private int clienteId;
 
         [ObservableProperty] private DateTime dataPagamento;
 
@@ -67,6 +70,22 @@ namespace AgendaNovo.ViewModels
             OnPropertyChanged(nameof(Falta));
             OnPropertyChanged(nameof(PercentualPago));
         }
+        public async Task AtualizarStatusAsync()
+        {
+            if (ValorPago >= Valor)
+            {
+                // Total pago, marcar como concluído
+                _clienteservice.AtivarSePendente(clienteId);
+                _agendaservice.AtivarSePendente(AgendamentoId);
+            }
+            else
+            {
+                // Ainda falta valor, deixar como pendente
+                _clienteservice.ValorIncompleto(clienteId);
+                _agendaservice.ValorIncompleto(AgendamentoId);
+            }
+        }
+
         partial void OnFotosChanged(FotosReveladas value)
         {
             MostrarBotaoSalvarFotos = true;
@@ -106,6 +125,7 @@ namespace AgendaNovo.ViewModels
         public async Task CarregarAsync()
         {
             var header = await _service.ObterResumoAgendamentoAsync(AgendamentoId);
+            ClienteId = header.ClienteId;
             ClienteNome = header.ClienteNome;
             ServicoNome = header.ServicoNome;
             DataAgendamento = header.Data;
@@ -114,11 +134,13 @@ namespace AgendaNovo.ViewModels
 
             var lista = await _service.ListarPagamentosAsync(AgendamentoId);
             Pagamentos = new ObservableCollection<PagamentoDto>(lista);
+            
         }
 
         [RelayCommand]
         public async Task SalvarOuAdicionarPagamentoAsync()
         {
+            var agendamento = _service.ObterResumoAgendamentoAsync(AgendamentoId);
             if (NovoPagamento.Valor <= 0) return;
 
             if (EstaEditando)
@@ -132,7 +154,9 @@ namespace AgendaNovo.ViewModels
                     Metodo = NovoPagamento.Metodo,
                     Observacao = NovoPagamento.Observacao
                 };
+                
                 await _service.AtualizarPagamentoAsync(dto);
+
             }
             else
             {
@@ -145,9 +169,12 @@ namespace AgendaNovo.ViewModels
                     Observacao = NovoPagamento.Observacao
                 };
                 await _service.AdicionarPagamentoAsync(AgendamentoId, dto);
+                
+                
             }
 
             await CarregarAsync();
+            await AtualizarStatusAsync();
             LimparFormulario();
         }
 
@@ -158,6 +185,7 @@ namespace AgendaNovo.ViewModels
             if (p is null) return;
             await _service.RemoverPagamentoAsync(p.Id);
             await CarregarAsync();
+            await AtualizarStatusAsync();
         }
 
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }
@@ -168,5 +196,5 @@ namespace AgendaNovo.ViewModels
     public class CriarPagamentoDto : NovoPagamentoDto { }
     public class AtualizarPagamentoDto : NovoPagamentoDto { public int Id { get; set; } }
 
-    public record ResumoAgendamentoDto(string ClienteNome, FotosReveladas Fotos, string ServicoNome, DateTime Data, decimal Valor);
+    public record ResumoAgendamentoDto(int ClienteId, string ClienteNome, FotosReveladas Fotos, string ServicoNome, DateTime Data, decimal Valor);
 }

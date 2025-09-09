@@ -256,6 +256,9 @@
         </StackPanel>
         <!-- Pesquisa -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10">
+            <StackPanel VerticalAlignment="Center">
+                <Button Content="Todos Meses" Background="LightGray" Command="{Binding LimparFiltroMesCommand}"/>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
                 <ComboBox Width="120" Margin="5,0"
               ItemsSource="{Binding Meses}"

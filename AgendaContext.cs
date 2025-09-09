@@ -22,7 +22,8 @@ namespace AgendaNovo
         public DbSet<Agendamento> Agendamentos { get; set; }
         public DbSet <Servico> Servicos { get; set; }
         public DbSet <Pacote> Pacotes { get; set; }
-
+        public DbSet<Produto> Produtos { get; set; }
+        public DbSet<AgendamentoProduto> AgendamentoProdutos { get; set; }
         public DbSet <Pagamento> Pagamentos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

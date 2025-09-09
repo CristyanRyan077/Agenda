@@ -19,6 +19,13 @@ namespace AgendaNovo.Models
         public bool HasOverflow
     => OverflowCount > 0;
 
+        private bool _selecionado;
+        public bool Selecionado
+        {
+            get => _selecionado;
+            set => SetProperty(ref _selecionado, value);
+        }
+
         public IEnumerable<object> PreviewItemsWithOverflow
         {
             get

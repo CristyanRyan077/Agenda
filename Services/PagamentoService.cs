@@ -26,7 +26,7 @@ namespace AgendaNovo.Services
                 join s in db.Servicos.AsNoTracking() on a.ServicoId equals s.Id into sj
                 from s in sj.DefaultIfEmpty()
                 where a.Id == agendamentoId
-                select new ResumoAgendamentoDto(c.Nome, a.Fotos, s != null ? s.Nome : "—", a.Data, a.Valor);
+                select new ResumoAgendamentoDto(c.Id, c.Nome, a.Fotos, s != null ? s.Nome : "—", a.Data, a.Valor);
 
             return await q.FirstAsync();
         }

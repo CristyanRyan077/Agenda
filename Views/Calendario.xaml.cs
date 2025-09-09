@@ -30,10 +30,23 @@ namespace AgendaNovo.Views
             DataContext = vm;
             _main = main;
         }
+        private static T FindAncestorByName<T>(DependencyObject current, string name) where T : FrameworkElement
+        {
+            while (current != null)
+            {
+                if (current is T fe && fe.Name == name) return fe;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
 
         private void Dia_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Border border && border.DataContext is DiaCalendario dia && DataContext is CalendarioViewModel vm)
+            if (e.OriginalSource is DependencyObject d && FindAncestorByName<Border>(d, "ItemBorder") != null)
+                return;
+
+            if (sender is Border && ((FrameworkElement)sender).DataContext is DiaCalendario dia
+                && DataContext is CalendarioViewModel vm)
             {
                 vm.SelecionarDia(dia.Data);
             }
@@ -113,6 +126,14 @@ namespace AgendaNovo.Views
                 e.Effects = DragDropEffects.None;
             }
 
+            e.Handled = true;
+        }
+        private void Agendamento_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not FrameworkElement fe) return;
+            if (fe.DataContext is not Agendamento ag) return;
+            if (DataContext is CalendarioViewModel vm)
+                vm.SelecionarAgendamento(ag);
             e.Handled = true;
         }
 

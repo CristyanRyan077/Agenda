@@ -52,4 +52,10 @@ namespace AgendaNovo.Models
         Dinheiro = 2,
         
     }
+    public enum ExportTipo 
+    {
+        Ambos = 0,
+        Resumo = 1,
+        EmAberto = 2, 
+    }
 }

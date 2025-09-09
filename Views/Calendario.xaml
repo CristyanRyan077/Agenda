@@ -188,7 +188,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Fotos" Binding="{Binding Fotos}"/>
-                        <DataGridTextColumn Header="Observação" Binding="{Binding Cliente.Observacao}"/>
+                        <DataGridTextColumn Header="Observação" Width="200" Binding="{Binding Cliente.Observacao}"/>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -229,7 +229,7 @@
                 </ItemsControl>
 
                 <!-- Dias do mês -->
-                <ItemsControl Grid.Row="2" Margin="60,0,0,0" VerticalAlignment="Center" Grid.ColumnSpan="4" Foreground="White" ItemsSource="{Binding DiasDoMes}">
+                <ItemsControl Grid.Row="2" Margin="0,0,0,0" VerticalAlignment="Center" Grid.ColumnSpan="4" Foreground="White" ItemsSource="{Binding DiasDoMes}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="7"/>
@@ -237,12 +237,32 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:DiaCalendario}">
-                            <Border x:Name="AgBorder" Height="110" BorderBrush="Gray" BorderThickness="0.5" Background="#FF484848"
+                            <Border x:Name="AgBorder" Height="110"   Background="#FF484848"
                                     AllowDrop="True"
                                     DragLeave="Dia_DragLeave"
                                     DragOver="Dia_DragOver" Drop="Dia_Drop"
                                     MouseDown="Dia_MouseDown">
-                                <Grid Margin="5">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="Gray"/>
+                                        <Setter Property="BorderThickness" Value="0.5"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Style.Triggers>
+                                            <!-- Hover -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" Value="#AAAAFF"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                                <Setter Property="Background" Value="#FF515151"/>
+                                                <!-- opcional, leve realce -->
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding Selecionado}" Value="True">
+                                                <Setter Property="BorderBrush" Value="#4DA3FF"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    </Border.Style>
+                                    <Grid Margin="5">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <!-- Dia -->
@@ -260,7 +280,8 @@
                                                     <Border x:Name="ItemBorder"
                                                                   Margin="0,2" Padding="6,4"
                                                                   CornerRadius="6"
-                                                                  Background="{Binding EstaPago, Converter={StaticResource PagoParaCor}}">
+                                                                  Background="{Binding EstaPago, Converter={StaticResource PagoParaCor}}"
+                                                                  MouseDown="Agendamento_MouseDown">
                                                         <Grid>
                                                             <StackPanel Orientation="Horizontal" Margin="6,0,0,0"
                                                                         Cursor="Hand" PreviewMouseMove="Agendamento_PreviewMouseMove">
@@ -281,6 +302,18 @@
                                                             <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#4DA3FF"/>
                                                             <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2"/>
                                                         </Trigger>
+                                                        <DataTrigger Value="True">
+                                                            <DataTrigger.Binding>
+                                                                <MultiBinding Converter="{StaticResource IdEqualsConverter}">
+                                                                    <Binding Path="Id"/>
+                                                                    <!-- id do agendamento deste card -->
+                                                                    <Binding Path="DataContext.AgendamentoSelecionadoIdFiltro"
+                                                                     RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                                </MultiBinding>
+                                                            </DataTrigger.Binding>
+                                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#4DA3FF"/>
+                                                            <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2"/>
+                                                        </DataTrigger>
                                                     </DataTemplate.Triggers>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
