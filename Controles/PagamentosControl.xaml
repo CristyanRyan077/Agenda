@@ -10,15 +10,17 @@
     <Grid Background="#2F2F2F">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- header -->
+            <!-- 0 HEADER -->
             <RowDefinition Height="Auto"/>
-            <!-- resumo -->
+            <!-- 1 RESUMO -->
+            <RowDefinition Height="Auto"/>
+            <!-- 2 FORM PAGAMENTO -->
+            <RowDefinition Height="Auto"/>
+            <!-- 3 FORM PRODUTO -->
+            <RowDefinition Height="Auto"/>
+            <!-- 4 FORM FOTOS -->
             <RowDefinition Height="*"/>
-            <!-- fotos -->
-            <RowDefinition Height="Auto"/>
-            <!-- grid -->
-            <RowDefinition Height="Auto"/>
-            <!-- ações -->
+            <!-- 5 GRID HISTÓRICO -->
         </Grid.RowDefinitions>
 
         <!-- HEADER -->
@@ -57,6 +59,57 @@
                 </StackPanel>
             </Border>
         </UniformGrid>
+        <!-- FORMULÁRIO DE PRODUTO -->
+        <Border Grid.Row="3" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="4"
+                   Text="Adicionar Produto"
+                   Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+
+                <!-- Produto -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
+                      DisplayMemberPath="Nome"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedProdutoId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      hc:InfoElement.Placeholder="Selecione..." />
+                </StackPanel>
+
+                <!-- Quantidade -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
+                    <TextBlock Text="Qtd" Foreground="#BBB" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NovoProduto.Quantidade, Mode=TwoWay}" />
+                </StackPanel>
+
+                <!-- Valor Unitário -->
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
+                    <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <!-- Botão -->
+                <StackPanel Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    <Button Content="Adicionar Produto"
+                    Command="{Binding  AdicionarProdutoCommand}"
+                    CommandParameter="Produto"
+                    Padding="12,6"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    BorderThickness="0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- AÇÕES / FORMULÁRIO PRINCIPAL -->
         <Border Grid.Row="2" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6">
@@ -79,36 +132,30 @@
                    Text="Adicionar Pagamento" 
                    Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
 
-                <!-- Data -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento}" />
-                </StackPanel>
-
                 <!-- Método -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
                     <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding Metodo}"
-                    SelectedItem="{Binding MetodoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               hc:InfoElement.Placeholder="PIX, Crédito..." />
                 </StackPanel>
 
                 <!-- Observação -->
-                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
                     <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding NovoPagamento.Observacao}" />
                 </StackPanel>
 
                 <!-- Valor -->
-                <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
                     <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding NovoPagamento.Valor}" />
+                    <TextBox Width="150" HorizontalAlignment="Left" Text="{Binding NovoPagamento.Valor}" />
                 </StackPanel>
 
                 <!-- Botão -->
                 <StackPanel Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <Button Content="{Binding EstaEditando, Converter={StaticResource BoolToTextConverter}}"
-                     Command="{Binding SalvarOuAdicionarPagamentoCommand}"
+                     Command="{Binding SalvarOuAdicionarHistoricoCommand}"
                     Padding="12,6"
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"
                     BorderThickness="0"/>
@@ -116,7 +163,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="3"  Background="#3A3A3A" CornerRadius="12" Margin="0,0,0,6" Padding="12">
+        <Border Grid.Row="4"  Background="#3A3A3A" CornerRadius="12" Margin="0,0,0,6" Padding="12">
             <Grid>
                 
 
@@ -137,30 +184,31 @@
  
 
         <!-- GRID -->
-        <Border Grid.Row="4" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">
+        <Border Grid.Row="5" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">
             <DockPanel>
                 <TextBlock Text="Histórico de Pagamentos" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
-                <DataGrid ItemsSource="{Binding Pagamentos}"
-                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
-                          EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                          Width="900"
-                          HorizontalAlignment="Left"
-                          Margin="0,8,0,0" RowHeaderWidth="0" SelectedItem="{Binding PagamentoSelecionado}">
+                <DataGrid ItemsSource="{Binding Historico}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                              EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                              Width="900"
+                              HorizontalAlignment="Left"
+                              Margin="0,8,0,0" RowHeaderWidth="0" SelectedItem="{Binding ItemSelecionado}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Data" Binding="{Binding DataPagamento, StringFormat=dd/MM/yyyy}" Width="*" />
+                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="*" />
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="*" />
                         <DataGridTextColumn Header="Método" Binding="{Binding Metodo}" Width="*" />
-                        <DataGridTextColumn Header="Observ." Binding="{Binding Observacao}" Width="2*" />
+                        <DataGridTextColumn Header="Observ." Binding="{Binding Descricao}" Width="2*" />
                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="*" />
                         <DataGridTemplateColumn Header="" Width="140">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                        <Button Content="Editar" Margin="0,0,6,0"
-                                                Command="{Binding DataContext.SelecionarPagamentoParaEdicaoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"/>
-                                        <Button Content="Excluir"
-                                                Command="{Binding DataContext.ExcluirPagamentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"/>
+                                        <Button Content="Editar" Margin="0,0,6,0" Background="#E8FCFF"
+                                                    Command="{Binding DataContext.SelecionarHistoricoParaEdicaoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"/>
+                                        <Button Content="Excluir" 
+                                                    Command="{Binding DataContext.ExcluirPagamentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}" Background="#FFFFA6A6"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

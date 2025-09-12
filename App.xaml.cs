@@ -32,7 +32,7 @@ namespace AgendaNovo
             options.UseSqlServer("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
 
             services.AddDbContextFactory<AgendaContext>(options => options.UseSqlServer
-            ("Data Source=2857AL17;Initial Catalog=AgendaDB;Integrated Security=True;Trust Server Certificate=True;"));
+            ("Data Source=PCBRANCOGAMER\\SQLEXPRESS;Initial Catalog=AgendaStudio;Integrated Security=True;Trust Server Certificate=True"));
 
             //Services
             services.AddTransient<IClienteService, ClienteService>();
@@ -42,6 +42,7 @@ namespace AgendaNovo
             services.AddTransient<IAgendamentoService, AgendamentoService>();
             services.AddTransient<IPagamentoService, PagamentoService>();
             services.AddTransient<INotificacaoService, NotificacaoService>();
+            services.AddTransient<IProdutoService, ProdutoService>();
             //Views
             services.AddScoped<WindowManager>();
             services.AddTransient<Agendar>();

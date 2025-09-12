@@ -1,4 +1,5 @@
 ﻿using AgendaNovo.Interfaces;
+using AgendaNovo.Models;
 using AgendaNovo.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,16 +32,6 @@ namespace AgendaNovo.Services
             return await q.FirstAsync();
         }
 
-        public async Task<List<PagamentoDto>> ListarPagamentosAsync(int agendamentoId)
-        {
-            using var db = _dbFactory.CreateDbContext();
-
-            return await db.Pagamentos.AsNoTracking()
-                .Where(p => p.AgendamentoId == agendamentoId)
-                .OrderBy(p => p.DataPagamento)
-                .Select(p => new PagamentoDto(p.Id, p.DataPagamento, p.Valor, p.Metodo, p.Observacao))
-                .ToListAsync();
-        }
 
         public async Task AdicionarPagamentoAsync(int agendamentoId, CriarPagamentoDto dto)
         {
@@ -72,6 +63,95 @@ namespace AgendaNovo.Services
         {
             using var db = _dbFactory.CreateDbContext();
             db.Pagamentos.Remove(new Pagamento { Id = pagamentoId });
+            await db.SaveChangesAsync();
+        }
+        public async Task<List<HistoricoFinanceiroDto>> ListarHistoricoAsync(int agendamentoId)
+        {
+            using var db = _dbFactory.CreateDbContext();
+
+
+            // 1. Pagamentos
+            var pagamentos = await db.Pagamentos
+                 .AsNoTracking()
+                 .Where(p => p.AgendamentoId == agendamentoId)
+                 .ToListAsync();
+
+            // 2. Produtos
+            var produtos = await db.AgendamentoProdutos
+                .AsNoTracking()
+                .Where(ap => ap.AgendamentoId == agendamentoId)
+                .Include(ap => ap.Produto)
+                .Include(ap => ap.Agendamento) // traz a data
+                .ToListAsync();
+            var historicoPagamentos = pagamentos.Select(p => new HistoricoFinanceiroDto(
+                p.Id,
+                p.DataPagamento,
+                "Pagamento",
+                p.Observacao ?? "Pagamento de serviço",
+                p.Valor,
+                p.Metodo
+            ));
+            var historicoProdutos = produtos
+            .Where(ap => ap.Agendamento != null)
+            .Select(ap => new HistoricoFinanceiroDto(
+                ap.Id,
+                ap.CreatedAt,
+                "Produto",
+                ap.Produto.Nome,
+                ap.ValorUnitario * ap.Quantidade,
+                null
+            ));
+
+            // 3. Junta tudo
+            return historicoPagamentos
+                .Union(historicoProdutos)
+                .OrderBy(h => h.Data)
+                .ToList();
+        }
+        public async Task AdicionarProdutoAoAgendamentoAsync(int agendamentoId,
+            CriarProdutoAgendamentoDto dto,
+            MetodoPagamento? metodo = null,
+            string? observacao = null,
+            DateTime? dataPagamento = null)
+        {
+            using var db = _dbFactory.CreateDbContext();
+            await using var tx = await db.Database.BeginTransactionAsync();
+
+            var entidade = new AgendamentoProduto
+            {
+                AgendamentoId = agendamentoId,
+                ProdutoId = dto.ProdutoId,
+                Quantidade = dto.Quantidade,
+                ValorUnitario = dto.ValorUnitario,
+                CreatedAt = DateTime.Now
+            };
+
+            db.AgendamentoProdutos.Add(entidade);
+            await db.SaveChangesAsync();
+
+            // pega o nome do produto para a observação
+            var produto = await db.Produtos.AsNoTracking()
+                                .Where(p => p.Id == dto.ProdutoId)
+                                .Select(p => p.Nome)
+                                .FirstAsync();
+
+            db.Pagamentos.Add(new Pagamento
+            {
+                AgendamentoId = agendamentoId,
+                Valor = entidade.ValorTotal,
+                DataPagamento = dataPagamento ?? DateTime.Now,
+                Metodo = metodo ?? MetodoPagamento.Pix,
+                Observacao = observacao ?? $"Produto: {produto}",
+                AgendamentoProdutoId = entidade.Id
+            });
+            await db.SaveChangesAsync();
+
+            await tx.CommitAsync();
+        }
+        public async Task RemoverProdutoDoAgendamentoAsync(int agendamentoProdutoId)
+        {
+            using var db = _dbFactory.CreateDbContext();
+            db.AgendamentoProdutos.Remove(new AgendamentoProduto { Id = agendamentoProdutoId });
             await db.SaveChangesAsync();
         }
     }

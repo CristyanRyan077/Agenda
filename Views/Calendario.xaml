@@ -409,9 +409,9 @@
           Background="#2F2F2F"
           CornerRadius="12"
           Padding="16"
-                    Margin="30,100,0,0"
+                    Margin="40,20,0,0"
           Width="1000"
-          MaxHeight="680">
+          Height="780">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>

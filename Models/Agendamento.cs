@@ -55,6 +55,7 @@ namespace AgendaNovo
             public int Id { get; set; }
             public int AgendamentoId { get; set; }
             public Agendamento Agendamento { get; set; } = null!;
+            public int? AgendamentoProdutoId { get; set; }
 
             [ObservableProperty] private decimal valor;            // valor da parcela
             [ObservableProperty] private DateTime dataPagamento;   // quando pagou
@@ -75,6 +76,7 @@ namespace AgendaNovo
             public int Quantidade { get; set; } = 1;
             public decimal ValorUnitario { get; set; }
             public decimal ValorTotal => Quantidade * ValorUnitario;
+            public DateTime CreatedAt { get; set; } = DateTime.Now;
         }
 
 

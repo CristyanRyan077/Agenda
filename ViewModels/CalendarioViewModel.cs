@@ -31,6 +31,7 @@ namespace AgendaNovo.ViewModels
         private readonly IServicoService _servicoService;
         private readonly IPacoteService _pacoteService;
         private readonly IPagamentoService _pagamentoService;
+        private readonly IProdutoService _produtoService;
 
 
         public CalendarioViewModel(AgendaViewModel agendaViewModel, IAgendamentoService agendamentoService,
@@ -38,7 +39,8 @@ namespace AgendaNovo.ViewModels
         ICriancaService criancaService,
         IPacoteService pacoteService,
         IServicoService servicoService,
-        IPagamentoService pagamentoService)
+        IPagamentoService pagamentoService,
+        IProdutoService produtoService)
         {
 
             AgendaViewModel = agendaViewModel;
@@ -48,6 +50,7 @@ namespace AgendaNovo.ViewModels
             _pacoteService = pacoteService;
             _servicoService = servicoService;
             _pagamentoService = pagamentoService;
+            _produtoService = produtoService;
             _clienteService.ClienteInativo();
             
             MesAtual = DateTime.Today;
@@ -177,7 +180,7 @@ namespace AgendaNovo.ViewModels
         public async Task AbrirPagamentosAsync(int agendamentoId)
         {
             System.Diagnostics.Debug.WriteLine($"🔵 Abrindo pagamentos para agendamento {agendamentoId}");
-            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId, _agendamentoService, _clienteService);
+            PagamentosVM = new PagamentosViewModel(_pagamentoService, agendamentoId, _agendamentoService, _clienteService, _produtoService);
             await PagamentosVM.CarregarAsync();
             MostrarPagamentos = true;
             System.Diagnostics.Debug.WriteLine($"✅ MostrarPagamentos = {MostrarPagamentos}");
