@@ -83,6 +83,12 @@ namespace AgendaNovo.Services
                 .Include(ap => ap.Produto)
                 .Include(ap => ap.Agendamento) // traz a data
                 .ToListAsync();
+
+            var pagosViaProduto = pagamentos
+                .Where(p => p.AgendamentoProdutoId != null)
+                .Select(p => p.AgendamentoProdutoId!.Value)
+                .ToHashSet();
+
             var historicoPagamentos = pagamentos.Select(p => new HistoricoFinanceiroDto(
                 p.Id,
                 p.DataPagamento,
@@ -101,10 +107,14 @@ namespace AgendaNovo.Services
                 ap.ValorUnitario * ap.Quantidade,
                 null
             ));
+            var historicoProdutosNaoPagos = produtos
+                .Where(ap => !pagosViaProduto.Contains(ap.Id))
+                .Select(ap => new HistoricoFinanceiroDto(
+                    ap.Id, ap.CreatedAt, "Produto", ap.Produto.Nome, ap.ValorTotal, null));
 
             // 3. Junta tudo
             return historicoPagamentos
-                .Union(historicoProdutos)
+                .Union(historicoProdutosNaoPagos)
                 .OrderBy(h => h.Data)
                 .ToList();
         }

@@ -3,6 +3,7 @@ using AgendaNovo.Models;
 using AgendaNovo.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using System;
 using System.Collections.Generic;
@@ -73,8 +74,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private CriarPagamentoDto novoPagamento = new();
         [ObservableProperty] private CriarProdutoAgendamentoDto novoProduto = new();
         [ObservableProperty] private bool modoProduto;
-        [ObservableProperty] private int selectedProdutoId;
-
+        [ObservableProperty] private Produto? produtoSelecionado;
 
         public MetodoPagamento MetodoSelecionado { get; set; }
 
@@ -153,6 +153,7 @@ namespace AgendaNovo.ViewModels
             Id = 0;
             NovoPagamento = new CriarPagamentoDto { DataPagamento = DateTime.Today };
             NovoProduto = new CriarProdutoAgendamentoDto();
+            ProdutoSelecionado = null;
             EstaEditando = false;
             ModoProduto = false;
         }
@@ -183,6 +184,12 @@ namespace AgendaNovo.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Erro no CarregarAsync: {ex}");
                 throw;
             }
+        }
+        private void NotificarFinanceiro()
+        {
+            WeakReferenceMessenger.Default.Send(
+                new DadosAtualizadosMessage(clienteId: ClienteId, agendamentoId: AgendamentoId)
+            );
         }
 
         [RelayCommand]
@@ -217,12 +224,14 @@ namespace AgendaNovo.ViewModels
                     };
 
                     await _service.AdicionarPagamentoAsync(AgendamentoId, dto);
+                    
                 }
             }
 
             await CarregarAsync();
             await AtualizarStatusAsync();
             LimparFormulario();
+            NotificarFinanceiro();
         }
         [RelayCommand]
         public async Task AdicionarProdutoAsync()
@@ -237,21 +246,22 @@ namespace AgendaNovo.ViewModels
             await CarregarAsync();
             await AtualizarStatusAsync();
             LimparFormulario();
+            NotificarFinanceiro();
         }
-        partial void OnSelectedProdutoIdChanged(int value)
-        {
-            var prod = ProdutosDisponiveis?.FirstOrDefault(p => p.Id == value);
-            if (prod is null) return;
-            var valor = (EstaEditando && NovoProduto?.ValorUnitario > 0)
-                ? NovoProduto!.ValorUnitario
-                : prod.Valor;
 
-            var qtd = NovoProduto?.Quantidade > 0 ? NovoProduto.Quantidade : 1;
+        partial void OnProdutoSelecionadoChanged(Produto? p)
+        {
+            if (p is null)
+            {
+                NovoProduto = new CriarProdutoAgendamentoDto();
+                return;
+            }
+
             NovoProduto = new CriarProdutoAgendamentoDto
             {
-                ProdutoId = value,
-                Quantidade = qtd,
-                ValorUnitario = valor
+                ProdutoId = p.Id,
+                Quantidade = NovoProduto?.Quantidade > 0 ? NovoProduto.Quantidade : 1,
+                ValorUnitario = (!EstaEditando || NovoProduto?.ValorUnitario <= 0) ? p.Valor : NovoProduto!.ValorUnitario
             };
         }
 
@@ -268,6 +278,7 @@ namespace AgendaNovo.ViewModels
 
             await CarregarAsync();
             await AtualizarStatusAsync();
+            NotificarFinanceiro();
         }
 
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }
@@ -275,11 +286,11 @@ namespace AgendaNovo.ViewModels
     }
     public class NovoPagamentoDto { public DateTime DataPagamento { get; set; } public decimal Valor { get; set; } public MetodoPagamento Metodo { get; set; } public string? Observacao { get; set; } }
     public class CriarPagamentoDto : NovoPagamentoDto { }
-    public class CriarProdutoAgendamentoDto
+    public partial class CriarProdutoAgendamentoDto : ObservableObject
     {
-        public int ProdutoId { get; set; }
-        public int Quantidade { get; set; }
-        public decimal ValorUnitario { get; set; }
+        [ObservableProperty] private int produtoId;
+        [ObservableProperty] private int quantidade = 1;
+        [ObservableProperty] private decimal valorUnitario;
     }
     public class AtualizarPagamentoDto : NovoPagamentoDto { public int Id { get; set; } }
     public record HistoricoFinanceiroDto(

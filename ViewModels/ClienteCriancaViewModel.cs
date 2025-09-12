@@ -373,9 +373,9 @@ namespace AgendaNovo.ViewModels
                 int mesRef = mes ?? agora.Month;
                 int anoRef = ano ?? agora.Year;
                 var totalMes = agendamentos
-                    .Where(a => a.Data.Month == mesRef && a.Data.Year == anoRef)
-                    .SelectMany(a => a.Pagamentos)             
-                    .Sum(p => p.Valor);
+                        .SelectMany(a => a.Pagamentos)
+                        .Where(p => p.DataPagamento.Month == mesRef && p.DataPagamento.Year == anoRef)
+                        .Sum(p => p.Valor);
 
                 var totalHistorico = agendamentos
                         .SelectMany(a => a.Pagamentos)           

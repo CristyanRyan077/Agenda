@@ -55,6 +55,7 @@ namespace AgendaNovo
             public int Id { get; set; }
             public int AgendamentoId { get; set; }
             public Agendamento Agendamento { get; set; } = null!;
+
             public int? AgendamentoProdutoId { get; set; }
 
             [ObservableProperty] private decimal valor;            // valor da parcela

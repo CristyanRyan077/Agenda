@@ -82,8 +82,7 @@
                     <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
                       DisplayMemberPath="Nome"
-                      SelectedValuePath="Id"
-                      SelectedValue="{Binding SelectedProdutoId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       hc:InfoElement.Placeholder="Selecione..." />
                 </StackPanel>
 
@@ -96,7 +95,7 @@
                 <!-- Valor Unitário -->
                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
                     <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
                 </StackPanel>
 
                 <!-- Botão -->
@@ -195,7 +194,6 @@
                               Margin="0,8,0,0" RowHeaderWidth="0" SelectedItem="{Binding ItemSelecionado}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="*" />
-                        <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="*" />
                         <DataGridTextColumn Header="Método" Binding="{Binding Metodo}" Width="*" />
                         <DataGridTextColumn Header="Observ." Binding="{Binding Descricao}" Width="2*" />
                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="*" />

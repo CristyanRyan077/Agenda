@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
@@ -21,7 +22,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AgendaNovo.ViewModels
 {
-    public partial class CalendarioViewModel : ObservableObject
+    public partial class CalendarioViewModel : ObservableRecipient, IRecipient<DadosAtualizadosMessage>
     {
         public AgendaViewModel AgendaViewModel { get; }
         private readonly AgendaViewModel _agenda;
@@ -42,7 +43,7 @@ namespace AgendaNovo.ViewModels
         IPagamentoService pagamentoService,
         IProdutoService produtoService)
         {
-
+            IsActive = true;
             AgendaViewModel = agendaViewModel;
             _agendamentoService = agendamentoService;
             _clienteService = clienteService;
@@ -67,13 +68,7 @@ namespace AgendaNovo.ViewModels
                 RefreshCalendar();
             });
             RefreshCalendar();
-            WeakReferenceMessenger.Default.Register<DadosAtualizadosMessage>(this, (r, m) =>
-            {
-
-                agendaViewModel.OnDadosAtualizados(m);
-                RefreshCalendar();
-
-            });
+            
         }
 
         public IAgendamentoService AgendamentoService => _agendamentoService;
@@ -118,6 +113,21 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Cliente clienteSelecionado;
         [ObservableProperty] private Agendamento agendamentoSelecionado;
         [ObservableProperty] private bool detalhesVisiveis;
+
+        public void Receive(DadosAtualizadosMessage m)
+        {
+            AgendaViewModel.OnDadosAtualizados(m);
+            RefreshCalendar();
+
+            if (MostrarHistoricoCliente && m.ClienteId == AgendamentoSelecionado?.ClienteId)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    HistoricoCliente();
+                    AplicarDestaqueNoHistorico();
+                });
+            }
+        }
         public void RefreshCalendar()
         {
             // 1) Recarrega só os agendamentos
