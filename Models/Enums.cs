@@ -48,8 +48,9 @@ namespace AgendaNovo.Models
     {
 
         Pix = 0,
-        Cartão = 1,
-        Dinheiro = 2,
+        Débito = 1,
+        Crédito = 2,
+        Dinheiro = 3,
         
     }
     public enum ExportTipo 

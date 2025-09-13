@@ -3,10 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                          xmlns:hc="https://handyorg.github.io/handycontrol"
-             xmlns:local="clr-namespace:AgendaNovo.Controles" xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:PagamentosViewModel}"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:local="clr-namespace:AgendaNovo.Controles" 
+             xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" 
+             d:DataContext="{d:DesignInstance Type=viewmodels:PagamentosViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
     <Grid Background="#2F2F2F">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,11 +17,11 @@
             <RowDefinition Height="Auto"/>
             <!-- 1 RESUMO -->
             <RowDefinition Height="Auto"/>
-            <!-- 2 FORM PAGAMENTO -->
+            <!-- 2 FORM ÚNICO (Pagamento/Produto) -->
             <RowDefinition Height="Auto"/>
-            <!-- 3 FORM PRODUTO -->
+            <!-- 3 (vazio, sobrou do layout antigo) -->
             <RowDefinition Height="Auto"/>
-            <!-- 4 FORM FOTOS -->
+            <!-- 4 STATUS FOTOS -->
             <RowDefinition Height="*"/>
             <!-- 5 GRID HISTÓRICO -->
         </Grid.RowDefinitions>
@@ -28,7 +31,6 @@
             <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
                 <TextBlock Text="{Binding ClienteNome}" FontSize="18" FontFamily="#Heveltica" Foreground="White" Margin="0,0,12,0"/>
                 <TextBlock Text="{Binding ServicoNome}" FontSize="12" Foreground="#DDD" Margin="0,0,12,0"/>
-                
             </StackPanel>
         </DockPanel>
 
@@ -59,147 +61,178 @@
                 </StackPanel>
             </Border>
         </UniformGrid>
-        <!-- FORMULÁRIO DE PRODUTO -->
-        <Border Grid.Row="3" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.ColumnSpan="4"
-                   Text="Adicionar Produto"
-                   Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
-
-                <!-- Produto -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
-                      DisplayMemberPath="Nome"
-                      SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                      hc:InfoElement.Placeholder="Selecione..." />
-                </StackPanel>
-
-                <!-- Quantidade -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
-                    <TextBlock Text="Qtd" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding NovoProduto.Quantidade, Mode=TwoWay}" />
-                </StackPanel>
-
-                <!-- Valor Unitário -->
-                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
-                    <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
-                </StackPanel>
-
-                <!-- Botão -->
-                <StackPanel Grid.Row="1" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    <Button Content="Adicionar Produto"
-                    Command="{Binding  AdicionarProdutoCommand}"
-                    CommandParameter="Produto"
-                    Padding="12,6"
-                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
-                    BorderThickness="0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- AÇÕES / FORMULÁRIO PRINCIPAL -->
+        <!-- === FORM ÚNICO: Pagamento | Produto (toggle) === -->
         <Border Grid.Row="2" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <!-- header/toggle -->
                     <RowDefinition Height="Auto"/>
+                    <!-- campos -->
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <!-- botão -->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="140"/>
                     <ColumnDefinition Width="240"/>
-                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="140"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.ColumnSpan="5" 
-                   Text="Adicionar Pagamento" 
-                   Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
-                <!-- Data -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay}"/>
+                <!-- Título + Toggle -->
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+                    <TextBlock Text="Novo Lançamento" Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,16,0"/>
+                    <!-- Usa seus converters: EnumToBoolConverter + BoolToVisibilityConverter -->
+                    <RadioButton x:Name="rbPagamento" Content="Pagamento" Margin="0,0,8,0" Foreground="White"
+                                 IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Pagamento}"/>
+                    <RadioButton x:Name="rbProduto" Content="Produto" Foreground="White"
+                                 IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Produto}"/>
                 </StackPanel>
 
-                <!-- Método -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
-                    <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding Metodo}"
-                    SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              hc:InfoElement.Placeholder="PIX, Crédito..." />
-                </StackPanel>
+                <!-- CAMPOS: PAGAMENTO -->
+                <Grid x:Name="PagamentoFields" Grid.Row="1" Grid.ColumnSpan="5"
+                      Visibility="{Binding ElementName=rbPagamento, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="240"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Observação -->
-                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
-                    <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding NovoPagamento.Observacao}" />
-                </StackPanel>
+                    <!-- Data -->
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay}"/>
+                    </StackPanel>
 
-                <!-- Valor -->
-                <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,8,0">
-                    <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Width="100" HorizontalAlignment="Left" Text="{Binding NovoPagamento.Valor}" />
-                </StackPanel>
+                    <!-- Método -->
+                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                        <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Metodo}"
+                                  SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  hc:InfoElement.Placeholder="PIX, Crédito..." />
+                    </StackPanel>
 
-                <!-- Botão -->
-                <StackPanel Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                    <Button Content="{Binding EstaEditando, Converter={StaticResource BoolToTextConverter}}"
-                     Command="{Binding SalvarOuAdicionarHistoricoCommand}"
-                    Padding="12,6"
-                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
-                    BorderThickness="0"/>
+                    <!-- Observação -->
+                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                        <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding NovoPagamento.Observacao}" />
+                    </StackPanel>
+
+                    <!-- Valor -->
+                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                        <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <TextBox Width="120" HorizontalAlignment="Left">
+                            <TextBox.Text>
+                                <Binding Path="NovoPagamento.Valor" Mode="TwoWay" UpdateSourceTrigger="LostFocus"
+                                         ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True">
+                                    <Binding.TargetNullValue>0</Binding.TargetNullValue>
+                                    <Binding.FallbackValue>0</Binding.FallbackValue>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                    </StackPanel>
+                </Grid>
+
+                <!-- CAMPOS: PRODUTO -->
+                <Grid x:Name="ProdutoFields" Grid.Row="1" Grid.ColumnSpan="5"
+                      Visibility="{Binding ElementName=rbProduto, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Produto -->
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
+                                  DisplayMemberPath="Nome"
+                                  SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay}" 
+                                  hc:InfoElement.Placeholder="Selecione..." />
+                    </StackPanel>
+
+                    <!-- Quantidade -->
+                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                        <TextBlock Text="Qtd" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <hc:NumericUpDown
+                            Value="{Binding NovoProduto.Quantidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Minimum="1"
+                            Maximum="999"
+                            Height="30"
+                            Width="80"/>
+                    </StackPanel>
+
+                    <!-- Valor Unitário (auto) -->
+                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                        <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <TextBox Width="120" IsReadOnly="True">
+                            <TextBox.Text>
+                                <Binding Path="NovoProduto.ValorUnitario" Mode="TwoWay" UpdateSourceTrigger="LostFocus"
+                                         ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True">
+                                    <Binding.TargetNullValue>0</Binding.TargetNullValue>
+                                    <Binding.FallbackValue>0</Binding.FallbackValue>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                    </StackPanel>
+                </Grid>
+
+                <!-- BOTÃO PRIMÁRIO (comuta comando e texto conforme toggle) -->
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button Padding="12,6" Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Content" Value="Adicionar Pagamento"/>
+                                <Setter Property="Command" Value="{Binding SalvarOuAdicionarHistoricoCommand}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=rbProduto, Path=IsChecked}" Value="True">
+                                        <Setter Property="Content" Value="Adicionar Produto"/>
+                                        <Setter Property="Command" Value="{Binding AdicionarProdutoCommand}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <Border Grid.Row="4"  Background="#3A3A3A" CornerRadius="12" Margin="0,0,0,6" Padding="12">
+        <!-- STATUS FOTOS -->
+        <Border Grid.Row="4" Background="#3A3A3A" CornerRadius="12" Margin="0,0,0,6" Padding="12">
             <Grid>
-                
-
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <TextBlock Text="Status das fotos:" Foreground="White" FontSize="14" Margin="0,0,18,0"/>
-                <RadioButton Foreground="White" Content="Revelado" IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Revelado}" />
-                <RadioButton Foreground="Green" Content="Entregue" IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Entregue}" Margin="8,0,0,0"/>
-            </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Status das fotos:" Foreground="White" FontSize="14" Margin="0,0,18,0"/>
+                    <RadioButton Foreground="White" Content="Revelado" 
+                                 IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Revelado}" />
+                    <RadioButton Foreground="Green" Content="Entregue" Margin="8,0,0,0"
+                                 IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Entregue}" />
+                </StackPanel>
                 <Button Content="Salvar status das fotos"
-                       
                         Command="{Binding SalvarStatusFotosCommand}"
                         Visibility="{Binding MostrarBotaoSalvarFotos, Converter={StaticResource BoolToVisibilityConverter}}"
                         Background="#4CAF50" Foreground="White" FontWeight="Bold"
                         Padding="10,6" Margin="0,2,60,0" />
             </Grid>
-
         </Border>
- 
 
-        <!-- GRID -->
+        <!-- HISTÓRICO -->
         <Border Grid.Row="5" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">
             <DockPanel>
                 <TextBlock Text="Histórico de Pagamentos" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
                 <DataGrid ItemsSource="{Binding Historico}"
-                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
-                              EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                              Width="900"
-                              HorizontalAlignment="Left"
-                              Margin="0,8,0,0" RowHeaderWidth="0" SelectedItem="{Binding ItemSelecionado}">
+                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                          EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                          Width="900" HorizontalAlignment="Left"
+                          Margin="0,8,0,0" RowHeaderWidth="0"
+                          SelectedItem="{Binding ItemSelecionado}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="*" />
-                        <DataGridTextColumn Header="Método" Binding="{Binding Metodo}" Width="*" />
+                        <DataGridTextColumn Header="Método" Binding="{Binding Metodo, TargetNullValue=—}" Width="*" />
                         <DataGridTextColumn Header="Observ." Binding="{Binding Descricao}" Width="2*" />
                         <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="*" />
                         <DataGridTemplateColumn Header="" Width="140">
@@ -207,11 +240,11 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Content="Editar" Margin="0,0,6,0" Background="#E8FCFF"
-                                                    Command="{Binding DataContext.SelecionarHistoricoParaEdicaoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}"/>
-                                        <Button Content="Excluir" 
-                                                    Command="{Binding DataContext.ExcluirPagamentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}" Background="#FFFFA6A6"/>
+                                                Command="{Binding DataContext.SelecionarHistoricoParaEdicaoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Content="Excluir" Background="#FFFFA6A6"
+                                                Command="{Binding DataContext.ExcluirPagamentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -220,7 +253,5 @@
                 </DataGrid>
             </DockPanel>
         </Border>
-
-        
     </Grid>
 </UserControl>
