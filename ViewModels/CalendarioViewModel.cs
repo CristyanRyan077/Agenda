@@ -157,17 +157,23 @@ namespace AgendaNovo.ViewModels
         {
             AgendamentoSelecionadoIdFiltro = null; // limpamos filtro por agendamento
             DataSelecionada = data.Date;           // marca o dia
-            foreach (var d in DiasDoMes)
-                d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
-            Debug.WriteLine($"SelecionarDia: {data:dd/MM/yyyy}");
+            if (DataSelecionada.HasValue)
+            {
+                foreach (var d in DiasDoMes)
+                    d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
+                Debug.WriteLine($"SelecionarDia: {data:dd/MM/yyyy}");
+            }
         }
 
         public void SelecionarAgendamento(Agendamento ag)
         {
             AgendamentoSelecionadoIdFiltro = ag?.Id;
             DataSelecionada = ag?.Data.Date;       // ainda marca o dia do card
-            foreach (var d in DiasDoMes)
-                d.Selecionado = DataSelecionada.HasValue && d.Data.Date == DataSelecionada.Value.Date;
+            if (DataSelecionada.HasValue)
+            {
+                foreach (var d in DiasDoMes)
+                    d.Selecionado = DataSelecionada.HasValue && d.Data.Date == DataSelecionada.Value.Date;
+            }
             Debug.WriteLine($"SelecionarAgendamento: {ag?.Id}");
         }
         public void RefreshAgendamento(Agendamento agendamentoAtualizado)
@@ -356,28 +362,35 @@ namespace AgendaNovo.ViewModels
         }
         private void FiltrarAgendamentos()
         {
+            var agendamentoIdFiltroLocal = AgendamentoSelecionadoIdFiltro;
+            var dataSelecionadaLocal = DataSelecionada;
+            var filtroLocal = FiltroSelecionado;
+            var textoLocal = TextoPesquisa;
+
             IEnumerable<Agendamento> filtrado = ListaAgendamentos;
             // prioridade 1: filtro por agendamento específico
-            if (AgendamentoSelecionadoIdFiltro.HasValue)
-                filtrado = filtrado.Where(a => a.Id == AgendamentoSelecionadoIdFiltro.Value);
+            if (agendamentoIdFiltroLocal.HasValue)
+                filtrado = filtrado.Where(a => a.Id == agendamentoIdFiltroLocal.Value);
             // prioridade 2: filtro por dia
-            else if (DataSelecionada.HasValue)
-                filtrado = filtrado.Where(a => a.Data.Date == DataSelecionada.Value.Date);
+            else if (dataSelecionadaLocal.HasValue)
+                filtrado = filtrado.Where(a => a.Data.Date == dataSelecionadaLocal.Value.Date);
 
-            if (FiltroSelecionado == "Pendente") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Pendente);
-            else if (FiltroSelecionado == "Concluido") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
-            else if (FiltroSelecionado == "Revelado") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Revelado);
-            else if (FiltroSelecionado == "Entregue") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Entregue);
+            // filtros por status / fotos
+            if (filtroLocal == "Pendente") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Pendente);
+            else if (filtroLocal == "Concluido") filtrado = filtrado.Where(a => a.Status == StatusAgendamento.Concluido);
+            else if (filtroLocal == "Revelado") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Revelado);
+            else if (filtroLocal == "Entregue") filtrado = filtrado.Where(a => a.Fotos == FotosReveladas.Entregue);
 
-
-            if (!string.IsNullOrWhiteSpace(TextoPesquisa))
+            // busca por texto
+            if (!string.IsNullOrWhiteSpace(textoLocal))
             {
-                DataSelecionada = null;
-                AgendamentoSelecionadoIdFiltro = null;
-                filtrado = filtrado.Where(a => a.Cliente.Nome.Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase));
+                // evita NullReference caso Cliente ou Nome sejam null
+                filtrado = filtrado.Where(a => !string.IsNullOrEmpty(a.Cliente?.Nome) &&
+                    a.Cliente.Nome.Contains(textoLocal, StringComparison.OrdinalIgnoreCase));
             }
 
-            AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado);
+            // força avaliação aqui e atualiza a coleção
+            AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado.ToList());
             Debug.WriteLine($"FiltrarAgendamentos: DataSel={DataSelecionada}, AgSel={AgendamentoSelecionadoIdFiltro}");
         }
         partial void OnAgendamentoSelecionadoIdFiltroChanged(int? value)
@@ -390,7 +403,7 @@ namespace AgendaNovo.ViewModels
                 {
                     DataSelecionada = ag.Data.Date;
                     foreach (var d in DiasDoMes)
-                        d.Selecionado = d.Data.Date == DataSelecionada.Value.Date;
+                        d.Selecionado = DataSelecionada.HasValue && d.Data.Date == DataSelecionada.Value.Date;
                 }
             }
             FiltrarAgendamentos(); // 👈 ESSENCIAL

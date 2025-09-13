@@ -17,8 +17,8 @@
 
     <Grid Background="#FF333333">
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-
+        <ScrollViewer CanContentScroll="True">
+           
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -159,6 +159,7 @@
 
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
+                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat='{}{0:dd/MM/yyyy}'}"/>
                         <DataGridTextColumn Header="Horário" Binding="{Binding Horario, StringFormat=\{0:hh\\:mm\}}" Width="60"/>
                         <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}"  />
                         <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" Width="100"/>
@@ -194,7 +195,7 @@
 
 
                 <!-- Navegação -->
-                <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="300,20,0,20"  Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="0,20,0,0"  Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
                     <Button Command="{Binding VoltarMesCommand}" Content="◀" Margin="0,0,0,0"/>
                     <TextBlock Text="{Binding MesAtual,Converter={StaticResource MesAnoPtBrConverter},  StringFormat={}{0:MMMM yyyy}}"                          
                            Width="130"
@@ -287,7 +288,7 @@
                                                                         Cursor="Hand" PreviewMouseMove="Agendamento_PreviewMouseMove">
                                                                 <TextBlock Text="{Binding Horario, StringFormat=\{0:hh\\:mm\}}"/>
                                                                 <TextBlock Text="-" Margin="6,0"/>
-                                                                <TextBlock Text="{Binding Cliente.Nome}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Text="{Binding Cliente.Nome}" MaxWidth="120" FontSize="12" TextTrimming="CharacterEllipsis"/>
                                                                 <Ellipse Width="10" Height="10" 
                                                                                   Stroke="White"
                                                                                   StrokeThickness="1"
@@ -300,7 +301,8 @@
                                                     <DataTemplate.Triggers>
                                                         <Trigger SourceName="ItemBorder" Property="IsMouseOver" Value="True">
                                                             <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#4DA3FF"/>
-                                                            <Setter TargetName="ItemBorder" Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="Opacity" Value="0.6"/>
+                                                            
                                                         </Trigger>
                                                         <DataTrigger Value="True">
                                                             <DataTrigger.Binding>

@@ -54,7 +54,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private int id;
         [ObservableProperty] private int clienteId;
 
-        [ObservableProperty] private DateTime dataPagamento;
+        [ObservableProperty] private DateTime dataPagamento = DateTime.Today;
 
 
         [ObservableProperty] private string? observacao;
@@ -76,6 +76,12 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private bool modoProduto;
         [ObservableProperty] private Produto? produtoSelecionado;
 
+
+        [ObservableProperty]
+        private TipoLancamento tipoLancamento = TipoLancamento.Pagamento;
+        public string TextoBotaoPrimario =>
+            TipoLancamento == TipoLancamento.Pagamento ? "Adicionar Pagamento" : "Adicionar Produto";
+
         public MetodoPagamento MetodoSelecionado { get; set; }
 
         partial void OnHistoricoChanged(ObservableCollection<HistoricoFinanceiroDto> value)
@@ -84,6 +90,13 @@ namespace AgendaNovo.ViewModels
             OnPropertyChanged(nameof(Falta));
             OnPropertyChanged(nameof(PercentualPago));
         }
+        partial void OnTipoLancamentoChanged(TipoLancamento value)
+        {
+            // Mantém compatibilidade com a sua lógica já existente
+            ModoProduto = (value == TipoLancamento.Produto);
+            OnPropertyChanged(nameof(TextoBotaoPrimario));
+        }
+
         public async Task AtualizarStatusAsync()
         {
             if (ValorPago >= Valor)
@@ -155,7 +168,7 @@ namespace AgendaNovo.ViewModels
             NovoProduto = new CriarProdutoAgendamentoDto();
             ProdutoSelecionado = null;
             EstaEditando = false;
-            ModoProduto = false;
+            ModoProduto = (TipoLancamento == TipoLancamento.Produto);
         }
 
 
@@ -284,7 +297,13 @@ namespace AgendaNovo.ViewModels
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }
         [RelayCommand] public void Fechar() { /* Window.Close via evento/serviço UI */ }
     }
-    public class NovoPagamentoDto { public DateTime DataPagamento { get; set; } public decimal Valor { get; set; } public MetodoPagamento Metodo { get; set; } public string? Observacao { get; set; } }
+    public partial class NovoPagamentoDto : ObservableObject
+    {
+        [ObservableProperty] private DateTime dataPagamento = DateTime.Today;
+        [ObservableProperty] private decimal valor;
+        [ObservableProperty] private MetodoPagamento metodo;
+        [ObservableProperty] private string? observacao;
+    }
     public class CriarPagamentoDto : NovoPagamentoDto { }
     public partial class CriarProdutoAgendamentoDto : ObservableObject
     {

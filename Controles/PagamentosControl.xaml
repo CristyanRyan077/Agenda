@@ -123,16 +123,21 @@
                     <ColumnDefinition Width="160"/>
                     <ColumnDefinition Width="140"/>
                     <ColumnDefinition Width="240"/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="160"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.ColumnSpan="5" 
                    Text="Adicionar Pagamento" 
                    Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <!-- Data -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
+                    <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay}"/>
+                </StackPanel>
 
                 <!-- Método -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
                     <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding Metodo}"
                     SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -140,15 +145,15 @@
                 </StackPanel>
 
                 <!-- Observação -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
                     <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding NovoPagamento.Observacao}" />
                 </StackPanel>
 
                 <!-- Valor -->
-                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,8,0">
+                <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,8,0">
                     <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
-                    <TextBox Width="150" HorizontalAlignment="Left" Text="{Binding NovoPagamento.Valor}" />
+                    <TextBox Width="100" HorizontalAlignment="Left" Text="{Binding NovoPagamento.Valor}" />
                 </StackPanel>
 
                 <!-- Botão -->

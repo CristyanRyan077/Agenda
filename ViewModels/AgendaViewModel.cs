@@ -860,7 +860,7 @@ namespace AgendaNovo
         }
         public void EnviarMensagemWhatsapp(Cliente cliente, Crianca crianca)
         {
-            if (MessageBox.Show("Deseja enviar o agendamento atualizado via WhatsApp?", "Confirmar envio",
+            if (MessageBox.Show("Deseja enviar o agendamento via WhatsApp?", "Confirmar envio",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
             var textoCrianca = crianca != null
@@ -874,7 +874,7 @@ namespace AgendaNovo
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +
                             $"Serviço: {servicoNome}\n" +
-                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.Pagamentos:N2}\n" +
+                            $"Valor: R$ {NovoAgendamento.Valor:N2} | Pago: R$ {NovoAgendamento.ValorPago:N2}\n" +
                             $"📍 *AVISOS*:\r\n- A criança tem direito a *dois* acompanhantes 👶👩🏻‍\U0001f9b0👨🏻‍\U0001f9b0" +
                             $" o terceiro acompanhante paga R$ 20,00\r\n- A sessão fotográfica tem duração de até 1 hora." +
                             $"\r\n- *Tolerância máxima de atraso: 30 minutos*🚨" +

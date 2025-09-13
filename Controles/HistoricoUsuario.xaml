@@ -185,16 +185,25 @@
                                         </StackPanel>
 
                                         <!-- linha 3: serviço + cliente -->
-                                        <StackPanel Grid.Row="2" Margin="0,6,0,0">
-                                            <TextBlock Text="{Binding Agendamento.Servico.Nome}"
-                                             FontSize="14"
-                                            FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Agendamento.Cliente.Nome}"
-                                            FontSize="14"
-                                            Foreground="#263238" />
-                                        </StackPanel>
+                                            <StackPanel Grid.Row="2" Orientation="Vertical">
+                                                <StackPanel Grid.Row="2" Margin="0,6,0,0">
+                                                    <TextBlock Text="{Binding Agendamento.Servico.Nome}"
+                                                        FontSize="14"
+                                                        FontWeight="SemiBold"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Agendamento.Cliente.Nome}"
+                                                        FontSize="14" Margin="0,0,6,0"
+                                                        Foreground="#263238" />
+                                                    <TextBlock Text="-" FontSize="14" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding Agendamento.Crianca.Nome}"
+                                                        FontSize="14"
+                                                        Foreground="#263238" />
+                                                </StackPanel>
+                                            </StackPanel>
 
-                                        <!-- linha 4: pagamento + progressbar -->
+
+                                            <!-- linha 4: pagamento + progressbar -->
                                         <StackPanel Grid.Row="3" Margin="0,8,0,0">
                                             <ProgressBar Height="10"
                              Maximum="{Binding Agendamento.Valor}"

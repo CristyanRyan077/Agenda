@@ -58,4 +58,9 @@ namespace AgendaNovo.Models
         Resumo = 1,
         EmAberto = 2, 
     }
+    public enum TipoLancamento 
+    { 
+        Pagamento = 0,
+        Produto = 1
+    }
 }
