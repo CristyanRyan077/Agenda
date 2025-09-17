@@ -9,6 +9,9 @@
              d:DataContext="{d:DesignInstance Type=viewmodels:PagamentosViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding SalvarOuAdicionarHistoricoCommand}"/>
+    </UserControl.InputBindings>
 
     <Grid Background="#2F2F2F">
         <Grid.RowDefinitions>
@@ -62,128 +65,144 @@
             </Border>
         </UniformGrid>
 
-        <!-- === FORM ÚNICO: Pagamento | Produto (toggle) === -->
-        <Border Grid.Row="2" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6">
-            <Grid>
+        <!-- FORMULÁRIO DE PAGAMENTO (2 colunas) -->
+        <Border Grid.Row="2" Background="#3A3A3A" CornerRadius="12" Padding="16" Margin="0,0,0,6"
+                HorizontalAlignment="Center" Width="600">
+            <Grid Grid.IsSharedSizeScope="True" HorizontalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <!-- header/toggle -->
+                    <!-- título / toggle -->
                     <RowDefinition Height="Auto"/>
-                    <!-- campos -->
+                    <!-- linha 1 -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- linha 2 -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- chips -->
                     <RowDefinition Height="Auto"/>
                     <!-- botão -->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="140"/>
-                    <ColumnDefinition Width="240"/>
-                    <ColumnDefinition Width="140"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                    <ColumnDefinition Width="*" SharedSizeGroup="col"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Título + Toggle -->
-                <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
-                    <TextBlock Text="Novo Lançamento" Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,16,0"/>
-                    <!-- Usa seus converters: EnumToBoolConverter + BoolToVisibilityConverter -->
-                    <RadioButton x:Name="rbPagamento" Content="Pagamento" Margin="0,0,8,0" Foreground="White"
-                                 IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Pagamento}"/>
-                    <RadioButton x:Name="rbProduto" Content="Produto" Foreground="White"
-                                 IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Produto}"/>
-                </StackPanel>
+                <DockPanel Grid.Row="0" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,0,0,12">
+                    <TextBlock Text="Novo Lançamento" Foreground="White" FontSize="16" FontWeight="Bold" />
+                    <StackPanel Orientation="Horizontal" Margin="16,0,0,0">
+                        <RadioButton x:Name="rbPagamento" Content="Pagamento" Margin="0,0,8,0" Foreground="White"
+                     IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Pagamento}"/>
+                        <RadioButton x:Name="rbProduto" Content="Produto" Foreground="White"
+                     IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Produto}"/>
+                    </StackPanel>
+                </DockPanel>
 
-                <!-- CAMPOS: PAGAMENTO -->
-                <Grid x:Name="PagamentoFields" Grid.Row="1" Grid.ColumnSpan="5"
-                      Visibility="{Binding ElementName=rbPagamento, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                <!-- ====== PAGAMENTO ====== -->
+                <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                    Visibility="{Binding ElementName=rbPagamento, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="140"/>
-                        <ColumnDefinition Width="240"/>
-                        <ColumnDefinition Width="140"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Data -->
-                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
                         <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay}"/>
+                        <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"/>
                     </StackPanel>
 
                     <!-- Método -->
-                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
                         <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding Metodo}"
-                                  SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  hc:InfoElement.Placeholder="PIX, Crédito..." />
-                    </StackPanel>
-
-                    <!-- Observação -->
-                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
-                        <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding NovoPagamento.Observacao}" />
+                        <ComboBox ItemsSource="{Binding Metodo}" 
+                  SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                  hc:InfoElement.Placeholder="PIX, Crédito..." />
                     </StackPanel>
 
                     <!-- Valor -->
-                    <StackPanel Grid.Column="3" Margin="0,0,8,0">
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
                         <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <TextBox Width="120" HorizontalAlignment="Left">
-                            <TextBox.Text>
-                                <Binding Path="NovoPagamento.Valor" Mode="TwoWay" UpdateSourceTrigger="LostFocus"
-                                         ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True">
-                                    <Binding.TargetNullValue>0</Binding.TargetNullValue>
-                                    <Binding.FallbackValue>0</Binding.FallbackValue>
-                                </Binding>
-                            </TextBox.Text>
-                        </TextBox>
+                        <hc:TextBox Width="180">
+                            <hc:TextBox.Text>
+                                <Binding Path="NovoPagamento.Valor" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"
+                     ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True"/>
+                            </hc:TextBox.Text>
+                        </hc:TextBox>
+                    </StackPanel>
+
+                    <!-- Observação -->
+                    <StackPanel Grid.Row="1" Grid.Column="1">
+                        <TextBlock Text="Observação" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding NovoPagamento.Observacao, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="32"/>
                     </StackPanel>
                 </Grid>
 
-                <!-- CAMPOS: PRODUTO -->
-                <Grid x:Name="ProdutoFields" Grid.Row="1" Grid.ColumnSpan="5"
-                      Visibility="{Binding ElementName=rbProduto, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="140"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Chips de valor rápido -->
+                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0"
+            Visibility="{Binding ModoProduto, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <TextBlock Text="Atalhos:" Foreground="#BBB" Margin="0,4,8,0"/>
+                    <WrapPanel>
+                        <Button Content="R$ 20,00" Margin="0,0,6,0"
+                Command="{Binding DefinirValorRapidoCommand}">
+                            <Button.CommandParameter>
+                                <sys:Decimal xmlns:sys="clr-namespace:System;assembly=mscorlib">20</sys:Decimal>
+                            </Button.CommandParameter>
+                        </Button>
+                        <Button Content="R$ 60,00" Margin="0,0,6,0"
+                Command="{Binding DefinirValorRapidoCommand}">
+                            <Button.CommandParameter>
+                                <sys:Decimal xmlns:sys="clr-namespace:System;assembly=mscorlib">60</sys:Decimal>
+                            </Button.CommandParameter>
+                        </Button>
+                        <Button Content="R$ 80,00" Margin="0,0,6,0"
+                Command="{Binding DefinirValorRapidoCommand}">
+                            <Button.CommandParameter>
+                                <sys:Decimal xmlns:sys="clr-namespace:System;assembly=mscorlib">80</sys:Decimal>
+                            </Button.CommandParameter>
+                        </Button>
+                        <Button Content="R$ 100,00" Margin="0,0,6,0"
+                Command="{Binding DefinirValorRapidoCommand}">
+                            <Button.CommandParameter>
+                                <sys:Decimal xmlns:sys="clr-namespace:System;assembly=mscorlib">100</sys:Decimal>
+                            </Button.CommandParameter>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
+                
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,5,0"
+            Visibility="{Binding ElementName=rbProduto, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="Atalhos:" Foreground="#BBB" Margin="0,5,12,0"/>
 
-                    <!-- Produto -->
-                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                        <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
-                                  DisplayMemberPath="Nome"
-                                  SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay}" 
-                                  hc:InfoElement.Placeholder="Selecione..." />
-                    </StackPanel>
+                    <WrapPanel>
+                        <Button Content="2×" Margin="0,0,6,0"
+                Command="{Binding DefinirQuantidadeRapidaCommand}">
+                            <Button.CommandParameter>
+                                <sys:Int32 xmlns:sys="clr-namespace:System;assembly=mscorlib">2</sys:Int32>
+                            </Button.CommandParameter>
+                        </Button>
+                        <Button Content="5×" Margin="0,0,6,0"
+                Command="{Binding DefinirQuantidadeRapidaCommand}">
+                            <Button.CommandParameter>
+                                <sys:Int32 xmlns:sys="clr-namespace:System;assembly=mscorlib">5</sys:Int32>
+                            </Button.CommandParameter>
+                        </Button>
+                        <Button Content="10×" Margin="0,0,6,0"
+                Command="{Binding DefinirQuantidadeRapidaCommand}">
+                            <Button.CommandParameter>
+                                <sys:Int32 xmlns:sys="clr-namespace:System;assembly=mscorlib">10</sys:Int32>
+                            </Button.CommandParameter>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
 
-                    <!-- Quantidade -->
-                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                        <TextBlock Text="Qtd" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <hc:NumericUpDown
-                            Value="{Binding NovoProduto.Quantidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Minimum="1"
-                            Maximum="999"
-                            Height="30"
-                            Width="80"/>
-                    </StackPanel>
 
-                    <!-- Valor Unitário (auto) -->
-                    <StackPanel Grid.Column="2" Margin="0,0,8,0">
-                        <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
-                        <TextBox Width="120" IsReadOnly="True">
-                            <TextBox.Text>
-                                <Binding Path="NovoProduto.ValorUnitario" Mode="TwoWay" UpdateSourceTrigger="LostFocus"
-                                         ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True">
-                                    <Binding.TargetNullValue>0</Binding.TargetNullValue>
-                                    <Binding.FallbackValue>0</Binding.FallbackValue>
-                                </Binding>
-                            </TextBox.Text>
-                        </TextBox>
-                    </StackPanel>
-                </Grid>
-
-                <!-- BOTÃO PRIMÁRIO (comuta comando e texto conforme toggle) -->
-                <StackPanel Grid.Row="2" Grid.ColumnSpan="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <!-- CTA -->
+                <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                     <Button Padding="12,6" Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0">
                         <Button.Style>
                             <Style TargetType="Button">
@@ -199,6 +218,44 @@
                         </Button.Style>
                     </Button>
                 </StackPanel>
+                
+
+                <!-- ====== PRODUTO (mantém seu layout, mas em 2 colunas) ====== -->
+                <Grid Grid.Row="1" Grid.ColumnSpan="2"
+          Visibility="{Binding ElementName=rbProduto, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Produto -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
+                        <TextBlock Text="Produto" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding ProdutosDisponiveis}"
+                  DisplayMemberPath="Nome"
+                  SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay}" 
+                  hc:InfoElement.Placeholder="Selecione..." />
+                    </StackPanel>
+
+                    <!-- Quantidade -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
+                        <TextBlock Text="Quantidade" Foreground="#BBB" Margin="40,0,0,4"/>
+                        <hc:NumericUpDown
+            Value="{Binding NovoProduto.Quantidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Minimum="1" Maximum="999" Height="30" Width="120"/>
+                    </StackPanel>
+
+                    <!-- Valor Unitário (auto) -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+                        <TextBlock Text="Valor Unitário" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <TextBox Width="180" IsReadOnly="True"
+                 Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, StringFormat=R$ {0:N2}}"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Border>
 

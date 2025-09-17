@@ -45,6 +45,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <hc:TextBox Name="txtIdBusca"
+              Text="{Binding IdBusca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
               Width="150" Grid.Row="0"
               Height="50" VerticalAlignment="Top"
               HorizontalAlignment="Left"
@@ -248,6 +249,12 @@
                           Width="170" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center"
                           Margin="0,0,0,60" Background="#FF00FFE2"
                           Grid.Row="5"/>
+                <hc:SearchBar hc:InfoElement.Placeholder="Buscar por Nome ou Telefone" Height="32" Width="250" Background="White"
+                            Text="{Binding TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Grid.Row="5" Margin="0,0,0,5"
+                            VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                            BorderBrush="Black"
+                            />
 
                 <!-- Calendário -->
                 <StackPanel Grid.Row="0" Grid.RowSpan="5" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -274,22 +281,21 @@
 
                     <DataGrid AutoGenerateColumns="False"
                           Height="300"
-                          Width="900"
+                          Width="950"
                           HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
                                   IsReadOnly="True"
                           ItemsSource="{Binding ListaAgendamentos}"
                           SelectedItem="{Binding ItemSelecionado, Mode=TwoWay}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="Id" Binding="{Binding Cliente.Id}" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                             <DataGridTextColumn Header="Horário" Binding="{Binding Horario,StringFormat=\{0:hh\\:mm\}}" />
                             <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
                             <DataGridTextColumn Header="Crianca" Binding="{Binding Crianca.Nome}" />
                             <DataGridTextColumn Header="Telefone" Binding="{Binding Cliente.Telefone}" />
                             <DataGridTextColumn Header="Servico" Binding="{Binding Servico.Nome}" />
                             <DataGridTextColumn Header="Pacote" Width="80" Binding="{Binding Pacote.Nome}" />
-
-                            <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" />
                             <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" />
                             <DataGridTemplateColumn Header="Pago">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -312,7 +318,7 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Tema" Binding="{Binding Tema}" />
                             <DataGridTextColumn Header="Genero" Binding="{Binding Crianca.Genero}" />
-                            <DataGridTextColumn Header="Idade" IsReadOnly="True" Binding="{Binding Crianca.IdadeFormatada}" />
+                            <DataGridTextColumn Header="Mêsversario" IsReadOnly="True" Binding="{Binding MesversarioFormatado}" />
                             <DataGridTextColumn Header="Fotos" Binding="{Binding Fotos}"/>
                         </DataGrid.Columns>
                     </DataGrid>

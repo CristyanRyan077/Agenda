@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AgendaNovo.Services.PagamentoService;
 
 namespace AgendaNovo.Interfaces
 {
@@ -21,5 +22,6 @@ namespace AgendaNovo.Interfaces
             string? observacao = null,
             DateTime? dataPagamento = null);
         Task RemoverProdutoDoAgendamentoAsync(int agendamentoProdutoId);
+        //Task<bool> CriarTransacaoAsync(TransacaoDto dto);
     }
 }

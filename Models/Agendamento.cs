@@ -46,6 +46,9 @@ namespace AgendaNovo
         [NotMapped] public decimal ValorPago => Pagamentos?.Sum(p => p.Valor) ?? 0m;
         [NotMapped] public int? NumeroMes { get; set; }
 
+        public int? Mesversario { get; set; }
+        public string? MesversarioFormatado => $"Mês {Mesversario}";
+
         public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
 
@@ -83,17 +86,14 @@ namespace AgendaNovo
 
         partial void OnPagamentosChanged(ObservableCollection<Pagamento> value)
         {
-            // Desinscreve da antiga e inscreve na nova coleção
             if (value != null)
                 value.CollectionChanged += Pagamentos_CollectionChanged;
 
-            // Trocar a referência já dispara PropertyChanged de Pagamentos (pelo atributo),
-            // aqui garantimos também o dependente:
+
             OnPropertyChanged(nameof(ValorPago));
         }
         private void Pagamentos_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Qualquer Add/Remove/Reset na coleção reflete no ValorPago imediatamente
             OnPropertyChanged(nameof(ValorPago));
         }
     }

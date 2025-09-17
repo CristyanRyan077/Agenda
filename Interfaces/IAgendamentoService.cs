@@ -19,6 +19,7 @@ namespace AgendaNovo.Interfaces
         void AtivarSePendente(int agendamentoid);
         void ValorIncompleto(int agendamentoid);
 
+
         // Filtros úteis
         List<Agendamento> GetByDate(DateTime data);
         List<Agendamento> GetByCliente(int clienteId);

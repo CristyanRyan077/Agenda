@@ -4,10 +4,15 @@ using AgendaNovo.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks;
 using static AgendaNovo.Agendamento;
+using static System.Net.WebRequestMethods;
 
 namespace AgendaNovo.Services
 {
@@ -15,8 +20,22 @@ namespace AgendaNovo.Services
     {
 
         private readonly IDbContextFactory<AgendaContext> _dbFactory;
+        private readonly HttpClient _http;
         public PagamentoService(IDbContextFactory<AgendaContext> dbFactory)
-        => _dbFactory = dbFactory;
+        {
+            _http = new HttpClient();
+            _http.BaseAddress = new Uri("https://localhost:7279/");
+            _dbFactory = dbFactory;
+        }
+
+
+       /* public async Task<bool> CriarTransacaoAsync(TransacaoDto dto)
+        {
+            
+            var response = await _http.PostAsJsonAsync("api/transacoes", dto);
+
+            return response.IsSuccessStatusCode; 
+        } */
 
         public async Task<ResumoAgendamentoDto> ObterResumoAgendamentoAsync(int agendamentoId)
         {
@@ -163,6 +182,22 @@ namespace AgendaNovo.Services
             using var db = _dbFactory.CreateDbContext();
             db.AgendamentoProdutos.Remove(new AgendamentoProduto { Id = agendamentoProdutoId });
             await db.SaveChangesAsync();
+        }
+        public class TransacaoDto
+        {
+            public int Id { get; set; }
+            public DateTime Data { get; set; }
+
+            [Required(ErrorMessage = "Selecione o tipo (Receita ou Despesa).")]
+            public char? Tipo { get; set; }
+
+            [Required]
+            public string? Valor { get; set; }
+            public int ContaId { get; set; }
+            public int PlanoContasId { get; set; }
+
+            public string? ContaNome { get; set; }
+            public string? PlanoDescricao { get; set; }
         }
     }
 }

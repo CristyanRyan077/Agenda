@@ -66,9 +66,25 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pagamentos)
                 .FirstOrDefault(a => a.Id == id);
         }
+        private static int? ConverterIdadeParaMeses(int? idade, IdadeUnidade unidade)
+        {
+            if (!idade.HasValue) return null;
+            return unidade switch
+            {
+                IdadeUnidade.Ano or IdadeUnidade.Anos => Math.Max(0, idade.Value * 12),
+                IdadeUnidade.Mês or IdadeUnidade.Meses => Math.Max(0, idade.Value),
+                _ => null
+            };
+        }
 
         public Agendamento Add(Agendamento agendamento)
         {
+            Crianca? crianca = agendamento.Crianca;
+            if (crianca == null && agendamento.CriancaId.HasValue)
+                crianca = _db.Criancas.Find(agendamento.CriancaId.Value);
+
+            agendamento.Mesversario = ConverterIdadeParaMeses(crianca?.Idade, crianca?.IdadeUnidade ?? IdadeUnidade.Meses);
+
             _db.Agendamentos.Add(agendamento);
             _db.SaveChanges();
             return agendamento;
@@ -95,13 +111,25 @@ namespace AgendaNovo.Services
             .Include(a => a.Servico)
             .Include(a => a.Pagamentos)
             .FirstOrDefault(a => a.Id == agendamento.Id);
-            if (existente != null)
+            if (existente == null)
             {
-                CopiarDados(agendamento, existente);
-                _db.SaveChanges();
-            }
-            else
                 MessageBox.Show("agendamento inexistente");
+                return;
+            }
+
+            // Detectar alterações relevantes
+            bool criancaAlterada = existente.CriancaId != agendamento.CriancaId;
+            bool dataAlterada = existente.Data.Date != agendamento.Data.Date;
+            bool servicoAlterado = existente.ServicoId != agendamento.ServicoId;
+            CopiarDados(agendamento, existente);
+            Crianca? crianca = existente.Crianca;
+
+            if (crianca == null && existente.CriancaId.HasValue)
+                crianca = _db.Criancas.Find(existente.CriancaId.Value);
+
+            if (criancaAlterada || dataAlterada || servicoAlterado)
+                existente.Mesversario = ConverterIdadeParaMeses(crianca?.Idade, crianca?.IdadeUnidade ?? IdadeUnidade.Meses);
+
         }
 
         public void Delete(int id)

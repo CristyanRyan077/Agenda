@@ -33,6 +33,7 @@
             <conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
             <conv:DateEqualsConverter x:Key="DateEqualsConverter"/>
             <conv:IdEqualsConverter x:Key="IdEqualsConverter"/>
+            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <conv:DecimalSafeConverter x:Key="DecimalSafeConverter"/>
             <conv:BoolToTextConverter x:Key="BoolToTextConverter" 
                                TrueText="Salvar"

@@ -1,6 +1,7 @@
 ﻿using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
+using AgendaNovo.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -8,10 +9,13 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static AgendaNovo.Agendamento;
+using static AgendaNovo.Services.PagamentoService;
 
 namespace AgendaNovo.ViewModels
 {
@@ -237,7 +241,20 @@ namespace AgendaNovo.ViewModels
                     };
 
                     await _service.AdicionarPagamentoAsync(AgendamentoId, dto);
-                    
+                   /* var transacaodto = new TransacaoDto
+                    {
+                        Data = NovoPagamento.DataPagamento,
+                        Tipo = 'R', // Receita
+                        Valor = NovoPagamento.Valor.ToString("N2", new CultureInfo("pt-BR")),
+                        ContaId = 1, // Exemplo (poderia ser definido pelo usuário)
+                        PlanoContasId = 2 // Exemplo
+                    };
+                    var sucesso = await _service.CriarTransacaoAsync(transacaodto);
+                    if (!sucesso)
+                    {
+                        Debug.WriteLine($"Transação Falhou");
+                    } */
+
                 }
             }
 
@@ -292,6 +309,20 @@ namespace AgendaNovo.ViewModels
             await CarregarAsync();
             await AtualizarStatusAsync();
             NotificarFinanceiro();
+        }
+        [RelayCommand]
+        public void DefinirValorRapido(decimal valor)
+        {
+            if (valor <= 0) return;
+            NovoPagamento ??= new();
+            NovoPagamento.Valor = valor;
+        }
+        [RelayCommand]
+        public void DefinirQuantidadeRapida(int quantidade)
+        {
+            if (quantidade <= 0) return;
+            NovoProduto ??= new();
+            NovoProduto.Quantidade = quantidade;
         }
 
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }

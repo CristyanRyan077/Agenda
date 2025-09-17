@@ -305,18 +305,12 @@ namespace AgendaNovo.ViewModels
 
             var agendamentosdocliente = _clienteService.GetAgendamentos(value.ClienteId) ?? new List<Agendamento>();
 
-            var acompanhamentos = agendamentosdocliente
-                .Where(a => a.Servico.Nome == "Acompanhamento Mensal")
-                .OrderBy(a => a.Data)
-                .Select((a, index) => new { a.Id, NumeroMes = index + 1 })
-                .ToList();
-
             var historico = agendamentosdocliente
                 .OrderByDescending(a => a.Data)
                 .Select(a => new AgendamentoHistoricoVM
                 {
                     Agendamento = a,
-                    NumeroMes = acompanhamentos.FirstOrDefault(x => x.Id == a.Id)?.NumeroMes
+                    NumeroMes = a.Mesversario
                 })
                 .ToList();
 

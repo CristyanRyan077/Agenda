@@ -52,11 +52,16 @@ namespace AgendaNovo
         [ObservableProperty] private Agendamento novoAgendamento = new();
         [ObservableProperty] private ObservableCollection<Agendamento> listaAgendamentos = new();
         [ObservableProperty] private ObservableCollection<Agendamento> agendamentosFiltrados = new();
+        public ICollectionView ListaAgendamentosView { get; private set; }
+        private bool _viewInicializada;
+        private bool _atualizandoLista;
+
 
         [ObservableProperty] private decimal valorPacote;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
         [ObservableProperty] private Pagamento novoPagamento = new Pagamento();
+        [ObservableProperty] private string idBusca;
 
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
@@ -282,6 +287,10 @@ namespace AgendaNovo
 
             Application.Current.Dispatcher.Invoke(() =>
             {
+                _atualizandoLista = true;        // trava refresh enquanto popula
+                _pesquisaCts?.Cancel();          // cancela debounce pendente da busca
+
+                // 1) popular coleções na UI thread
                 ListaAgendamentos.Clear();
                 foreach (var a in agendamentos)
                     ListaAgendamentos.Add(a);
@@ -294,9 +303,21 @@ namespace AgendaNovo
                 foreach (var c in clientes)
                     foreach (var cr in _criancaService.GetByClienteId(c.Id))
                         ListaCriancas.Add(cr);
+                if (!_viewInicializada)
+                {
+                    ListaAgendamentosView = CollectionViewSource.GetDefaultView(ListaAgendamentos);
+                    ListaAgendamentosView.Filter = AgendamentoFilter;
+                    _viewInicializada = true;
+                }
+                else
+                {
+                    // se já existia, apenas atualiza a view depois de popular
+                    ListaAgendamentosView?.Refresh();
+                }
+
+                _atualizandoLista = false;
 
             });
-
             OnPropertyChanged(nameof(ListaAgendamentos));
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -339,6 +360,20 @@ namespace AgendaNovo
             {
                 ListaPacotesFiltrada.Add(pacote);
             }
+        }
+        private bool AgendamentoFilter(object obj)
+        {
+
+            var a = obj as Agendamento;
+            if (a == null) return false;
+
+            var q = TextoPesquisa?.Trim();
+            if (string.IsNullOrWhiteSpace(q))
+                return true;
+
+            return
+                (a.Cliente?.Nome?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false)
+             || (a.Cliente?.Telefone?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false);
         }
         public void CarregarServicos()
         {
@@ -486,10 +521,12 @@ namespace AgendaNovo
             NovoAgendamento = new Agendamento();
             NovoAgendamento.Data = DataSelecionada == default ? DateTime.Today : DataSelecionada;
             ItemSelecionado = null;
+
             NovoAgendamento.ServicoId = 0;
             NovoAgendamento.PacoteId = 0;
             NovoAgendamento.Valor = 0;
             novoPagamento.Valor = 0;
+            IdBusca = string.Empty;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
             Pacoteselecionado = null;
@@ -587,6 +624,7 @@ namespace AgendaNovo
                 CriancaSelecionada = null;
                 NovoAgendamento.CriancaId = null;
                 NovoAgendamento.Crianca = null;
+                NovoAgendamento.Mesversario = null;
             }
   
             Debug.WriteLine($"🔍 ServicoSelecionado: {(ServicoSelecionado != null ? ServicoSelecionado.Nome + " (ID: " + ServicoSelecionado.Id + ")" : "null")}");
@@ -846,7 +884,20 @@ namespace AgendaNovo
             NovoAgendamento.Data = DataSelecionada;
             NovoAgendamento.Fotos = Fotosreveladas;
             AdicionarPagamento();
-            
+            if (criancaParaAgendar != null || CriancaSelecionada != null)
+            {
+                var idade = (criancaParaAgendar ?? CriancaSelecionada)?.Idade;
+                var unidade = (criancaParaAgendar ?? CriancaSelecionada)?.IdadeUnidade ?? IdadeUnidade.Meses;
+
+                NovoAgendamento.Mesversario = unidade is IdadeUnidade.Ano or IdadeUnidade.Anos
+                    ? (idade ?? 0) * 12
+                    : idade;
+            }
+            else
+            {
+                NovoAgendamento.Mesversario = null;
+            }
+
 
             if (agendamentoidnotificacao.HasValue)
                 WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoidnotificacao));
@@ -1091,27 +1142,30 @@ namespace AgendaNovo
             OnPropertyChanged(nameof(ListaAgendamentos));
             OnPropertyChanged(nameof(DataReferencia));
         }
-
+        private CancellationTokenSource? _pesquisaCts;
         partial void OnTextoPesquisaChanged(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
-            }
-            else
-            {
-                var filtrado = ListaAgendamentos
-                    .Where(a => a.Cliente.Nome.Contains(value, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
 
-                AgendamentosFiltrados = new ObservableCollection<Agendamento>(filtrado);
-            }
-        }
-        [RelayCommand]
-        private void MostrarTodos()
-        {
-            TextoPesquisa = string.Empty;
-            AgendamentosFiltrados = new ObservableCollection<Agendamento>(ListaAgendamentos);
+            if (_atualizandoLista) return;
+            _pesquisaCts?.Cancel();
+            _pesquisaCts = new CancellationTokenSource();
+            var token = _pesquisaCts.Token;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(50, token); // debounce
+                    if (token.IsCancellationRequested) return;
+
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        ListaAgendamentosView?.Refresh();
+                    });
+                }
+                catch (TaskCanceledException) { }
+            }, token);
+
         }
         private IEnumerable<Agendamento> FiltrarPorDia(DayOfWeek dia)
         {
