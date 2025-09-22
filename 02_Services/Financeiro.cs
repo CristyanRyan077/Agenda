@@ -24,9 +24,12 @@ namespace AgendaNovo.Services
         {
             public decimal ReceitaBruta { get; set; }
             public decimal Recebido { get; set; }
+            public decimal ReceitaProdutos { get; set; }
             public decimal EmAberto { get; set; }
             public int QtdAgendamentos { get; set; }
             public decimal TicketMedio { get; set; }
+            public decimal TicketMedioProdutos { get; set; }
+            public int QtdProdutos { get; set; }
             public decimal PercRecebido => ReceitaBruta == 0 ? 0 : Math.Round(Recebido / ReceitaBruta * 100, 2);
         }
 

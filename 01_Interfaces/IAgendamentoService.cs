@@ -1,5 +1,6 @@
 ﻿using AgendaNovo.Models;
 using AgendaNovo.Services;
+using AgendaNovo.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +33,11 @@ namespace AgendaNovo.Interfaces
 
 
         Task AtualizarFotosAsync(int agendamentoId, FotosReveladas fotos);
-        Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null);
+        Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, int? produtoId = null, StatusAgendamento? status = null);
         Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null);
         Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null);
+        public Task<List<ProdutoResumoVM>> ResumoPorProdutoAsync(
+        DateTime inicio, DateTime fim, int? produtoId = null, StatusAgendamento? status = null);
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
+using AgendaNovo.ViewModels;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -231,7 +232,7 @@ namespace AgendaNovo.Services
             return q;
         }
 
-        public async Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null)
+        public async Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, int? produtoId = null, StatusAgendamento? status = null)
         {
             var tid = Environment.CurrentManagedThreadId;
             System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] CalcularKpis START ctx={_db.CtxId} tid={tid}");
@@ -258,18 +259,54 @@ namespace AgendaNovo.Services
                      Aberto = g.Sum(a => a.Valor - (a.Pago < a.Valor ? a.Pago : a.Valor)),
                      Qtd = g.Count(),
                      TicketMedio = g.Where(a => a.Status == StatusAgendamento.Concluido)
-                       .Average(a => (decimal?)(a.Pago < a.Valor ? a.Pago : a.Valor))
+                       .Average(a => (decimal?)(a.Pago < a.Valor ? a.Pago : a.Valor)),
+
                  })
                  .FirstOrDefaultAsync();
 
 
+                 var pagamentosPorItemQ =
+                    from p in _db.Set<Agendamento.Pagamento>().AsNoTracking()
+                    where p.AgendamentoProdutoId != null
+                    group p by p.AgendamentoProdutoId!.Value into g
+                    select new { AgendamentoProdutoId = g.Key, Pago = g.Sum(x => x.Valor) };
+
+                // 2) Linhas de venda (join AgendamentoProdutos x agendamentos válidos x pagamentos por item)
+                var itensQ =
+                    from ap in _db.AgendamentoProdutos.AsNoTracking()
+                    join a in valid on ap.AgendamentoId equals a.Id
+                    join pg in pagamentosPorItemQ on ap.Id equals pg.AgendamentoProdutoId into pgj
+                    from pg in pgj.DefaultIfEmpty()
+                    where !produtoId.HasValue || ap.ProdutoId == produtoId.Value
+                    select new
+                    {
+                        Quantidade = ap.Quantidade,
+                        ValorTotal = ap.Quantidade * ap.ValorUnitario, // usar expressão (propriedade calculada não traduz)
+                        Pago = pg == null ? 0m : pg.Pago
+                    };
+
+                // 3) Materializa as linhas e agrega em memória (estável no EF Core)
+                var itens = await itensQ.ToListAsync();
+
+                var receitaProdutos = itens.Sum(i => Math.Min(i.Pago, i.ValorTotal));
+                var qtdProdutos = itens.Sum(i => i.Quantidade);
+                var ticketMedioProd = qtdProdutos > 0 ? receitaProdutos / qtdProdutos : 0m;
+
+                // ==============================
+                // Retorno unificado
+                // ==============================
                 return new FinanceiroResumo
                 {
                     ReceitaBruta = kpi?.Receita ?? 0m,
                     Recebido = kpi?.Recebido ?? 0m,
                     EmAberto = Math.Max(0, kpi?.Aberto ?? 0m),
                     QtdAgendamentos = kpi?.Qtd ?? 0,
-                    TicketMedio = Math.Round(kpi?.TicketMedio ?? 0m, 2)
+                    TicketMedio = Math.Round(kpi?.TicketMedio ?? 0m, 2),
+
+                    // Produtos
+                    ReceitaProdutos = receitaProdutos,
+                    QtdProdutos = qtdProdutos,
+                    TicketMedioProdutos = Math.Round(ticketMedioProd, 2)
                 };
             }
             catch (Exception ex)
@@ -354,6 +391,71 @@ namespace AgendaNovo.Services
                 };
 
             return query.ToListAsync();
+        }
+        public async Task<List<ProdutoResumoVM>> ResumoPorProdutoAsync(
+     DateTime inicio, DateTime fim, int? produtoId = null, StatusAgendamento? status = null)
+        {
+            var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
+
+            // Agendamentos válidos no intervalo (exceto cancelados e com filtro de status, se houver)
+            var agdsValid = _db.Agendamentos.AsNoTracking()
+                .Where(a => a.Data >= inicio && a.Data <= fimIncl)
+                .Where(a => a.Status != StatusAgendamento.Cancelado);
+
+            if (status.HasValue)
+                agdsValid = agdsValid.Where(a => a.Status == status.Value);
+
+            // Pagamentos por item (AgendamentoProdutoId) agregados no servidor
+            var pagamentosPorItemQ =
+                from p in _db.Pagamentos.AsNoTracking() // ou _db.Set<Agendamento.Pagamento>()
+                where p.AgendamentoProdutoId != null
+                group p by p.AgendamentoProdutoId!.Value into g
+                select new { AgendamentoProdutoId = g.Key, Pago = g.Sum(x => x.Valor) };
+
+            // “Linhas” (itens vendidos) já com valores necessários – ainda tudo no servidor
+            var itensQ =
+                from ap in _db.AgendamentoProdutos.AsNoTracking()
+                join a in agdsValid on ap.AgendamentoId equals a.Id
+                join pg in pagamentosPorItemQ on ap.Id equals pg.AgendamentoProdutoId into pgj
+                from pg in pgj.DefaultIfEmpty()
+                where !produtoId.HasValue || ap.ProdutoId == produtoId.Value
+                select new
+                {
+                    ap.ProdutoId,
+                    Quantidade = ap.Quantidade,
+                    ValorTotal = ap.Quantidade * ap.ValorUnitario,        // evita propriedade não mapeada
+                    Pago = pg == null ? 0m : pg.Pago
+                };
+
+            // 🔻 materializa apenas as “linhas” (tamanho = nº de AgendamentoProduto no período/filtrado)
+            var itens = await itensQ.ToListAsync();
+
+            // Busca nomes dos produtos só para os IDs presentes
+            var ids = itens.Select(i => i.ProdutoId).Distinct().ToList();
+            var nomePorId = await _db.Produtos.AsNoTracking()
+                .Where(p => ids.Contains(p.Id))
+                .Select(p => new { p.Id, p.Nome })
+                .ToDictionaryAsync(x => x.Id, x => x.Nome);
+
+            // Agrega em memória (super simples, sem esquisitices de tradução)
+            var agregados = itens
+                .GroupBy(i => i.ProdutoId)
+                .Select(g =>
+                {
+                    var receita = g.Sum(i => Math.Min(i.Pago, i.ValorTotal));
+                    var qtd = g.Sum(i => i.Quantidade);
+                    return new ProdutoResumoVM
+                    {
+                        Produto = nomePorId.TryGetValue(g.Key, out var nome) ? nome : "—",
+                        Receita = receita,
+                        Qtd = qtd,
+                        TicketMedio = qtd > 0 ? receita / qtd : 0m
+                    };
+                })
+                .OrderByDescending(x => x.Receita)
+                .ToList();
+
+            return agregados;
         }
     }
 

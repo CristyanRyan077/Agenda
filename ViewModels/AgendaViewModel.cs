@@ -354,7 +354,9 @@ namespace AgendaNovo
         {
             ListaPacotesFiltrada.Clear();
 
-            var pacotesFiltrados = ListaPacotes.Where(p => p.ServicoId == servicoId).ToList();
+            var pacotesFiltrados = ListaPacotes.Where(p => p.ServicoId == servicoId)
+                .OrderBy(p => p.Nome)
+                .ToList();
 
             foreach (var pacote in pacotesFiltrados)
             {

@@ -36,6 +36,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private DateTime? periodoInicio;
         [ObservableProperty] private DateTime? periodoFim;
         [ObservableProperty] private Servico servicoSelecionado;
+        [ObservableProperty] private Produto produtoSelecionado;
         [ObservableProperty] private string statusSelecionado = "Todos";
         [ObservableProperty] private ExportTipo exportSelecionado = ExportTipo.Ambos;
 
@@ -50,7 +51,12 @@ namespace AgendaNovo.ViewModels
         // 🔹 Listas
         [ObservableProperty] private ObservableCollection<RecebivelVM> emAbertoLista = new();
         [ObservableProperty] private ObservableCollection<ServicoResumoVM> servicosResumo = new();
+        [ObservableProperty] private ObservableCollection<ProdutoResumoVM> produtoResumo = new();
 
+        // Produtos
+        [ObservableProperty] private decimal receitaProdutos;
+        [ObservableProperty] private decimal ticketMedioProdutos;
+        [ObservableProperty] private int qtdProdutos;
         partial void OnRecebidoChanged(decimal value) => OnPropertyChanged(nameof(PercRecebido));
         partial void OnReceitaBrutaChanged(decimal value) => OnPropertyChanged(nameof(PercRecebido));
 
@@ -72,19 +78,24 @@ namespace AgendaNovo.ViewModels
             try
             {
                 var sw = Stopwatch.StartNew();
-                var (ini, fim, status, servicoId) = PrepararFiltros();
-                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servicoId, status);
+                var (ini, fim, status, servicoId, produtoId) = PrepararFiltros();
+                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servicoId, produtoId, status);
                 Debug.WriteLine($"KPIs: {sw.Elapsed}");
                 var emAberto = await _agendamentoService.ListarEmAbertoAsync(ini, fim, servicoId, status);
                 Debug.WriteLine($"EmAberto: {sw.Elapsed}");
                 var resumo = await _agendamentoService.ResumoPorServicoAsync(ini, fim, servicoId, status);
                 Debug.WriteLine($"Resumo: {sw.Elapsed}");
+                var resumoproduto = await _agendamentoService.ResumoPorProdutoAsync(ini, fim, produtoId, status);
 
                 ReceitaBruta = kpis.ReceitaBruta;
                 Recebido = kpis.Recebido;
                 EmAberto = kpis.EmAberto;
                 QtdAgendamentos = kpis.QtdAgendamentos;
                 TicketMedio = kpis.TicketMedio;
+
+                ReceitaProdutos = kpis.ReceitaProdutos;
+                TicketMedioProdutos = kpis.TicketMedioProdutos;
+                QtdProdutos = kpis.QtdProdutos;
 
                 EmAbertoLista = new ObservableCollection<RecebivelVM>(
                     emAberto.Select(r => new RecebivelVM
@@ -107,6 +118,14 @@ namespace AgendaNovo.ViewModels
                         Qtd = s.Qtd,
                         TicketMedio = s.TicketMedio
                     }));
+                ProdutoResumo = new ObservableCollection<ProdutoResumoVM>(
+                    resumoproduto.Select(p => new ProdutoResumoVM
+                    {
+                        Produto = p.Produto,
+                        Receita = p.Receita,
+                        Qtd = p.Qtd,
+                        TicketMedio = p.TicketMedio
+                    }));
             }
             finally
             {
@@ -115,7 +134,7 @@ namespace AgendaNovo.ViewModels
         }
 
         // --- MÉTODOS PRIVADOS ---
-        private (DateTime ini, DateTime fim, StatusAgendamento? status, int? servicoId) PrepararFiltros()
+        private (DateTime ini, DateTime fim, StatusAgendamento? status, int? servicoId, int? produtoId) PrepararFiltros()
         {
             var ini = PeriodoInicio ?? DateTime.MinValue;
             var fim = (PeriodoFim?.Date.AddDays(1).AddTicks(-1)) ?? DateTime.MaxValue;
@@ -125,7 +144,7 @@ namespace AgendaNovo.ViewModels
                 Enum.TryParse(StatusSelecionado, out StatusAgendamento stParsed))
                 status = stParsed;
 
-            return (ini, fim, status, ServicoSelecionado?.Id);
+            return (ini, fim, status, ServicoSelecionado?.Id, ProdutoSelecionado?.Id);
         }
 
 
@@ -316,6 +335,14 @@ namespace AgendaNovo.ViewModels
         public decimal Receita { get; set; }
         public int Qtd { get; set; }
         public decimal TicketMedio { get; set; }
+    }
+    public class ProdutoResumoVM
+    {
+        public string Produto { get; set; }
+        public decimal Receita { get; set; }
+        public int Qtd { get; set; }
+        public decimal TicketMedio { get; set; }
+
     }
 
 }
