@@ -921,8 +921,9 @@ namespace AgendaNovo
                 : "";
 
             var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
-
-            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario} ({NovoAgendamento.Data.ToString("dddd", new CultureInfo("pt-BR"))}) \n\n" +
+            var cultura = new CultureInfo("pt-BR");
+            var diaSemana = cultura.TextInfo.ToTitleCase(NovoAgendamento.Data.ToString("dddd", cultura));
+            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario:hh\\:mm} ({diaSemana}) \n\n" +
                             $"Cliente: {cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +

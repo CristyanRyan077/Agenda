@@ -57,16 +57,8 @@ namespace AgendaNovo.ViewModels
             MesAtual = DateTime.Today;
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();
-            MoverAgendamentoCommand = new RelayCommand<(Agendamento, DateTime)>(param =>
-            {
-                var (ag, novaData) = param;
-                // mantém o horário atual:
-                TimeSpan horario = ag.Horario ?? TimeSpan.Zero;
-                ag.Data = novaData;
-                ag.Horario = horario;
-                _agendamentoService.Update(ag);
-                RefreshCalendar();
-            });
+            MoverAgendamentoCommand =
+            new RelayCommand<(Agendamento ag, DateTime novaData)>(p => MoverAgendamentoInMemory(p.ag, p.novaData));
             RefreshCalendar();
             
         }
@@ -155,8 +147,8 @@ namespace AgendaNovo.ViewModels
         }
         public void SelecionarDia(DateTime data)
         {
-            AgendamentoSelecionadoIdFiltro = null; // limpamos filtro por agendamento
-            DataSelecionada = data.Date;           // marca o dia
+            AgendamentoSelecionadoIdFiltro = null; 
+            DataSelecionada = data.Date;          
             if (DataSelecionada.HasValue)
             {
                 foreach (var d in DiasDoMes)
@@ -168,7 +160,7 @@ namespace AgendaNovo.ViewModels
         public void SelecionarAgendamento(Agendamento ag)
         {
             AgendamentoSelecionadoIdFiltro = ag?.Id;
-            DataSelecionada = ag?.Data.Date;       // ainda marca o dia do card
+            DataSelecionada = ag?.Data.Date;     
             if (DataSelecionada.HasValue)
             {
                 foreach (var d in DiasDoMes)
@@ -502,6 +494,55 @@ namespace AgendaNovo.ViewModels
 
         private Brush VerCor(DateTime data) =>
             VerificarSeTemEvento(data) ? Brushes.LightGreen : Brushes.Transparent;
+        private void MoverAgendamentoInMemory(Agendamento ag, DateTime novaData)
+        {
+            if (ag == null) return;
+            var velhaData = ag.Data.Date;
+            var novaDataDate = novaData.Date;
+
+            if (velhaData == novaDataDate) return;
+
+            // 1) Atualiza o modelo (e dispara PropertyChanged)
+            ag.Data = novaDataDate; // garanta que Agendamento.OnPropertyChanged(nameof(Data)) seja chamado
+
+            // 2) Tira do dia antigo
+            var diaAntigo = DiasDoMes.FirstOrDefault(d => d.Data.Date == velhaData);
+            diaAntigo?.Agendamentos.Remove(ag);
+
+            // 3) Coloca no novo dia (em ordem)
+            var diaNovo = DiasDoMes.FirstOrDefault(d => d.Data.Date == novaDataDate);
+            if (diaNovo != null)
+            {
+                // insere ordenado por horário
+                int idx = 0;
+                while (idx < diaNovo.Agendamentos.Count && diaNovo.Agendamentos[idx].Horario <= ag.Horario) idx++;
+                diaNovo.Agendamentos.Insert(idx, ag);
+            }
+
+            // 4) Mantém lista “plana” sincronizada (se você usa)
+            var idxPlano = ListaAgendamentos.IndexOf(ag);
+            if (idxPlano >= 0)
+            {
+                // Se Agendamento implementa INotifyPropertyChanged corretamente, isso já basta.
+                // Se não, force o CollectionChanged:
+                ListaAgendamentos.RemoveAt(idxPlano);
+                // re-inserir mantendo ordenação global se você exibe em alguma grid:
+                int pos = 0;
+                while (pos < ListaAgendamentos.Count &&
+                       (ListaAgendamentos[pos].Data < ag.Data ||
+                        (ListaAgendamentos[pos].Data == ag.Data && ListaAgendamentos[pos].Horario <= ag.Horario)))
+                    pos++;
+                ListaAgendamentos.Insert(pos, ag);
+            }
+
+            // 5) Ajusta seleção/destaques se você usa highlight por dia
+            DataSelecionada = novaDataDate;
+            foreach (var d in DiasDoMes)
+                d.Selecionado = d.Data.Date == novaDataDate;
+
+            // Se seu filtro depende de DataSelecionada/AgendamentoSelecionadoIdFiltro:
+            FiltrarAgendamentos();
+        }
     } 
 
 } 

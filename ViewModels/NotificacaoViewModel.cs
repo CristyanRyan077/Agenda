@@ -49,7 +49,7 @@ namespace AgendaNovo.ViewModels
 
             // Aqui você pode personalizar o texto da mensagem
             var mensagem = $"Olá {cliente.Nome}, tudo bem?\n\n" +
-                           $"Estou passando para confirmar o agendamento de amanhã ({agendamento.Data:dd/MM} às {agendamento.Horario}h).\n" +
+                           $"Estou passando para confirmar o agendamento de amanhã ({agendamento.Data:dd/MM} às {agendamento.Horario:hh\\:mm}).\n" +
                            $"Qualquer dúvida, me avise 🙂";
 
             var textoEscapado = Uri.EscapeDataString(mensagem);

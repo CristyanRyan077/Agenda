@@ -240,8 +240,10 @@
                         <DataTemplate DataType="{x:Type models:DiaCalendario}">
                             <Border x:Name="AgBorder" Height="110"   Background="#FF484848"
                                     AllowDrop="True"
-                                    DragLeave="Dia_DragLeave"
-                                    DragOver="Dia_DragOver" Drop="Dia_Drop"
+                                    PreviewDragLeave="Dia_PreviewDragLeave"
+                                    PreviewDragOver="Dia_PreviewDragOver"
+                                    PreviewDrop="Dia_PreviewDrop"
+                                    MouseUp="Agendamento_MouseUp"
                                     MouseDown="Dia_MouseDown">
                                 <Border.Style>
                                     <Style TargetType="Border">
