@@ -94,7 +94,7 @@
                 <Grid Grid.Row="3" Grid.Column="0" Margin="0,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1.5*"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
@@ -111,14 +111,6 @@
                       IsReadOnly="True"
                       Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                       BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" HorizontalAlignment="Right"/>
-
-                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoPagamento.Valor, UpdateSourceTrigger=PropertyChanged }"
-                      Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
-                      hc:InfoElement.Placeholder="Pago"
-                        Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                        BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Kind="CashCycle" Opacity="0.3" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Width="32" Height="32" Foreground="#FFA6FF9F"/>
 
 
                 </Grid>
@@ -184,9 +176,9 @@
                                     SelectedItem="{Binding CriancaSelecionada.IdadeUnidade, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Grid>
-                
+
                 <Grid Grid.Row="5">
-                <hc:ComboBox Grid.Column="0" Grid.Row="5" Width="140" Height="60" HorizontalAlignment="Left"
+                    <hc:ComboBox Grid.Column="0" Grid.Row="5" Width="140" Height="60" HorizontalAlignment="Left"
                 hc:InfoElement.Placeholder="Horário" Margin="0,0,0,10" VerticalAlignment="Top"
               ItemsSource="{Binding HorariosDisponiveis}" 
               SelectedItem="{Binding HorarioTexto,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -194,7 +186,7 @@
                Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                BorderBrush="Transparent" SelectionTextBrush="Black"/>
 
-                <hc:TextBox Grid.Column="0" Text="{Binding NovoCliente.Observacao,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <hc:TextBox Grid.Column="0" Text="{Binding NovoCliente.Observacao,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  Grid.Row="5" Width="310" Height="60" HorizontalAlignment="Center"
                  TextWrapping="Wrap"
                 AcceptsReturn="True"
@@ -202,16 +194,8 @@
                 hc:InfoElement.Placeholder="Observacao" Margin="0,0,0,10" VerticalAlignment="Bottom" BorderBrush="Transparent"
                Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"/>
 
-   
+
                 </Grid>
-                <StackPanel Orientation="Horizontal" Margin="0,0,20,20" Grid.Row="6" VerticalAlignment="Top" HorizontalAlignment="Left">
-                    <RadioButton Content="Revelado" FontSize="20" FontFamily="Arial" Margin="0,0,20,0"
-               Foreground="White" GroupName="FotosReveladas"
-               IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Revelado}"/>
-                    <RadioButton Content="Entregue" FontSize="20" FontFamily="Arial"
-               Foreground="White" GroupName="FotosReveladas"
-               IsChecked="{Binding Fotosreveladas, Mode=TwoWay, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Entregue}"/>
-                </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="6" Margin="0,50,0,0">
                     <Button Content="Excluir" Background="Red" Width="120" Height="30" Command="{Binding ExcluirCommand}" Click="Button_Click_1" />
                     <Button Content="Salvar" Background="Green" Width="120" Height="30" Command="{Binding AgendarCommand}" Click="Button_Click"/>

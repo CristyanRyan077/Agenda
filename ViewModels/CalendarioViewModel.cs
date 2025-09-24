@@ -33,6 +33,8 @@ namespace AgendaNovo.ViewModels
         private readonly IPacoteService _pacoteService;
         private readonly IPagamentoService _pagamentoService;
         private readonly IProdutoService _produtoService;
+        public IRelayCommand<Agendamento> EditarAgendamentoCommand { get; }
+        public IRelayCommand<Agendamento> PagamentosAgendamentoCommand { get; }
 
 
         public CalendarioViewModel(AgendaViewModel agendaViewModel, IAgendamentoService agendamentoService,
@@ -60,7 +62,26 @@ namespace AgendaNovo.ViewModels
             MoverAgendamentoCommand =
             new RelayCommand<(Agendamento ag, DateTime novaData)>(p => MoverAgendamentoInMemory(p.ag, p.novaData));
             RefreshCalendar();
-            
+            EditarAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
+            {
+                if (ag is null) return;
+                SelecionarAgendamento(ag);
+                EditarAgendamentoPorId(ag.Id);   // isto já faz: TelaEditarAgendamento + MostrarEditarAgendamento = true
+                HistoricoCliente(ag.ClienteId);               // abre/atualiza a coluna de histórico
+                AplicarDestaqueNoHistorico();
+            });
+
+            PagamentosAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
+            {
+                if (ag is null) return;
+                SelecionarAgendamento(ag);
+                _ = AbrirPagamentosAsync(ag.Id); // isto já faz: PagamentosVM + MostrarPagamentos = true
+                HistoricoCliente(ag.ClienteId);               // abre/atualiza a coluna de histórico
+                AplicarDestaqueNoHistorico();
+
+            });
+
+
         }
 
         public IAgendamentoService AgendamentoService => _agendamentoService;
@@ -115,7 +136,7 @@ namespace AgendaNovo.ViewModels
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    HistoricoCliente();
+                    HistoricoCliente(m.ClienteId.Value);
                     AplicarDestaqueNoHistorico();
                 });
             }
@@ -159,6 +180,7 @@ namespace AgendaNovo.ViewModels
 
         public void SelecionarAgendamento(Agendamento ag)
         {
+            AgendamentoSelecionado = ag;
             AgendamentoSelecionadoIdFiltro = ag?.Id;
             DataSelecionada = ag?.Data.Date;     
             if (DataSelecionada.HasValue)
@@ -203,8 +225,8 @@ namespace AgendaNovo.ViewModels
         [RelayCommand]
         private void FecharEdicao()
         {
-            mostrarPagamentos = false;
-            mostrarHistoricoCliente = false;
+            MostrarEditarAgendamento = false;
+            MostrarHistoricoCliente = false;
             var agendaVM = AgendaViewModel;
             agendaVM.NovoAgendamento = new Agendamento();
             agendaVM.NovoCliente = new Cliente();
@@ -219,9 +241,9 @@ namespace AgendaNovo.ViewModels
             AtualizarCriancasDoCliente(value);
         }
         public bool TemHistorico => HistoricoAgendamentos?.Any() == true;
-        public void HistoricoCliente()
+        public void HistoricoCliente(int clienteId)
         {
-            var agendamentosdocliente = _clienteService.GetAgendamentos(AgendamentoSelecionado.ClienteId) ?? new List<Agendamento>();
+            var agendamentosdocliente = _clienteService.GetAgendamentos(clienteId) ?? new List<Agendamento>();
 
 
             var historico = agendamentosdocliente              
@@ -267,39 +289,52 @@ namespace AgendaNovo.ViewModels
         }
         public void EditarAgendamentoPorId(int id)
         {
-            var agendamentoCompleto = _agendamentoService.GetById(id);
-            if (agendamentoCompleto == null) return;
+            var a = _agendamentoService.GetByIdAsNoTracking(id);
+            if (a == null) return;
 
-            AgendamentoEditandoId = agendamentoCompleto.Id;
+            AgendamentoEditandoId = a.Id;
 
             var agendaVM = AgendaViewModel;
             agendaVM._populandoCampos = true;
 
             ListaCriancas.Clear();
-            int? agendamentoIdNotificacao = agendamentoCompleto.Id;
-            int? clienteIdNotificacao = agendamentoCompleto.Id;
+            int? agendamentoIdNotificacao = a.Id;
+            int? clienteIdNotificacao = a.ClienteId;
 
-            agendaVM.NovoAgendamento = agendamentoCompleto;
-            agendaVM.NovoCliente = agendamentoCompleto.Cliente;
-            agendaVM.DataSelecionada = agendamentoCompleto.Data;
-            agendaVM.ClienteSelecionado = agendamentoCompleto.Cliente;
-            agendaVM.CriancaSelecionada = agendamentoCompleto.Crianca;
-            agendaVM.Fotosreveladas = agendamentoCompleto.Fotos;
-            agendaVM.ItemSelecionado = agendamentoCompleto;
-            agendaVM.NovoPagamento = new Pagamento { Valor = agendamentoCompleto.Pagamentos.Sum(p => p.Valor) };
+            agendaVM.NovoAgendamento = new Agendamento
+            {
+                Id = a.Id,
+                Data = a.Data,
+                Horario = a.Horario,
+                Tema = a.Tema,
+                Valor = a.Valor,
+                ServicoId = a.ServicoId,
+                PacoteId = a.PacoteId,
+                CriancaId = a.CriancaId,
+                Fotos = a.Fotos,
+                Mesversario = a.Mesversario
+                // não setar navegações aqui
+            };
 
-            agendaVM.HorarioTexto = agendamentoCompleto.Horario?.ToString(@"hh\:mm");
+            agendaVM.NovoCliente = new Cliente
+            {
+                Id = a.ClienteId,
+                Nome = a.Cliente?.Nome,
+                Telefone = a.Cliente?.Telefone,
+                Observacao = a.Cliente?.Observacao
+                // sem coleções/navegações
+            };
             agendaVM.CarregarServicos();
             agendaVM.CarregarPacotes();
-            if (agendamentoCompleto.ServicoId.HasValue)
-                agendaVM.FiltrarPacotesPorServico(agendamentoCompleto.ServicoId.Value);
+            if (a.ServicoId.HasValue)
+                agendaVM.FiltrarPacotesPorServico(a.ServicoId.Value);
             agendaVM.PreencherValorPacoteSelecionado(agendaVM.NovoAgendamento.PacoteId);
 
-            if (agendamentoCompleto.Servico != null)
-                agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == agendamentoCompleto.Servico.Id);
+            if (a.Servico != null)
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos.FirstOrDefault(s => s.Id == a.Servico.Id);
 
             agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada
-                .FirstOrDefault(p => p.Id == agendamentoCompleto.Pacote?.Id);
+                .FirstOrDefault(p => p.Id == a.Pacote?.Id);
 
             agendaVM._populandoCampos = false;
             agendaVM.ForcarAtualizacaoCampos();

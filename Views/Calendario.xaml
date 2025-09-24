@@ -284,7 +284,22 @@
                                                                   Margin="0,2" Padding="6,4"
                                                                   CornerRadius="6"
                                                                   Background="{Binding EstaPago, Converter={StaticResource PagoParaCor}}"
-                                                                  MouseDown="Agendamento_MouseDown">
+                                                                  MouseDown="Agendamento_MouseDown"
+                                                                  PreviewMouseDown="ItemBorder_PreviewMouseRightButtonDown"
+                                                                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                                                        <Border.ContextMenu>
+                                                            <!-- Faz o DataContext do menu ser o PlacementTarget (o Border) -->
+                                                            <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                                                                <!-- Editar -->
+                                                                <MenuItem Header="Editar…"
+                                                                    Command="{Binding Tag.EditarAgendamentoCommand}"          
+                                                                    CommandParameter="{Binding DataContext}" />
+                                                                <!-- Pagamentos -->
+                                                                <MenuItem Header="Pagamentos"
+                                                                        Command="{Binding Tag.PagamentosAgendamentoCommand}"          
+                                                                        CommandParameter="{Binding DataContext}" />
+                                                            </ContextMenu>
+                                                        </Border.ContextMenu>
                                                         <Grid>
                                                             <StackPanel Orientation="Horizontal" Margin="6,0,0,0"
                                                                         Cursor="Hand" PreviewMouseMove="Agendamento_PreviewMouseMove">
@@ -445,9 +460,31 @@
             Background="White"
             Visibility="{Binding MostrarHistoricoCliente}">
                 <ContentControl HorizontalContentAlignment="Right"
-Width="300"
-Content="{Binding TelaHistoricoCliente}"/>
+                                Width="300"
+                                Content="{Binding TelaHistoricoCliente}"/>
             </Border>
+
+        </Grid>
+        <Grid Visibility="{Binding MostrarEditarAgendamento, Converter={StaticResource BoolToVisibilityConverter}}"
+      Background="#80000000"
+      Panel.ZIndex="9998">
+           
+            <Border Background="#2F2F2F" CornerRadius="12" Padding="16" Width="1000" Height="650"
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ContentControl Content="{Binding TelaEditarAgendamento}" />
+                
+            </Border>
+            <DockPanel Grid.Row="0" LastChildFill="False">
+                <Button Content="✕" FontSize="22" HorizontalAlignment="Center"
+              Command="{Binding FecharEdicaoCommand}"
+              DockPanel.Dock="Top"
+              Margin="940,40,0,0" VerticalAlignment="Center"
+              Width="60" Height="50"
+              Background="#E53935"
+              Foreground="White"
+              BorderThickness="0"/>
+
+            </DockPanel>
 
         </Grid>
 

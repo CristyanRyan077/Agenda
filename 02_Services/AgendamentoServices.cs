@@ -67,6 +67,17 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pagamentos)
                 .FirstOrDefault(a => a.Id == id);
         }
+        public Agendamento? GetByIdAsNoTracking(int id)
+        {
+            return _db.Agendamentos
+                .Include(a => a.Cliente)
+                .Include(a => a.Crianca)
+                .Include(a => a.Pacote)
+                .Include(a => a.Servico)
+                .Include(a => a.Pagamentos)
+                .AsNoTracking()
+                .FirstOrDefault(a => a.Id == id);
+        }
         private static int? ConverterIdadeParaMeses(int? idade, IdadeUnidade unidade)
         {
             if (!idade.HasValue) return null;

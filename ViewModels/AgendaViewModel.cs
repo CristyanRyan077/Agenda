@@ -638,6 +638,7 @@ namespace AgendaNovo
             agendamento.Fotos = Fotosreveladas;
             agendamento.Tema = NovoAgendamento.Tema;
             agendamento.Horario = NovoAgendamento.Horario;
+            agendamento.Mesversario = criancaParaAgendar?.Idade ?? CriancaSelecionada?.Idade;
             AdicionarPagamento();
 
 
@@ -1068,8 +1069,9 @@ namespace AgendaNovo
                     Pagamentos = ag.Pagamentos,
                     ServicoId = ag.ServicoId,
                     PacoteId = ag.PacoteId,
-                    Fotos = ag.Fotos
-                    
+                    Fotos = ag.Fotos,
+                    Mesversario = cri.Idade
+
                 };
                 ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == ag.ServicoId);
                 Pacoteselecionado = ListaPacotes.FirstOrDefault(p => p.Id == ag.PacoteId);

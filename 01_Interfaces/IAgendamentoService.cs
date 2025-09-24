@@ -13,6 +13,7 @@ namespace AgendaNovo.Interfaces
     {
         List<Agendamento> GetAll();
         Agendamento? GetById(int id);
+        Agendamento? GetByIdAsNoTracking(int id);
         Agendamento Add(Agendamento agendamento);
         void Update(Agendamento agendamento);
         void Delete(int id);

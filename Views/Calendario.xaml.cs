@@ -86,6 +86,12 @@ namespace AgendaNovo.Views
             var anim = new DoubleAnimation(-200, TimeSpan.FromMilliseconds(250));
             DrawerTransform.BeginAnimation(TranslateTransform.XProperty, anim);
         }
+        private void ItemBorder_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is Agendamento ag
+                && DataContext is CalendarioViewModel vm)
+                vm.SelecionarAgendamento(ag);
+        }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not DataGrid dg) return;
@@ -102,7 +108,7 @@ namespace AgendaNovo.Views
                 if (item == null) return;
 
                 vm.AbrirPagamentosAsync(item.Id);  // abre/preenche a modal
-                vm.HistoricoCliente();               // abre/atualiza a coluna de histórico
+                vm.HistoricoCliente(item.ClienteId);               // abre/atualiza a coluna de histórico
                 vm.AplicarDestaqueNoHistorico();     // garante o highlight no card certo
             }
         }
