@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AgendaNovo.Agendamento;
 
 namespace AgendaNovo
 {
@@ -52,7 +54,29 @@ namespace AgendaNovo
         public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
 
+        [ObservableProperty] private DateTime? escolhaFeitaEm;   // Etapa 1
+        partial void OnEscolhaFeitaEmChanged(DateTime? oldValue, DateTime? newValue)
+            => OnPropertyChanged(nameof(FotosEscolhidas));
 
+        [ObservableProperty] private DateTime? tratadasEm;       // Etapa 2
+        partial void OnTratadasEmChanged(DateTime? oldValue, DateTime? newValue)
+            => OnPropertyChanged(nameof(FotosTratadas));
+
+        [ObservableProperty] private DateTime? entregueEm;       // Etapa 4
+        partial void OnEntregueEmChanged(DateTime? oldValue, DateTime? newValue)
+            => OnPropertyChanged(nameof(Entregue));
+        [ObservableProperty] private DateTime? producaoConcluidaEm; // 👈 Etapa 3 AGORA AQUI
+        partial void OnProducaoConcluidaEmChanged(DateTime? o, DateTime? n)
+            => OnPropertyChanged(nameof(ProducaoConcluida));
+        public int? PrazoTratarDias { get; set; }
+
+        [NotMapped] public DateTime PrevistoTratar => (Data.Date).AddDays(PrazoTratarDias ?? 3);
+        [NotMapped] public bool FotosEscolhidas => EscolhaFeitaEm.HasValue;
+        [NotMapped] public bool ProducaoConcluida => ProducaoConcluidaEm.HasValue;
+        [NotMapped] public bool FotosTratadas => TratadasEm.HasValue;  
+        [NotMapped] public bool Entregue => EntregueEm.HasValue;
+
+        public ICollection<AgendamentoProduto> AgendamentoProdutos { get; set; } = new List<AgendamentoProduto>();
         public partial class Pagamento : ObservableObject
         {
             public int Id { get; set; }
@@ -67,7 +91,7 @@ namespace AgendaNovo
             [ObservableProperty] private string? observacao;       // opcional
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         }
-        public class AgendamentoProduto
+        public partial class AgendamentoProduto : ObservableObject
         {
             public int Id { get; set; }
 
@@ -81,6 +105,25 @@ namespace AgendaNovo
             public decimal ValorUnitario { get; set; }
             public decimal ValorTotal => Quantidade * ValorUnitario;
             public DateTime CreatedAt { get; set; } = DateTime.Now;
+            [ObservableProperty] private DateTime? enviadoParaProducaoEm;
+            [ObservableProperty] private int? prazoProducaoDias = 15;
+            [ObservableProperty] private DateTime? producaoConcluidaEm;
+
+
+            [NotMapped]
+            public DateTime PrevistoProducao
+            {
+                get
+                {
+                    var baseDate = EnviadoParaProducaoEm?.Date
+                                   ?? Agendamento.TratadasEm?.Date
+                                   ?? Agendamento.Data.Date;
+                    return baseDate.AddDays(PrazoProducaoDias ?? 15);
+                }
+            }
+
+            [NotMapped]
+            public bool ProducaoConcluida => ProducaoConcluidaEm.HasValue;
         }
 
 

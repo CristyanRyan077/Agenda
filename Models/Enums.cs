@@ -39,6 +39,15 @@ namespace AgendaNovo.Models
         Revelado = 1,
         Entregue = 2
     }
+    public enum EtapaStatus { Pendente = 0, Hoje = 1, Atrasado = 2, Concluido = 3 }
+    public enum EtapaFotos
+    {
+        Escolha,            // 1
+        Tratamento,         // 2
+        EnvioProducao,      // 3 (por item)
+        ProducaoConcluida,  // 4 (por item)
+        Entrega             // 5
+    }
     public enum TipoBusca
     {
         Cliente,

@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="AgendaNovo.Controles.EtapasFotos"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:conv="clr-namespace:AgendaNovo.Models"
+             xmlns:local="clr-namespace:AgendaNovo.Controles"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="DotStepButton" TargetType="Button">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Command"
+                    Value="{Binding DataContext.SetEtapaCommand, 
+                                    RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse Stroke="Black" StrokeThickness="1"
+                                 Fill="{TemplateBinding Tag}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Center">
+
+            <!-- 1) Escolha -->
+            <Button Style="{StaticResource DotStepButton}"
+            Tag="{Binding FotosEscolhidas, Converter={StaticResource BoolToBrushConverter}}">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource StageParamConverter}">
+                        <Binding/>
+                        <!-- Agendamento -->
+                        <Binding Source="{x:Static conv:EtapaFotos.Escolha}"/>
+                    </MultiBinding>
+                </Button.CommandParameter>
+                <Button.ToolTip>Marcar escolha</Button.ToolTip>
+            </Button>
+
+            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
+
+            <!-- 2) Tratamento -->
+            <Button Style="{StaticResource DotStepButton}"
+            Tag="{Binding FotosTratadas, Converter={StaticResource BoolToBrushConverter}}">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource StageParamConverter}">
+                        <Binding/>
+                        <Binding Source="{x:Static conv:EtapaFotos.Tratamento}"/>
+                    </MultiBinding>
+                </Button.CommandParameter>
+                <Button.ToolTip>Marcar tratadas</Button.ToolTip>
+            </Button>
+
+            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
+
+            <!-- 3) Produção CONCLUÍDA (única bolinha para 3/4) -->
+            <Button Style="{StaticResource DotStepButton}"
+             Tag="{Binding ProducaoConcluida, Converter={StaticResource BoolToBrushConverter}}">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource StageParamConverter}">
+                        <Binding/>
+                        <Binding Source="{x:Static conv:EtapaFotos.ProducaoConcluida}"/>
+                    </MultiBinding>
+                </Button.CommandParameter>
+                <Button.ToolTip>Marcar reveladas</Button.ToolTip>
+            </Button>
+
+            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
+
+            <!-- 4) Entrega -->
+            <Button Style="{StaticResource DotStepButton}"
+            Tag="{Binding Entregue, Converter={StaticResource BoolToBrushConverter}}">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource StageParamConverter}">
+                        <Binding/>
+                        <Binding Source="{x:Static conv:EtapaFotos.Entrega}"/>
+                    </MultiBinding>
+                </Button.CommandParameter>
+                <Button.ToolTip>Marcar entregue</Button.ToolTip>
+            </Button>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

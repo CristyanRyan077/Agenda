@@ -9,18 +9,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:controles="clr-namespace:AgendaNovo.Controles"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:conv="clr-namespace:AgendaNovo.Models"
         mc:Ignorable="d"
         x:Name="main"
         MinWidth="800" MinHeight="600"
         d:DataContext="{d:DesignInstance Type=vm:AgendaViewModel}"
         Title="MainWindow">
+    
+    
     <Window.Resources>
+        <Style x:Key="DotStepButton" TargetType="Button">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Command"
+          Value="{Binding DataContext.SetEtapaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse Stroke="Black" StrokeThickness="1" Fill="{TemplateBinding Tag}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ToolTipService.ShowDuration" Value="4000"/>
+        </Style>
         <DropShadowEffect x:Key="DropShadow"
                       BlurRadius="5"
                       ShadowDepth="2"
                       Opacity="0.3" />
     </Window.Resources>
+    
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar Height="73"  Background="White">
@@ -210,7 +228,11 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
+
+
                                                     </StackPanel>
+                                                    
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -299,6 +321,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -386,6 +409,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -470,6 +494,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -552,6 +577,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -650,6 +676,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -749,6 +776,7 @@
                                                             <TextBlock Text="{Binding Data, StringFormat=dd/MM/yyyy}" FontSize="12" Margin="0 0 6 0"/>
                                                             <TextBlock Text="{Binding Horario, StringFormat={}{0:hh\\:mm}}" FontSize="12"/>
                                                         </StackPanel>
+                                                        <controles:EtapasFotos/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>

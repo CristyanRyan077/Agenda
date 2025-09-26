@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AgendaNovo.Agendamento;
 
 namespace AgendaNovo.Interfaces
 {
@@ -20,6 +21,10 @@ namespace AgendaNovo.Interfaces
 
         void AtivarSePendente(int agendamentoid);
         void ValorIncompleto(int agendamentoid);
+
+        void UpdateItens(int agendamentoId, List<AgendamentoProduto> itens);
+
+        void UpdateEtapas(Agendamento agendamento);
 
 
         // Filtros úteis

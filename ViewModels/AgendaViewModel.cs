@@ -1,5 +1,6 @@
 ﻿
 using AgendaNovo.Controles;
+using AgendaNovo.Converters;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Migrations;
 using AgendaNovo.Models;
@@ -33,6 +34,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 using static AgendaNovo.Agendamento;
 
@@ -112,6 +114,7 @@ namespace AgendaNovo
         public bool _populandoCampos;
         public IRelayCommand AbrirAdicionarServicoCommand { get; }
         public IRelayCommand FecharModalCommand { get; }
+        public IRelayCommand<SetEtapaParam> SetEtapaCommand { get; }
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
@@ -139,6 +142,7 @@ namespace AgendaNovo
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
             NovoAgendamento = new Agendamento();
+            SetEtapaCommand = new RelayCommand<SetEtapaParam>(SetEtapa);
             MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
             NotificacaoVM = new NotificacaoViewModel( servicoService , agendamentoService );
@@ -189,8 +193,56 @@ namespace AgendaNovo
 
             System.Diagnostics.Debug.WriteLine($"FiltrarServicos('{termo}') -> {ServicosFiltrados.Count} itens");
         }
+        private void SetEtapa(SetEtapaParam p)
+        {
+            if (p?.Agendamento is null) return;
+            var ag = p.Agendamento;
+            var agora = DateTime.Now;
 
-       
+            // SHIFT = limpar etapa
+            bool limpar = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+
+            switch (p.Etapa)
+            {
+                case EtapaFotos.Escolha:
+                    ag.EscolhaFeitaEm = limpar ? (DateTime?)null : (ag.EscolhaFeitaEm ?? agora);
+                    break;
+
+                case EtapaFotos.Tratamento:
+                    ag.TratadasEm = limpar ? (DateTime?)null : (ag.TratadasEm ?? agora);
+                    break;
+
+
+                case EtapaFotos.ProducaoConcluida:
+                    ag.ProducaoConcluidaEm = limpar ? null : ag.ProducaoConcluidaEm ?? agora;
+                    break;
+
+                case EtapaFotos.Entrega:
+                    ag.EntregueEm = limpar ? (DateTime?)null : (ag.EntregueEm ?? agora);
+                    break;
+            }
+
+            // persistir (use seus services)
+            try
+            {
+                _agendamentoService.UpdateEtapas(ag); // implemente salvando escalares + itens (attach/modified)
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[Etapas] Erro ao salvar: " + ex);
+            }
+
+            // ajuste UI/coleções se necessário
+            OnPropertyChanged(nameof(AgendamentosSegunda)); // etc, se usar coleções por dia
+            OnPropertyChanged(nameof(AgendamentosDomingo));
+            OnPropertyChanged(nameof(AgendamentosSegunda));
+            OnPropertyChanged(nameof(AgendamentosTerca));
+            OnPropertyChanged(nameof(AgendamentosQuarta));
+            OnPropertyChanged(nameof(AgendamentosQuinta));
+            OnPropertyChanged(nameof(AgendamentosSexta));
+            OnPropertyChanged(nameof(AgendamentosSabado));
+        }
+
 
         partial void OnServicoSelecionadoChanged(Servico? value)
         {

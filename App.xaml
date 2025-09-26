@@ -21,6 +21,7 @@
             <conv:MenorQueConverter x:Key="MenorQueConverter"/>
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <local:StringEqualsConverter x:Key="StringEqualsConverter"/>
+            <conv:StageParamConverter x:Key="StageParamConverter"/>
             <conv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
             <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <conv:MesAnoPtBrConverter x:Key="MesAnoPtBrConverter"/>
@@ -33,6 +34,9 @@
             <conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
             <conv:DateEqualsConverter x:Key="DateEqualsConverter"/>
             <conv:IdEqualsConverter x:Key="IdEqualsConverter"/>
+            <conv:EtapaToBrushConverter x:Key="EtapaToBrushConverter"/>
+            <conv:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+            <conv:PercentToBrushConverter x:Key="PercentToBrushConverter"/>
             <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <conv:DecimalSafeConverter x:Key="DecimalSafeConverter"/>
             <conv:BoolToTextConverter x:Key="BoolToTextConverter" 

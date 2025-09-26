@@ -14,5 +14,6 @@ namespace AgendaNovo.Models
         public string Nome { get; set; } = "";
 
         public decimal Valor { get; set; }
+        public int PrazoProducaoDias { get; set; } = 15;
     }
 }

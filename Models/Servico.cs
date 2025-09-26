@@ -16,6 +16,7 @@ namespace AgendaNovo.Models
         public string? Nome { get; set; }
 
         public bool PossuiCrianca { get; set; } = true;
+        public int PrazoTratarDias { get; set; } = 3;
 
         [NotMapped]
         public Brush Cor { get; set; } = Brushes.LightBlue;

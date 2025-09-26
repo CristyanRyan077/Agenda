@@ -4,6 +4,7 @@ using AgendaNovo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgendaNovo.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    partial class AgendaContextModelSnapshot : ModelSnapshot
+    [Migration("20250926003114_corrigido-erros")]
+    partial class corrigidoerros
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,9 +65,6 @@ namespace AgendaNovo.Migrations
 
                     b.Property<int?>("PrazoTratarDias")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("ProducaoConcluidaEm")
-                        .HasColumnType("datetime2");
 
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
@@ -356,7 +356,7 @@ namespace AgendaNovo.Migrations
             modelBuilder.Entity("AgendaNovo.Agendamento+AgendamentoProduto", b =>
                 {
                     b.HasOne("AgendaNovo.Agendamento", "Agendamento")
-                        .WithMany("AgendamentoProdutos")
+                        .WithMany()
                         .HasForeignKey("AgendamentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -405,8 +405,6 @@ namespace AgendaNovo.Migrations
 
             modelBuilder.Entity("AgendaNovo.Agendamento", b =>
                 {
-                    b.Navigation("AgendamentoProdutos");
-
                     b.Navigation("Pagamentos");
                 });
 

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static AgendaNovo.Agendamento;
 
 namespace AgendaNovo.Services
 {
@@ -51,6 +52,7 @@ namespace AgendaNovo.Services
                 .Include (a => a.Pacote)
                 .Include (a => a.Servico)
                 .Include (a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .AsNoTracking()
                 .ToList();
         }
@@ -65,6 +67,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
                 .Include(a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .FirstOrDefault(a => a.Id == id);
         }
         public Agendamento? GetByIdAsNoTracking(int id)
@@ -75,6 +78,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
                 .Include(a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .AsNoTracking()
                 .FirstOrDefault(a => a.Id == id);
         }
@@ -122,6 +126,7 @@ namespace AgendaNovo.Services
             .Include(a => a.Pacote)
             .Include(a => a.Servico)
             .Include(a => a.Pagamentos)
+            .Include(a => a.AgendamentoProdutos)
             .FirstOrDefault(a => a.Id == agendamento.Id);
             if (existente == null)
             {
@@ -160,6 +165,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
                 .Include(a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .Where(a => a.Data.Date == data.Date)
                 .AsNoTracking()
                 .ToList();
@@ -175,6 +181,7 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
                 .Include(a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .Where(a => a.ClienteId == clienteId)
                 .AsNoTracking()
                 .ToList();
@@ -188,9 +195,52 @@ namespace AgendaNovo.Services
                 .Include(a => a.Pacote)
                 .Include(a => a.Servico)
                 .Include(a => a.Pagamentos)
+                .Include(a => a.AgendamentoProdutos)
                 .Where(a => a.CriancaId == criancaId)
                 .AsNoTracking()
                 .ToList();
+        }
+        public void UpdateEtapas(Agendamento agendamento)
+        {
+            using var db = _dbFactory.CreateDbContext();
+
+            var existente = db.Agendamentos.FirstOrDefault(a => a.Id == agendamento.Id);
+            if (existente == null) return;
+
+            // Atualiza apenas os campos de etapas
+            existente.EscolhaFeitaEm = agendamento.EscolhaFeitaEm;
+            existente.TratadasEm = agendamento.TratadasEm;
+            existente.EntregueEm = agendamento.EntregueEm;
+
+            var e = db.Entry(existente);
+            e.Property(a => a.EscolhaFeitaEm).IsModified = true;
+            e.Property(a => a.TratadasEm).IsModified = true;
+            e.Property(a => a.ProducaoConcluidaEm).IsModified = true;
+            e.Property(a => a.EntregueEm).IsModified = true;
+
+            db.SaveChanges();
+        }
+        public void UpdateItens(int agendamentoId, List<AgendamentoProduto> itens)
+        {
+            using var db = _dbFactory.CreateDbContext();
+
+            var existentes = db.AgendamentoProdutos
+                .Where(p => p.AgendamentoId == agendamentoId)
+                .ToList();
+
+            foreach (var it in itens)
+            {
+                var existente = existentes.FirstOrDefault(x => x.Id == it.Id);
+                if (existente == null) continue;
+
+                existente.EnviadoParaProducaoEm = it.EnviadoParaProducaoEm;
+                existente.ProducaoConcluidaEm = it.ProducaoConcluidaEm;
+
+                db.Entry(existente).Property(x => x.EnviadoParaProducaoEm).IsModified = true;
+                db.Entry(existente).Property(x => x.ProducaoConcluidaEm).IsModified = true;
+            }
+
+            db.SaveChanges();
         }
 
         public async Task AtualizarFotosAsync(int agendamentoId, FotosReveladas fotos)
