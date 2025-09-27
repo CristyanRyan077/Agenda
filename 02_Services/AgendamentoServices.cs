@@ -286,7 +286,9 @@ namespace AgendaNovo.Services
                  ServicoNome = s != null ? s.Nome : "—",
                  ClienteNome = c != null ? c.Nome : null,
                  Valor = a.Valor,
-                 ValorPago = a.ValorPago,
+                 ValorPago = a.Pagamentos
+                 .Where(p => p.AgendamentoProdutoId == null)
+                 .Sum(p => (decimal?)p.Valor) ?? 0m,
                  Status = a.Status
              };
 
@@ -299,43 +301,65 @@ namespace AgendaNovo.Services
             System.Diagnostics.Debug.WriteLine($"[{T()}] [SRV {_sid}] CalcularKpis START ctx={_db.CtxId} tid={tid}");
             try
             {
+                var fimIncl = fim.Date.AddDays(1).AddTicks(-1);
+
+                // base (filtra por período, serviço e status se fornecidos)
                 var baseQ = _db.Agendamentos.AsNoTracking()
-                    .Where(a => a.Data >= inicio && a.Data <= fim);
+                    .Where(a => a.Data >= inicio && a.Data <= fimIncl);
+
                 if (servicoId.HasValue) baseQ = baseQ.Where(a => a.ServicoId == servicoId.Value);
                 if (status.HasValue) baseQ = baseQ.Where(a => a.Status == status.Value);
 
-                var valid = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
-                var q = valid.Select(a => new
-                {
-                    a.Valor,
-                    Pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m,
-                    a.Status
-                });
-                var kpi = await q
-                 .GroupBy(a => 1)
-                 .Select(g => new
-                 {
-                     Receita = g.Sum(a => a.Valor),
-                     Recebido = g.Sum(a => a.Pago < a.Valor ? a.Pago : a.Valor),
-                     Aberto = g.Sum(a => a.Valor - (a.Pago < a.Valor ? a.Pago : a.Valor)),
-                     Qtd = g.Count(),
-                     TicketMedio = g.Where(a => a.Status == StatusAgendamento.Concluido)
-                       .Average(a => (decimal?)(a.Pago < a.Valor ? a.Pago : a.Valor)),
+                // agendamentos válidos (exceto cancelados) - materializamos só id/valor/status (projeção simples)
+                var agds = await baseQ
+                    .Where(a => a.Status != StatusAgendamento.Cancelado)
+                    .Select(a => new { a.Id, a.Valor, a.Status })
+                    .ToListAsync();
 
-                 })
-                 .FirstOrDefaultAsync();
+                var agdIds = agds.Select(x => x.Id).ToList();
+
+                // pagamentos de serviço (AgendamentoProdutoId == null) somente para os agendamentos do período
+                var pagamentosServicoList = await _db.Pagamentos.AsNoTracking()
+                    .Where(p => p.AgendamentoProdutoId == null && agdIds.Contains(p.AgendamentoId))
+                    .GroupBy(p => p.AgendamentoId)
+                    .Select(g => new { AgendamentoId = g.Key, PagoServico = g.Sum(x => x.Valor) })
+                    .ToListAsync();
+
+                var pagamentosServicoDict = pagamentosServicoList
+                    .ToDictionary(x => x.AgendamentoId, x => x.PagoServico);
+
+                // Junta em memória: para cada agendamento pega o Pago (0 se não houver)
+                var kpiRaw = agds
+                    .Select(a => new
+                    {
+                        Valor = a.Valor, // se a.Valor for nullable no seu modelo, troque por (a.Valor ?? 0m)
+                        Pago = pagamentosServicoDict.TryGetValue(a.Id, out var p) ? p : 0m,
+                        a.Status
+                    })
+                    .ToList();
+
+                // Cálculos em memória — sem EF tentando traduzir Math.Min/ternários
+                var receita = kpiRaw.Sum(x => x.Valor);
+                var recebido = kpiRaw.Sum(x => x.Pago);
+                var aberto = kpiRaw.Sum(x => Math.Max(0m, x.Valor - x.Pago));
+                var qtd = kpiRaw.Count;
+
+                var concluidos = kpiRaw.Where(x => x.Status == StatusAgendamento.Concluido)
+                                       .Select(x => Math.Min(x.Pago, x.Valor));
+                var ticketMedio = concluidos.Any() ? concluidos.Average() : 0m;
 
 
-                 var pagamentosPorItemQ =
+                var pagamentosPorItemQ =
                     from p in _db.Set<Agendamento.Pagamento>().AsNoTracking()
                     where p.AgendamentoProdutoId != null
                     group p by p.AgendamentoProdutoId!.Value into g
                     select new { AgendamentoProdutoId = g.Key, Pago = g.Sum(x => x.Valor) };
+                var validAgdsQuery = baseQ.Where(a => a.Status != StatusAgendamento.Cancelado);
 
                 // 2) Linhas de venda (join AgendamentoProdutos x agendamentos válidos x pagamentos por item)
                 var itensQ =
                     from ap in _db.AgendamentoProdutos.AsNoTracking()
-                    join a in valid on ap.AgendamentoId equals a.Id
+                    join a in validAgdsQuery on ap.AgendamentoId equals a.Id
                     join pg in pagamentosPorItemQ on ap.Id equals pg.AgendamentoProdutoId into pgj
                     from pg in pgj.DefaultIfEmpty()
                     where !produtoId.HasValue || ap.ProdutoId == produtoId.Value
@@ -358,13 +382,12 @@ namespace AgendaNovo.Services
                 // ==============================
                 return new FinanceiroResumo
                 {
-                    ReceitaBruta = kpi?.Receita ?? 0m,
-                    Recebido = kpi?.Recebido ?? 0m,
-                    EmAberto = Math.Max(0, kpi?.Aberto ?? 0m),
-                    QtdAgendamentos = kpi?.Qtd ?? 0,
-                    TicketMedio = Math.Round(kpi?.TicketMedio ?? 0m, 2),
+                    ReceitaBruta = receita,
+                    Recebido = recebido,
+                    EmAberto = Math.Max(0, aberto),
+                    QtdAgendamentos = qtd,
+                    TicketMedio = Math.Round(ticketMedio, 2),
 
-                    // Produtos
                     ReceitaProdutos = receitaProdutos,
                     QtdProdutos = qtdProdutos,
                     TicketMedioProdutos = Math.Round(ticketMedioProd, 2)
@@ -398,7 +421,8 @@ namespace AgendaNovo.Services
                     from s in sj.DefaultIfEmpty()
                     join c in _db.Clientes.AsNoTracking() on a.ClienteId equals c.Id into cj
                     from c in cj.DefaultIfEmpty()
-                    let pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m
+                    let pago = a.Pagamentos.Where(p => p.AgendamentoProdutoId == null)
+                       .Sum(p => (decimal?)p.Valor) ?? 0m
                     where a.Valor > pago
                     orderby a.Data
                     select new RecebivelDTO
@@ -431,14 +455,15 @@ namespace AgendaNovo.Services
             var query =
                 from g in
                     (from a in valid
-                     let pago = a.Pagamentos.Sum(p => (decimal?)p.Valor) ?? 0m
+                     let pago = a.Pagamentos.Where(p => p.AgendamentoProdutoId == null)
+                       .Sum(p => (decimal?)p.Valor) ?? 0m
                      group new { a, pago } by a.ServicoId into grp
                      select new
                      {
                          ServicoId = grp.Key,
-                         Receita = grp.Sum(x => x.pago < x.a.Valor ? x.pago : x.a.Valor),
+                         Receita = grp.Sum(x => x.pago),
                          Qtd = grp.Count(),
-                         TicketMedio = grp.Average(x => x.pago < x.a.Valor ? x.pago : x.a.Valor)
+                         TicketMedio = grp.Average(x => x.pago)
                      })
                 join s in _db.Servicos.AsNoTracking() on g.ServicoId equals s.Id into sj
                 from s in sj.DefaultIfEmpty()
