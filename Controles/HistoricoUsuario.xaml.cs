@@ -30,7 +30,8 @@ namespace AgendaNovo.Controles
             if (sender is FrameworkElement fe && fe.DataContext is AgendamentoHistoricoVM item
                 && DataContext is CalendarioViewModel vm)
             {
-                vm.AbrirPagamentosAsync(item.Agendamento.Id);
+                if (vm.PagamentosAgendamentoCommand.CanExecute(item.Agendamento))
+                    vm.PagamentosAgendamentoCommand.Execute(item.Agendamento);
             }
         }
     }

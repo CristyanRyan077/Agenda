@@ -1,4 +1,6 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo._01_Interfaces;
+using AgendaNovo._02_Services;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
 using AgendaNovo.Views;
@@ -43,6 +45,7 @@ namespace AgendaNovo
             services.AddTransient<IPagamentoService, PagamentoService>();
             services.AddTransient<INotificacaoService, NotificacaoService>();
             services.AddTransient<IProdutoService, ProdutoService>();
+            services.AddTransient<IAcoesService, AcoesService>();
             //Views
             services.AddScoped<WindowManager>();
             services.AddTransient<Agendar>();

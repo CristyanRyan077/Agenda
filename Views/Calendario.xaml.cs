@@ -103,13 +103,12 @@ namespace AgendaNovo.Views
 
             if (DataContext is CalendarioViewModel vm)
             {
-                // Se você já binda SelectedItem, pode usar o selecionado:
+                
                 var item = vm.AgendamentoSelecionado;
                 if (item == null) return;
 
-                vm.AbrirPagamentosAsync(item.Id);  // abre/preenche a modal
-                vm.HistoricoCliente(item.ClienteId);               // abre/atualiza a coluna de histórico
-                vm.AplicarDestaqueNoHistorico();     // garante o highlight no card certo
+                if (vm.PagamentosAgendamentoCommand.CanExecute(item))
+                    vm.PagamentosAgendamentoCommand.Execute(item);
             }
         }
 
