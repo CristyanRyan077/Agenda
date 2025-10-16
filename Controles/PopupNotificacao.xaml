@@ -7,42 +7,30 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Border Background="#FF333333" CornerRadius="10" Padding="10"
-             Visibility="{Binding PopupVisivel, Converter={StaticResource BoolToVisibilityConverter}}">
+        Visibility="{Binding PopupVisivel, Converter={StaticResource BoolToVisibilityConverter}}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-          
+
             <DockPanel>
-                <TextBlock Text="Notificações"
-                           Foreground="White"
-                           FontWeight="Bold"
-                           FontSize="14"
-                           DockPanel.Dock="Left"/>
-
-                <Button Content="X"
-                        Foreground="Black"                       
-                        Width="20" Height="20"
-                        Margin="5,0,0,0"
-                        Background="Red"
-                        HorizontalAlignment="Right"
-                        Command="{Binding FecharPopupCommand}"/>
+                <TextBlock Text="Notificações" Foreground="White" FontWeight="Bold" FontSize="14" DockPanel.Dock="Left"/>
+                <Button Content="X" Foreground="Black" Width="20" Height="20" Margin="5,0,0,0"
+                    Background="Red" HorizontalAlignment="Right" Command="{Binding FecharPopupCommand}"/>
             </DockPanel>
-            <TextBlock Text="X" FontSize="16" IsHitTestVisible="False" Margin="0,0,5,0" HorizontalAlignment="Right"/>
-            <StackPanel Grid.Row="1">
-                <!-- Badge com número de notificações -->
-                <TextBlock Text="{Binding Notificacoes.Count, StringFormat='Clientes amanhã: {0}'}"
-                       Foreground="White"
-                       FontWeight="Bold"
-                       FontSize="14"
-                       HorizontalAlignment="Center"/>
 
-                <!-- Botão para abrir lista detalhada -->
+            <StackPanel Grid.Row="1" Margin="0,8,0,0">
+                <TextBlock Text="{Binding CountHojeEAmanha, StringFormat='Clientes hoje/amanhã: {0}'}"
+                       Foreground="White" FontWeight="Bold" FontSize="13"
+                       HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding CountFotos, StringFormat='Fotos atrasadas: {0}'}"
+                       Foreground="White" FontWeight="Bold" FontSize="13"
+                       HorizontalAlignment="Center" Margin="0,2,0,0"/>
+
                 <Button Content="Ver detalhes"
                     Command="{Binding AbrirDetalhesCommand}"
-                    Margin="0,10,0,0"
-                    Padding="5"/>
+                    Margin="0,10,0,0" Padding="5"/>
             </StackPanel>
         </Grid>
     </Border>

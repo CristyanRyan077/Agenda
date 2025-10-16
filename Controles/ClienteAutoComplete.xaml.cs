@@ -40,38 +40,68 @@ namespace AgendaNovo.Controles
             if (vm != null)
                 vm.MostrarSugestoes = false; // Fecha o Popup
         }
-       
+
         private void AutoCompleteBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var vm = DataContext as AgendaViewModel;
-            if (vm == null)
-                return;
+            var dc = DataContext;
+            if (dc == null) return;
+
             AtualizarPlaceholder();
-            if (vm.ResetandoCampos)
-                return;
-            vm.UsuarioDigitouNome = true;
+
+            // tenta ler ResetandoCampos
+            var propReset = dc.GetType().GetProperty("ResetandoCampos");
+            if (propReset != null && propReset.PropertyType == typeof(bool))
+            {
+                var reset = (bool)propReset.GetValue(dc);
+                if (reset) return;
+            }
+
+            // tenta setar UsuarioDigitouNome
+            var propUsuarioDigitou = dc.GetType().GetProperty("UsuarioDigitouNome");
+            if (propUsuarioDigitou != null && propUsuarioDigitou.PropertyType == typeof(bool))
+            {
+                propUsuarioDigitou.SetValue(dc, true);
+            }
+
             AtualizarPlaceholder();
         }
         private void AutoCompleteBox_LostFocus(object sender, RoutedEventArgs e)
         {
             if (!AutoCompleteBox.IsKeyboardFocusWithin && string.IsNullOrWhiteSpace(AutoCompleteBox.Text))
                 PlaceholderText.Visibility = Visibility.Visible;
-            var vm = DataContext as AgendaViewModel;
-            if (vm != null )
-                vm.MostrarSugestoes = false;
 
+            var dc = DataContext;
+            if (dc == null) return;
+
+            // tenta setar MostrarSugestoes = false
+            var propMostrarSug = dc.GetType().GetProperty("MostrarSugestoes");
+            if (propMostrarSug != null && propMostrarSug.PropertyType == typeof(bool))
+            {
+                propMostrarSug.SetValue(dc, false);
+            }
         }
 
         private void AutoCompleteBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            var vm = DataContext as AgendaViewModel;
-            if (vm.ResetandoCampos)
-                return;
-            PlaceholderText.Visibility = Visibility.Collapsed;
-            if (DataContext is AgendaViewModel vm2)
-            {
+            var dc = DataContext;
+            if (dc is null) return;
 
-                vm2.MostrarSugestoes = true;
+            // tenta ler ResetandoCampos se existir
+            var propReset = dc.GetType().GetProperty("ResetandoCampos");
+            if (propReset != null && propReset.PropertyType == typeof(bool))
+            {
+                var reset = (bool)propReset.GetValue(dc);
+                if (reset) return;
+            }
+
+            if (PlaceholderText != null)
+                PlaceholderText.Visibility = Visibility.Collapsed;
+
+            // tenta setar MostrarSugestoes se existir
+            var propMostrarSug = dc.GetType().GetProperty("MostrarSugestoes");
+            if (propMostrarSug != null && propMostrarSug.PropertyType == typeof(bool))
+            {
+                propMostrarSug.SetValue(dc, true);
             }
         }
         private void AtualizarPlaceholder()

@@ -458,7 +458,7 @@
             </Border>
             <Border HorizontalAlignment="Right" Width="300" Height="900"
             Background="White"
-            Visibility="{Binding MostrarHistoricoCliente}">
+            Visibility="{Binding MostrarHistoricoCliente,Converter={StaticResource BoolToVisibilityConverter}}">
                 <ContentControl HorizontalContentAlignment="Right"
                                 Width="300"
                                 Content="{Binding TelaHistoricoCliente}"/>

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AgendaNovo.Views" xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:FinanceiroViewModel}"
+        xmlns:local="clr-namespace:AgendaNovo.Views" xmlns:viewmodels="clr-namespace:AgendaNovo.ViewModels" xmlns:hc="https://handyorg.github.io/handycontrol" d:DataContext="{d:DesignInstance Type=viewmodels:FinanceiroViewModel}"
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="Financeiro" Height="450" Width="800">
@@ -84,7 +84,7 @@
                 </UniformGrid>
                 <TextBlock Text="Produtos" Margin="8,0,0,0" FontSize="22" FontFamily="Helvetica" Foreground="White"/>
                 <UniformGrid Columns="1" Margin="0,0,0,12">
-                    <Border CornerRadius="10" Background="#424242" Padding="12" Margin="6">
+                    <Border CornerRadius="10" Background="#424242" Padding="12" Margin="0">
                         <StackPanel Orientation="Horizontal">
 
                             <StackPanel Margin="6,0,0,0">
@@ -106,6 +106,22 @@
                         </StackPanel>
                     </Border>
                 </UniformGrid>
+                <Border CornerRadius="12" Background="#3A3A3A" Padding="10" Margin="0,0,0,8">
+                    <Border.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding CarregarCommand}"/>
+                    </Border.InputBindings>
+                    <DockPanel>
+                        <TextBlock Text="Busca Personalizada" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <hc:TextBox Width="300"
+                        Text="{Binding FiltroClienteNome, UpdateSourceTrigger=PropertyChanged}"
+                        hc:InfoElement.Placeholder="Buscar por nome do cliente"/>
+                            <Button Content="Limpar" Margin="6,0,0,0"
+                    Command="{Binding LimparFiltroClienteCommand}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
                 <!-- Resumo por serviço -->
                 <Border CornerRadius="12" Background="#3A3A3A" Padding="10">
                     <Grid>
@@ -122,7 +138,7 @@
 
                         <DataGrid
                             ItemsSource="{Binding ServicosResumo}"
-                            AutoGenerateColumns="False" Width="600"
+                            AutoGenerateColumns="False" Width="450" MaxHeight="300"
                             CanUserAddRows="False" HorizontalAlignment="Left" Grid.Row="1"
                             Margin="0,8,0,0" RowHeaderWidth="0">
                             <DataGrid.Columns>
@@ -135,29 +151,33 @@
 
                         <TextBlock Grid.Row="0"
                                      HorizontalAlignment="Center"
-                                    Margin="250,0,0,0"
+                                    Margin="50,0,0,0"
                                      Text="Resumo por Produto"
                                      Foreground="White" FontWeight="Bold" FontSize="16"/>
-                        <DataGrid ItemsSource="{Binding ProdutoResumo}"
-                            AutoGenerateColumns="False" Width="500"
-                            CanUserAddRows="False" HorizontalAlignment="Right" Grid.Row="1"
-                            Margin="0,8,30,0" RowHeaderWidth="0">
+                        <DataGrid ItemsSource="{Binding ProdutoResumo}" MaxHeight="300"
+                            AutoGenerateColumns="False" Width="400"
+                            CanUserAddRows="False" HorizontalAlignment="Center" Grid.Row="1"
+                            Margin="220,8,30,0" RowHeaderWidth="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Serviço" Binding="{Binding Produto}"/>
                                 <DataGridTextColumn Header="Receita" Binding="{Binding Receita, StringFormat=R$ {0:N2}}"/>
                                 <DataGridTextColumn Header="Qtd" Binding="{Binding Qtd}"/>
                                 <DataGridTextColumn Header="Ticket médio" Binding="{Binding TicketMedio, StringFormat=R$ {0:N2}}"/>
                             </DataGrid.Columns>
+                            
                         </DataGrid>
+                        
                     </Grid>
                 </Border>
+
+              
 
                 <!-- Em aberto -->
                 <Border CornerRadius="12" Background="#3A3A3A" Padding="10" Margin="0,0,0,12">
                     <DockPanel>
                         <TextBlock Text="Em aberto (cobranças)" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
                         <DataGrid EnableRowVirtualization="True" EnableColumnVirtualization="True" ItemsSource="{Binding EmAbertoLista}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
-                        HeadersVisibility="Column" Margin="0,8,0,0" MaxHeight="500" RowHeaderWidth="0">
+                        HeadersVisibility="Column" HorizontalAlignment="Left" Margin="0,8,0,0" MaxWidth="750" MaxHeight="500" RowHeaderWidth="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}"/>
                                 <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente}"/>
@@ -174,6 +194,7 @@
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+                       
 
                     </DockPanel>
                 </Border>

@@ -24,5 +24,13 @@ namespace AgendaNovo.Controles
         {
             InitializeComponent();
         }
+        private void CopiarObsEscolha_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(txtObsEscolha.Text))
+            {
+                Clipboard.SetText(txtObsEscolha.Text);
+            }
+        }
+
     }
 }

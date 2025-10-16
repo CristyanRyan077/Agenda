@@ -116,7 +116,7 @@ namespace AgendaNovo.ViewModels
             _clienteService.ClienteInativo();
             CarregarClientesDoBanco();
             LimparCamposClienteCrianca();
-            _criancaService.AtualizarIdadeDeTodasCriancas();
+            
             var mesAtual = DateTime.Now.Month;
             var mesItemAtual = Meses.FirstOrDefault(m => m.Numero == mesAtual) ?? MesTodos;
             SetMesSemRecalcular(mesItemAtual);

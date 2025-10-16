@@ -8,80 +8,216 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <!-- reaproveite seu DotStepButton -->
         <Style x:Key="DotStepButton" TargetType="Button">
-            <Setter Property="Width" Value="16"/>
-            <Setter Property="Height" Value="16"/>
-            <Setter Property="Command"
-                    Value="{Binding DataContext.SetEtapaCommand, 
-                                    RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Ellipse Stroke="Black" StrokeThickness="1"
-                                 Fill="{TemplateBinding Tag}"/>
-                    </ControlTemplate>
-                </Setter.Value>
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <!-- Área toda clicável -->
+                    <Grid Background="Transparent" SnapsToDevicePixels="True" UseLayoutRounding="True">
+                        <!-- Borda de hover -->
+                        <Border x:Name="HoverRing"
+                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            Margin="-2">
+                            <!-- ring um tiquinho maior -->
+                            <Ellipse Stroke="Black" StrokeThickness="1">
+                                <Ellipse.Fill>
+                                    <!-- Tag do Button define a cor (via converter) -->
+                                    <Binding RelativeSource="{RelativeSource TemplatedParent}"
+                                         Path="Tag"
+                                         TargetNullValue="#DDDDDD"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HoverRing" Property="BorderBrush" Value="#4DA3FF"/>
+                            <Setter TargetName="HoverRing" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="HoverRing" Property="BorderBrush" Value="#2B7BFF"/>
+                            <Setter TargetName="HoverRing" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="HoverRing" Property="BorderBrush" Value="#999"/>
+                            <Setter TargetName="HoverRing" Property="BorderThickness" Value="1"/>
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
             </Setter>
         </Style>
     </UserControl.Resources>
+
+    <!-- DataContext esperado: Agendamento -->
     <Grid>
-        <StackPanel Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Center">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="24"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <!-- 1) Escolha -->
-            <Button Style="{StaticResource DotStepButton}"
-            Tag="{Binding FotosEscolhidas, Converter={StaticResource BoolToBrushConverter}}">
-                <Button.CommandParameter>
-                    <MultiBinding Converter="{StaticResource StageParamConverter}">
-                        <Binding/>
-                        <!-- Agendamento -->
-                        <Binding Source="{x:Static conv:EtapaFotos.Escolha}"/>
-                    </MultiBinding>
-                </Button.CommandParameter>
-                <Button.ToolTip>Marcar escolha</Button.ToolTip>
-            </Button>
+        <!-- linha vertical -->
+        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="4"
+            Width="2" Background="#DDD" HorizontalAlignment="Center"/>
 
-            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
+        <!-- 1) Escolha -->
+        <Button Grid.Row="0" Grid.Column="0" Height="18" Width="18"
+        Style="{StaticResource DotStepButton}"
+        HorizontalAlignment="Center"
+        Tag="{Binding StatusEscolha, Converter={StaticResource EtapaToBrushConverter}}">
+            <Button.CommandParameter>
+                <MultiBinding Converter="{StaticResource StageParamConverter}">
+                    <Binding/>
+                    <!-- Agendamento -->
+                    <Binding Source="{x:Static conv:EtapaFotos.Escolha}"/>
+                </MultiBinding>
+            </Button.CommandParameter>
+            <Button.Command>
+                <Binding Path="DataContext.AbrirEtapaDialogCommand" 
+             RelativeSource="{RelativeSource AncestorType=Window}"/>
+            </Button.Command>
+        </Button>
+
+            <!-- Textos/observações -->
+            <StackPanel Grid.Row="0" Grid.Column="2" Margin="6,0,0,4">
+            <TextBlock Text="Escolha das fotos" FontWeight="SemiBold"/>
+
+            <!-- Expander com TextBox copiável (só observação completa) -->
+                <Expander Margin="0,4,0,0">
+                    <Expander.Header>
+                        <TextBlock Foreground="#555">
+                            <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource EtapaLookupConverter}"
+                                          ConverterParameter="full;t:60"
+                                          Mode="OneWay">
+                                <Binding Path="Etapas" Mode="OneWay"/>
+                                <Binding Source="{x:Static conv:EtapaFotos.Escolha}" Mode="OneWay"/>
+                                </MultiBinding>
+                        </TextBlock.Text>
+                        </TextBlock>
+                    </Expander.Header>
+
+                    <DockPanel LastChildFill="True">
+                    <Button Content="Copiar"
+                            DockPanel.Dock="Right"
+                            Margin="0,0,0,6"
+                            Padding="8,2"
+                            Click="CopiarObsEscolha_Click"/>
+
+                    <TextBox x:Name="txtObsEscolha"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     MaxHeight="90">
+                            <TextBox.Text>
+                            <MultiBinding Converter="{StaticResource EtapaLookupConverter}"
+                                          ConverterParameter="obs"
+                                          Mode="OneWay">
+                                <Binding Path="Etapas" Mode="OneWay"/>
+                                <Binding Source="{x:Static conv:EtapaFotos.Escolha}" Mode="OneWay"/>
+                            </MultiBinding>
+                        </TextBox.Text>
+                        </TextBox>
+                    </DockPanel>
+                </Expander>
+            </StackPanel>
 
             <!-- 2) Tratamento -->
-            <Button Style="{StaticResource DotStepButton}"
-            Tag="{Binding FotosTratadas, Converter={StaticResource BoolToBrushConverter}}">
-                <Button.CommandParameter>
-                    <MultiBinding Converter="{StaticResource StageParamConverter}">
-                        <Binding/>
+        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource DotStepButton}"
+            HorizontalAlignment="Center" Height="18" Width="18"
+            Tag="{Binding StatusTratamento, Converter={StaticResource EtapaToBrushConverter}}">
+            <Button.CommandParameter>
+                <MultiBinding Converter="{StaticResource StageParamConverter}">
+                    <Binding/>
+                    <Binding Source="{x:Static conv:EtapaFotos.Tratamento}"/>
+                </MultiBinding>
+            </Button.CommandParameter>
+            <Button.Command>
+                <Binding Path="DataContext.AbrirEtapaDialogCommand" 
+             RelativeSource="{RelativeSource AncestorType=Window}"/>
+            </Button.Command>
+        </Button>
+        <StackPanel Grid.Row="1" Grid.Column="2" Margin="6,0,0,4">
+            <TextBlock Text="Tratamento concluído" FontWeight="SemiBold"/>
+            <TextBlock Foreground="DimGray" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource EtapaLookupConverter}">
+                        <Binding Path="Etapas"/>
                         <Binding Source="{x:Static conv:EtapaFotos.Tratamento}"/>
                     </MultiBinding>
-                </Button.CommandParameter>
-                <Button.ToolTip>Marcar tratadas</Button.ToolTip>
-            </Button>
+                </TextBlock.Text>
+            </TextBlock>
+        </StackPanel>
 
-            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
-
-            <!-- 3) Produção CONCLUÍDA (única bolinha para 3/4) -->
-            <Button Style="{StaticResource DotStepButton}"
-             Tag="{Binding ProducaoConcluida, Converter={StaticResource BoolToBrushConverter}}">
-                <Button.CommandParameter>
-                    <MultiBinding Converter="{StaticResource StageParamConverter}">
-                        <Binding/>
-                        <Binding Source="{x:Static conv:EtapaFotos.ProducaoConcluida}"/>
+        <!-- 3) Reveladas / Produção -->
+        <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource DotStepButton}"
+            HorizontalAlignment="Center" Height="18" Width="18"
+            Tag="{Binding StatusRevelar, Converter={StaticResource EtapaToBrushConverter}}">
+            <Button.CommandParameter>
+                <MultiBinding Converter="{StaticResource StageParamConverter}">
+                    <Binding/>
+                    <Binding Source="{x:Static conv:EtapaFotos.Revelar}"/>
+                </MultiBinding>
+            </Button.CommandParameter>
+            <Button.Command>
+                <Binding Path="DataContext.AbrirEtapaDialogCommand" 
+             RelativeSource="{RelativeSource AncestorType=Window}"/>
+            </Button.Command>
+        </Button>
+        <StackPanel Grid.Row="2" Grid.Column="2" Margin="6,0,0,4">
+            <TextBlock Text="Reveladas" FontWeight="SemiBold"/>
+            <TextBlock Foreground="DimGray" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource EtapaLookupConverter}">
+                        <Binding Path="Etapas"/>
+                        <Binding Source="{x:Static conv:EtapaFotos.Revelar}"/>
                     </MultiBinding>
-                </Button.CommandParameter>
-                <Button.ToolTip>Marcar reveladas</Button.ToolTip>
-            </Button>
+                </TextBlock.Text>
+            </TextBlock>
+        </StackPanel>
 
-            <Line X1="0" Y1="0" X2="30" Y2="0" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center" Margin="4,0"/>
-
-            <!-- 4) Entrega -->
-            <Button Style="{StaticResource DotStepButton}"
-            Tag="{Binding Entregue, Converter={StaticResource BoolToBrushConverter}}">
-                <Button.CommandParameter>
-                    <MultiBinding Converter="{StaticResource StageParamConverter}">
-                        <Binding/>
+        <!-- 4) Entrega -->
+        <Button Grid.Row="3" Grid.Column="0" Style="{StaticResource DotStepButton}"
+            HorizontalAlignment="Center" Height="18" Width="18"
+            Tag="{Binding StatusEntrega, Converter={StaticResource EtapaToBrushConverter}}">
+            <Button.CommandParameter>
+                <MultiBinding Converter="{StaticResource StageParamConverter}">
+                    <Binding/>
+                    <Binding Source="{x:Static conv:EtapaFotos.Entrega}"/>
+                </MultiBinding>
+            </Button.CommandParameter>
+            <Button.Command>
+                <Binding Path="DataContext.AbrirEtapaDialogCommand" 
+             RelativeSource="{RelativeSource AncestorType=Window}"/>
+            </Button.Command>
+        </Button>
+        <StackPanel Grid.Row="3" Grid.Column="2" Margin="6,0,0,0">
+            <TextBlock Text="Entregue" FontWeight="SemiBold"/>
+            <TextBlock Foreground="DimGray" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource EtapaLookupConverter}">
+                        <Binding Path="Etapas"/>
                         <Binding Source="{x:Static conv:EtapaFotos.Entrega}"/>
                     </MultiBinding>
-                </Button.CommandParameter>
-                <Button.ToolTip>Marcar entregue</Button.ToolTip>
-            </Button>
-
+                </TextBlock.Text>
+            </TextBlock>
         </StackPanel>
     </Grid>
 </UserControl>

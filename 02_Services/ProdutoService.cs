@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Helpers;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AgendaNovo.AgendaViewModel;
 
 namespace AgendaNovo.Services
 {
@@ -49,5 +51,6 @@ namespace AgendaNovo.Services
                 _db.SaveChanges();
             }
         }
+        
     }
 }

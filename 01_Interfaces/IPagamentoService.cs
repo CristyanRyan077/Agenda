@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Models;
+﻿using AgendaNovo.Dtos;
+using AgendaNovo.Models;
 using AgendaNovo.ViewModels;
 using System;
 using System.Collections.Generic;

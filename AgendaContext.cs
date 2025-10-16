@@ -25,6 +25,7 @@ namespace AgendaNovo
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<AgendamentoProduto> AgendamentoProdutos { get; set; }
         public DbSet <Pagamento> Pagamentos { get; set; }
+        public DbSet <AgendamentoEtapa> AgendamentoEtapas { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -83,6 +84,7 @@ namespace AgendaNovo
             modelBuilder.Entity<Servico>()
                 .Property(s => s.PossuiCrianca)
                 .HasDefaultValue(true);
+
 
             base.OnModelCreating(modelBuilder);
 

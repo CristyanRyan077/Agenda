@@ -32,6 +32,7 @@ namespace AgendaNovo.Models
         Pendente = 0,
         Concluido = 1,
         Cancelado = 2,
+        Confirmado = 3
     }
     public enum FotosReveladas
     {
@@ -42,16 +43,23 @@ namespace AgendaNovo.Models
     public enum EtapaStatus { Pendente = 0, Hoje = 1, Atrasado = 2, Concluido = 3 }
     public enum EtapaFotos
     {
-        Escolha,            // 1
-        Tratamento,         // 2
-        EnvioProducao,      // 3 (por item)
-        ProducaoConcluida,  // 4 (por item)
-        Entrega             // 5
+        Escolha = 0,            
+        Tratamento = 1,         
+        Revelar = 2,  
+        Entrega = 3           
     }
+    public enum FotoAtrasoTipo { Tratamento, Revelar, Entrega }
     public enum TipoBusca
     {
         Cliente,
         Agendamento
+    }
+    public enum TipoEntrega
+    {
+        Foto = 0,
+        Album = 1,
+        Painel = 2,
+        Banner = 3
     }
     public enum MetodoPagamento
     {

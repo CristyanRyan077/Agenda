@@ -51,6 +51,7 @@ namespace AgendaNovo
             services.AddTransient<Login>();
             services.AddTransient<Calendario>();
             services.AddTransient<Financeiro>();
+            services.AddTransient<ProcessoFotos>();
 
             //ViewModels
             services.AddTransient<CalendarioViewModel>();
@@ -58,6 +59,7 @@ namespace AgendaNovo
             services.AddSingleton<AgendaViewModel>();
             services.AddTransient<FinanceiroViewModel>();
             services.AddTransient<PagamentosViewModel>();
+            services.AddTransient<FotosViewModel>();
 
             ServiceProvider = services.BuildServiceProvider();
             var login = ServiceProvider.GetRequiredService<Login>();

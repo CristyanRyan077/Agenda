@@ -39,6 +39,8 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private Produto produtoSelecionado;
         [ObservableProperty] private string statusSelecionado = "Todos";
         [ObservableProperty] private ExportTipo exportSelecionado = ExportTipo.Ambos;
+        [ObservableProperty] private string? filtroClienteNome;
+        [ObservableProperty] private ObservableCollection<FotoProcessoVM> fotosResumo = new();
 
         // 🔹 KPIs
         [ObservableProperty] private decimal receitaBruta;
@@ -68,6 +70,11 @@ namespace AgendaNovo.ViewModels
             PeriodoFim = PeriodoInicio.Value.AddMonths(1).AddDays(-1);
             CarregarAsync();
         }
+        [RelayCommand]
+        private void LimparFiltroCliente()
+        {
+            FiltroClienteNome = null;
+        }
 
         // 🔹 Método principal
         [RelayCommand]
@@ -78,14 +85,14 @@ namespace AgendaNovo.ViewModels
             try
             {
                 var sw = Stopwatch.StartNew();
-                var (ini, fim, status, servicoId, produtoId) = PrepararFiltros();
-                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servicoId, produtoId, status);
+                var (ini, fim, status, servicoId, produtoId,clienteNome) = PrepararFiltros();
+                var kpis = await _agendamentoService.CalcularKpisAsync(ini, fim, servicoId, produtoId, status, clienteNome);
                 Debug.WriteLine($"KPIs: {sw.Elapsed}");
-                var emAberto = await _agendamentoService.ListarEmAbertoAsync(ini, fim, servicoId, status);
+                var emAberto = await _agendamentoService.ListarEmAbertoAsync(ini, fim, servicoId, status, clienteNome);
                 Debug.WriteLine($"EmAberto: {sw.Elapsed}");
-                var resumo = await _agendamentoService.ResumoPorServicoAsync(ini, fim, servicoId, status);
+                var resumo = await _agendamentoService.ResumoPorServicoAsync(ini, fim, servicoId, status, clienteNome);
                 Debug.WriteLine($"Resumo: {sw.Elapsed}");
-                var resumoproduto = await _agendamentoService.ResumoPorProdutoAsync(ini, fim, produtoId, status);
+                var resumoproduto = await _agendamentoService.ResumoPorProdutoAsync(ini, fim, produtoId, status, clienteNome);
 
                 ReceitaBruta = kpis.ReceitaBruta;
                 Recebido = kpis.Recebido;
@@ -134,7 +141,7 @@ namespace AgendaNovo.ViewModels
         }
 
         // --- MÉTODOS PRIVADOS ---
-        private (DateTime ini, DateTime fim, StatusAgendamento? status, int? servicoId, int? produtoId) PrepararFiltros()
+        private (DateTime ini, DateTime fim, StatusAgendamento? status, int? servicoId, int? produtoId, string? clienteNome) PrepararFiltros()
         {
             var ini = PeriodoInicio ?? DateTime.MinValue;
             var fim = (PeriodoFim?.Date.AddDays(1).AddTicks(-1)) ?? DateTime.MaxValue;
@@ -143,8 +150,9 @@ namespace AgendaNovo.ViewModels
             if (!string.IsNullOrWhiteSpace(StatusSelecionado) && StatusSelecionado != "Todos" &&
                 Enum.TryParse(StatusSelecionado, out StatusAgendamento stParsed))
                 status = stParsed;
+            var clienteNome = string.IsNullOrWhiteSpace(FiltroClienteNome) ? null : FiltroClienteNome!.Trim();
 
-            return (ini, fim, status, ServicoSelecionado?.Id, ProdutoSelecionado?.Id);
+            return (ini, fim, status, ServicoSelecionado?.Id, ProdutoSelecionado?.Id, clienteNome);
         }
 
 
@@ -344,5 +352,7 @@ namespace AgendaNovo.ViewModels
         public decimal TicketMedio { get; set; }
 
     }
+    
+
 
 }

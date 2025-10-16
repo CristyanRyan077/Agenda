@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ControlzEx.Standard;
 using System;
+using AgendaNovo.Helpers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -44,39 +45,38 @@ namespace AgendaNovo
         [ObservableProperty] private StatusAgendamento status = StatusAgendamento.Pendente;
 
         [ObservableProperty] private FotosReveladas fotos;
+        [ObservableProperty] private TipoEntrega tipoEntrega = TipoEntrega.Foto;
 
         [NotMapped] public decimal ValorPago => Pagamentos?.Sum(p => p.Valor) ?? 0m;
         [NotMapped] public int? NumeroMes { get; set; }
 
         public int? Mesversario { get; set; }
-        public string? MesversarioFormatado => $"Mês {Mesversario}";
 
         public bool EstaPago => Math.Round(Valor, 2) <= Math.Round(ValorPago, 2);
         public bool Pago { get; set; }
 
-        [ObservableProperty] private DateTime? escolhaFeitaEm;   // Etapa 1
-        partial void OnEscolhaFeitaEmChanged(DateTime? oldValue, DateTime? newValue)
-            => OnPropertyChanged(nameof(FotosEscolhidas));
-
-        [ObservableProperty] private DateTime? tratadasEm;       // Etapa 2
-        partial void OnTratadasEmChanged(DateTime? oldValue, DateTime? newValue)
-            => OnPropertyChanged(nameof(FotosTratadas));
-
-        [ObservableProperty] private DateTime? entregueEm;       // Etapa 4
-        partial void OnEntregueEmChanged(DateTime? oldValue, DateTime? newValue)
-            => OnPropertyChanged(nameof(Entregue));
-        [ObservableProperty] private DateTime? producaoConcluidaEm; // 👈 Etapa 3 AGORA AQUI
-        partial void OnProducaoConcluidaEmChanged(DateTime? o, DateTime? n)
-            => OnPropertyChanged(nameof(ProducaoConcluida));
-        public int? PrazoTratarDias { get; set; }
-
-        [NotMapped] public DateTime PrevistoTratar => (Data.Date).AddDays(PrazoTratarDias ?? 3);
-        [NotMapped] public bool FotosEscolhidas => EscolhaFeitaEm.HasValue;
-        [NotMapped] public bool ProducaoConcluida => ProducaoConcluidaEm.HasValue;
-        [NotMapped] public bool FotosTratadas => TratadasEm.HasValue;  
-        [NotMapped] public bool Entregue => EntregueEm.HasValue;
-
         public ICollection<AgendamentoProduto> AgendamentoProdutos { get; set; } = new List<AgendamentoProduto>();
+        public ObservableCollection<AgendamentoEtapa> Etapas { get; } = new ();
+
+        public string? MesversarioFormatado
+        {
+            get
+            {
+                if (Mesversario == null)
+                    return null;
+
+                if (Mesversario < 12)
+                    return $"{Mesversario} {(Mesversario == 1 ? "mês" : "meses")}";
+
+                int anos = Mesversario.Value / 12;
+                int mesesRestantes = Mesversario.Value % 12;
+
+                if (mesesRestantes == 0)
+                    return $"{anos} {(anos == 1 ? "ano" : "anos")}";
+
+                return $"{anos} {(anos == 1 ? "ano" : "anos")} e {mesesRestantes} {(mesesRestantes == 1 ? "mês" : "meses")}";
+            }
+        }
         public partial class Pagamento : ObservableObject
         {
             public int Id { get; set; }
@@ -91,6 +91,7 @@ namespace AgendaNovo
             [ObservableProperty] private string? observacao;       // opcional
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         }
+       
         public partial class AgendamentoProduto : ObservableObject
         {
             public int Id { get; set; }
@@ -106,21 +107,8 @@ namespace AgendaNovo
             public decimal ValorTotal => Quantidade * ValorUnitario;
             public DateTime CreatedAt { get; set; } = DateTime.Now;
             [ObservableProperty] private DateTime? enviadoParaProducaoEm;
-            [ObservableProperty] private int? prazoProducaoDias = 15;
+            [ObservableProperty] private int prazoProducaoDias = 15;
             [ObservableProperty] private DateTime? producaoConcluidaEm;
-
-
-            [NotMapped]
-            public DateTime PrevistoProducao
-            {
-                get
-                {
-                    var baseDate = EnviadoParaProducaoEm?.Date
-                                   ?? Agendamento.TratadasEm?.Date
-                                   ?? Agendamento.Data.Date;
-                    return baseDate.AddDays(PrazoProducaoDias ?? 15);
-                }
-            }
 
             [NotMapped]
             public bool ProducaoConcluida => ProducaoConcluidaEm.HasValue;
@@ -139,5 +127,44 @@ namespace AgendaNovo
         {
             OnPropertyChanged(nameof(ValorPago));
         }
+        public void NotifyEtapasChanged() => RaiseEtapaFlags();
+        private void RaiseEtapaFlags()
+        {
+            OnPropertyChanged(nameof(Etapas));
+            OnPropertyChanged(nameof(EscolhaConcluida));
+            OnPropertyChanged(nameof(TratamentoConcluido));
+            OnPropertyChanged(nameof(Reveladas));       // ou Produção, conforme seu enum
+            OnPropertyChanged(nameof(Entregue));
+        }
+        [NotMapped]
+        public bool EscolhaConcluida => Etapas?.Any(e => e.Etapa == EtapaFotos.Escolha) == true;
+        [NotMapped]
+        public bool TratamentoConcluido => Etapas?.Any(e => e.Etapa == EtapaFotos.Tratamento) == true;
+        [NotMapped]
+        public bool Reveladas => Etapas?.Any(e => e.Etapa == EtapaFotos.Revelar) == true;
+        [NotMapped]
+        public bool Entregue => Etapas?.Any(e => e.Etapa == EtapaFotos.Entrega) == true;
+        [NotMapped] public DateTime? EscolhaEm => Etapas?.FirstOrDefault(e => e.Etapa == EtapaFotos.Escolha)?.DataConclusao;
+        [NotMapped] public DateTime? TratamentoEm => Etapas?.FirstOrDefault(e => e.Etapa == EtapaFotos.Tratamento)?.DataConclusao;
+        [NotMapped] public DateTime? RevelarEm => Etapas?.FirstOrDefault(e => e.Etapa == EtapaFotos.Revelar)?.DataConclusao;
+        [NotMapped] public DateTime? EntregaEm => Etapas?.FirstOrDefault(e => e.Etapa == EtapaFotos.Entrega)?.DataConclusao;
+        [NotMapped] public int PrazoTratarDiasEfetivo => Servico?.PrazoTratarDias > 0 ? Servico.PrazoTratarDias : 3;
+        [NotMapped] public DateTime PrevistoTratamento => BusinessDays.AddBusinessDays(Data.Date, PrazoTratarDiasEfetivo);
+        [NotMapped] public DateTime PrevistoRevelar => BusinessDays.AddBusinessDays(Data.Date, 15);
+        [NotMapped] public DateTime PrevistoEntrega => BusinessDays.AddBusinessDays(Data.Date, 30);
+        [NotMapped] public EtapaStatus StatusEscolha => EscolhaEm.HasValue ? EtapaStatus.Concluido : EtapaStatus.Pendente;
+        [NotMapped] public EtapaStatus StatusTratamento => CalcStatus(TratamentoEm, PrevistoTratamento);
+        [NotMapped] public EtapaStatus StatusRevelar => CalcStatus(RevelarEm, PrevistoRevelar);
+        [NotMapped] public EtapaStatus StatusEntrega => CalcStatus(EntregaEm, PrevistoEntrega);
+        private static EtapaStatus CalcStatus(DateTime? concluidoEm, DateTime previsto)
+        {
+            if (concluidoEm.HasValue) return EtapaStatus.Concluido;
+            var hoje = DateTime.Today;
+            if (hoje > previsto.Date) return EtapaStatus.Atrasado;
+            if (hoje == previsto.Date) return EtapaStatus.Hoje;
+            return EtapaStatus.Pendente;
+        }
+
+
     }
 }

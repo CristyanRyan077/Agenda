@@ -1,7 +1,9 @@
-﻿using AgendaNovo.Controles;
+﻿using AgendaNovo._01_Interfaces;
+using AgendaNovo.Controles;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Migrations;
 using AgendaNovo.Models;
+using AgendaNovo.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -33,17 +35,21 @@ namespace AgendaNovo.ViewModels
         private readonly IPacoteService _pacoteService;
         private readonly IPagamentoService _pagamentoService;
         private readonly IProdutoService _produtoService;
-        public IRelayCommand<Agendamento> EditarAgendamentoCommand { get; }
-        public IRelayCommand<Agendamento> PagamentosAgendamentoCommand { get; }
+        private readonly IAcoesService _acoes;
+        public IAsyncRelayCommand<Agendamento> EditarAgendamentoCommand { get; }
+        public IAsyncRelayCommand<Agendamento> PagamentosAgendamentoCommand { get; }
 
 
-        public CalendarioViewModel(AgendaViewModel agendaViewModel, IAgendamentoService agendamentoService,
+        public CalendarioViewModel(
+        AgendaViewModel agendaViewModel,
+        IAgendamentoService agendamentoService,
         IClienteService clienteService,
         ICriancaService criancaService,
         IPacoteService pacoteService,
         IServicoService servicoService,
         IPagamentoService pagamentoService,
-        IProdutoService produtoService)
+        IProdutoService produtoService,
+        IAcoesService acoesService)
         {
             IsActive = true;
             AgendaViewModel = agendaViewModel;
@@ -54,32 +60,21 @@ namespace AgendaNovo.ViewModels
             _servicoService = servicoService;
             _pagamentoService = pagamentoService;
             _produtoService = produtoService;
+            _acoes = acoesService;
             _clienteService.ClienteInativo();
             
             MesAtual = DateTime.Today;
             tipoSelecionado = TipoBusca.Cliente;
             CarregarDias();
-            MoverAgendamentoCommand =
-            new RelayCommand<(Agendamento ag, DateTime novaData)>(p => MoverAgendamentoInMemory(p.ag, p.novaData));
+            MoverAgendamentoAsyncCommand =
+            new AsyncRelayCommand<(Agendamento ag, DateTime novaData)>(ReagendarAsync);
             RefreshCalendar();
-            EditarAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
-            {
-                if (ag is null) return;
-                SelecionarAgendamento(ag);
-                EditarAgendamentoPorId(ag.Id);   // isto já faz: TelaEditarAgendamento + MostrarEditarAgendamento = true
-                HistoricoCliente(ag.ClienteId);               // abre/atualiza a coluna de histórico
-                AplicarDestaqueNoHistorico();
-            });
 
-            PagamentosAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
-            {
-                if (ag is null) return;
-                SelecionarAgendamento(ag);
-                _ = AbrirPagamentosAsync(ag.Id); // isto já faz: PagamentosVM + MostrarPagamentos = true
-                HistoricoCliente(ag.ClienteId);               // abre/atualiza a coluna de histórico
-                AplicarDestaqueNoHistorico();
+            EditarAgendamentoCommand =
+                new AsyncRelayCommand<Agendamento>(EditarAgendamentoAsync);
 
-            });
+            PagamentosAgendamentoCommand =
+                new AsyncRelayCommand<Agendamento>(AbrirPagamentosAsync);
 
 
         }
@@ -105,7 +100,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private DateTime? dataSelecionada;
         [ObservableProperty] private int? agendamentoSelecionadoIdFiltro;
         public ObservableCollection<Agendamento> ListaAgendamentos { get; } = new();
-        public IRelayCommand<(Agendamento ag, DateTime novaData)> MoverAgendamentoCommand { get; }
+        public IAsyncRelayCommand<(Agendamento ag, DateTime novaData)> MoverAgendamentoAsyncCommand { get; }
         public ObservableCollection<Crianca> ListaCriancas { get; } = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
 
@@ -141,6 +136,70 @@ namespace AgendaNovo.ViewModels
                 });
             }
         }
+        private readonly List<TimeSpan> _horariosFixos = new()
+        {
+            TimeSpan.Parse("09:00"),
+            TimeSpan.Parse("10:00"),
+            TimeSpan.Parse("11:00"),
+            TimeSpan.Parse("14:00"),
+            TimeSpan.Parse("15:00"),
+            TimeSpan.Parse("16:00"),
+            TimeSpan.Parse("17:00"),
+            TimeSpan.Parse("18:00"),
+            TimeSpan.Parse("19:00")
+        };
+        private async Task ReagendarAsync((Agendamento ag, DateTime novaData) p)
+        {
+            var (ag, novaData) = p;
+            if (ag is null) return;
+            var horarioEscolhido = ag.Horario;
+
+            if (HorarioOcupado(novaData, ag.Horario, ag.Id))
+            {
+                // pega sugestões
+                var sugestoes = SugerirProximosHorariosLivres(novaData, ag.Horario, 6);
+
+                if (sugestoes.Count == 0)
+                {
+                    MessageBox.Show(
+                        $"O dia {novaData:dd/MM} está lotado nos horários fixos.\n" +
+                        $"Tente outro dia ou ajuste manualmente.",
+                        "Conflito de Horário", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                var picker = new SelecionarHorarioWindow(sugestoes, ag.Horario);
+                var ok = picker.ShowDialog() == true;
+                if (!ok) return; // cancelado
+
+                horarioEscolhido = picker.HorarioSelecionado;
+            }
+            var velhaData = ag.Data; var velhoHorario = ag.Horario;
+            ag.Horario = horarioEscolhido;
+            MoverAgendamentoInMemory(ag, novaData);
+
+
+            try
+            {
+                // 2) Persiste no banco
+                await _agendamentoService.ReagendarAsync(ag.Id, novaData, horarioEscolhido);
+
+                // 3) Opcional: avisar outras telas/VMs
+                WeakReferenceMessenger.Default.Send(
+                    new DadosAtualizadosMessage(clienteId: ag.ClienteId, agendamentoId: ag.Id)
+                );
+
+
+                RefreshCalendar();
+            }
+            catch (Exception ex)
+            {
+                // Reversão simples se a persistência falhar
+                MoverAgendamentoInMemory(ag, ag.Data); // volta (ou guarde a velhaData antes)
+                Debug.WriteLine($"Erro ao reagendar: {ex}");
+                // Mostre um toast/MessageBox se preferir
+            }
+        }
+        
         public void RefreshCalendar()
         {
             // 1) Recarrega só os agendamentos
@@ -287,6 +346,81 @@ namespace AgendaNovo.ViewModels
                 h.EstaSendoEditado = (AgendamentoEditandoId.HasValue &&
                                       h.Agendamento?.Id == AgendamentoEditandoId.Value);
         }
+        private async Task EditarAgendamentoAsync(Agendamento ag)
+        {
+            if (ag is null) return;
+
+            // 1) Seleção/estado de UI 
+            SelecionarAgendamento(ag);
+
+            // 2) Pede dados ao serviço (sem tocar em UI dentro do serviço)
+            var dto = await _acoes.PrepararEdicaoAsync(ag.Id);
+            if (dto is null) return;
+
+            // 3) Preenche sua AgendaViewModel com os dados retornados
+            var agendaVM = AgendaViewModel;
+            agendaVM._populandoCampos = true;
+
+            // monta objetos “editáveis” sem navegação, como você já fazia:
+            agendaVM.NovoAgendamento = new Agendamento
+            {
+                Id = dto.Agendamento.Id,
+                Data = dto.Agendamento.Data,
+                Horario = dto.Agendamento.Horario,
+                Tema = dto.Agendamento.Tema,
+                Valor = dto.Agendamento.Valor,
+                ServicoId = dto.Agendamento.ServicoId,
+                PacoteId = dto.Agendamento.PacoteId,
+                CriancaId = dto.Agendamento.CriancaId,
+                Fotos = dto.Agendamento.Fotos,
+                Mesversario = dto.Agendamento.Mesversario
+            };
+
+            agendaVM.NovoCliente = new Cliente
+            {
+                Id = dto.Cliente?.Id ?? 0,
+                Nome = dto.Cliente?.Nome,
+                Telefone = dto.Cliente?.Telefone,
+                Observacao = dto.Cliente?.Observacao
+            };
+
+            // listas pré-carregadas
+            agendaVM.ListaServicos = new ObservableCollection<Servico>(dto.Servicos);
+            agendaVM.ListaPacotes = new ObservableCollection<Pacote>(dto.Pacotes);
+            agendaVM.ListaPacotesFiltrada = new ObservableCollection<Pacote>(dto.PacotesFiltrados);
+
+            // seleções auxiliares
+            if (dto.Agendamento.ServicoId.HasValue)
+                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
+                    .FirstOrDefault(s => s.Id == dto.Agendamento.ServicoId.Value);
+
+            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada
+                .FirstOrDefault(p => p.Id == dto.Agendamento.PacoteId);
+
+            agendaVM._populandoCampos = false;
+            agendaVM.ForcarAtualizacaoCampos();
+
+            // 4) UI: abrir modal, destacar histórico etc.
+            HistoricoAgendamentos = new ObservableCollection<AgendamentoHistoricoVM>(
+                await _acoes.ObterHistoricoClienteAsync(ag.ClienteId));
+            OnPropertyChanged(nameof(TemHistorico));
+            AplicarDestaqueNoHistorico();
+
+            if (!MostrarEditarAgendamento || TelaEditarAgendamento is null)
+            {
+                var view = new EditarAgendamentoView { DataContext = agendaVM };
+                view.FecharSolicitado += (s, e) =>
+                {
+                    MostrarEditarAgendamento = false;
+                    TelaEditarAgendamento = null;
+                    AgendamentoEditandoId = null;
+                    AplicarDestaqueNoHistorico();
+                };
+                TelaEditarAgendamento = view;
+                MostrarEditarAgendamento = true;
+            }
+        }
+
         public void EditarAgendamentoPorId(int id)
         {
             var a = _agendamentoService.GetByIdAsNoTracking(id);
@@ -538,7 +672,7 @@ namespace AgendaNovo.ViewModels
             if (velhaData == novaDataDate) return;
 
             // 1) Atualiza o modelo (e dispara PropertyChanged)
-            ag.Data = novaDataDate; // garanta que Agendamento.OnPropertyChanged(nameof(Data)) seja chamado
+            ag.Data = novaDataDate; 
 
             // 2) Tira do dia antigo
             var diaAntigo = DiasDoMes.FirstOrDefault(d => d.Data.Date == velhaData);
@@ -577,6 +711,39 @@ namespace AgendaNovo.ViewModels
 
             // Se seu filtro depende de DataSelecionada/AgendamentoSelecionadoIdFiltro:
             FiltrarAgendamentos();
+        }
+        private bool HorarioOcupado(DateTime dia, TimeSpan? horario, int agendamentoIdIgnorar = 0)
+        {
+            var vmDia = DiasDoMes.FirstOrDefault(d => d.Data.Date == dia.Date);
+            if (vmDia is null) return false;
+            return vmDia.Agendamentos.Any(a => a.Horario == horario && a.Id != agendamentoIdIgnorar);
+        }
+        private List<TimeSpan> HorariosLivres(DateTime dia)
+        {
+            var vmDia = DiasDoMes.FirstOrDefault(d => d.Data.Date == dia.Date);
+
+            if (vmDia is null) return _horariosFixos.ToList();
+
+            var ocupados = vmDia.Agendamentos
+            .Select(a => a.Horario.Value)
+            .Where(h => h != null)
+            .ToHashSet();
+
+            var livres = _horariosFixos
+            .Where(h => !ocupados.Contains(h))
+            .ToList();
+
+            return livres;
+        }
+        private List<TimeSpan> SugerirProximosHorariosLivres(DateTime dia, TimeSpan? aPartir, int max = 4)
+        {
+            var livres = HorariosLivres(dia).OrderBy(h => h).ToList();
+            var depois = livres.Where(h => h >= aPartir).ToList();
+            var antes = livres.Where(h => h < aPartir).ToList();
+            var result = new List<TimeSpan>();
+            result.AddRange(depois);
+            result.AddRange(antes);
+            return result.Take(max).ToList();
         }
     } 
 

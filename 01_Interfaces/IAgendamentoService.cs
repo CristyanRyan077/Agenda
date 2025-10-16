@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Models;
+﻿using AgendaNovo.Converters;
+using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.ViewModels;
 using System;
@@ -18,13 +19,13 @@ namespace AgendaNovo.Interfaces
         Agendamento Add(Agendamento agendamento);
         void Update(Agendamento agendamento);
         void Delete(int id);
-
         void AtivarSePendente(int agendamentoid);
         void ValorIncompleto(int agendamentoid);
-
+        void UpdateStatus(int id, StatusAgendamento novoStatus);
         void UpdateItens(int agendamentoId, List<AgendamentoProduto> itens);
-
-        void UpdateEtapas(Agendamento agendamento);
+        Task ReagendarAsync(int agendamentoId, DateTime novaData, TimeSpan? novoHorario);
+        AgendamentoEtapa AddOrUpdateEtapa(int agendamentoId, EtapaFotos etapa, DateTime data, string? obs);
+        List<AgendamentoAtrasoDTO> GetAgendamentosComFotosAtrasadas(DateTime hoje);
 
 
         // Filtros úteis
@@ -35,15 +36,16 @@ namespace AgendaNovo.Interfaces
         IQueryable<AgendaNovo.Services.FinanceiroRow> QueryFinanceiro(
            DateTime inicio, DateTime fim,
            int? servicoId = null,
-           StatusAgendamento? status = null);
+           StatusAgendamento? status = null, string? clienteNome = null);
 
 
-        Task AtualizarFotosAsync(int agendamentoId, FotosReveladas fotos);
-        Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, int? produtoId = null, StatusAgendamento? status = null);
-        Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null);
-        Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null);
+        Task<FinanceiroResumo> CalcularKpisAsync(DateTime inicio, DateTime fim, int? servicoId = null, int? produtoId = null, StatusAgendamento? status = null, string? clienteNome = null);
+        Task<List<RecebivelDTO>> ListarEmAbertoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null, string? clienteNome = null);
+        Task<List<ServicoResumoDTO>> ResumoPorServicoAsync(DateTime inicio, DateTime fim, int? servicoId = null, StatusAgendamento? status = null, string? clienteNome = null);
         public Task<List<ProdutoResumoVM>> ResumoPorProdutoAsync(
-        DateTime inicio, DateTime fim, int? produtoId = null, StatusAgendamento? status = null);
+        DateTime inicio, DateTime fim, int? produtoId = null, StatusAgendamento? status = null, string? clienteNome = null);
+        Task<List<FotoProcessoVM>> ListarProcessoFotosAsync(DateTime inicio, DateTime fim, EtapaStatus? status = null, string? clienteNome = null);
+        bool AbrirEtapaDialog(SetEtapaParam p);
     }
 
 }

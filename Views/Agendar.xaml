@@ -89,23 +89,20 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <controles:ServicosAutoComplete VerticalAlignment="Center" />
-                   
 
 
-                    <hc:ComboBox Name="txtpacote" Width="265" Height="60"
-                                              IsEditable="True" IsTextSearchEnabled="True"
-                                     DisplayMemberPath="Nome" SelectionChanged="ComboBoxPacotes_SelectionChanged"
-                                 hc:InfoElement.Placeholder="Pacote"
-                                  ItemsSource="{Binding ListaPacotesFiltrada}"
-                                  SelectedItem="{Binding Pacoteselecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                                  BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Right" Grid.ColumnSpan="3">
+
+                    <hc:ComboBox
+                            Name="txtpacote" Width="265" Height="60"
+                                IsEditable="True" IsTextSearchEnabled="True"
+                        DisplayMemberPath="Nome" SelectionChanged="ComboBoxPacotes_SelectionChanged"
+                    hc:InfoElement.Placeholder="Pacote"
+                    ItemsSource="{Binding ListaPacotesFiltrada}"
+                    SelectedItem="{Binding Pacoteselecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
+                    BorderBrush="Black" SelectionTextBrush="Black" HorizontalAlignment="Right" Grid.ColumnSpan="3">
 
                     </hc:ComboBox>
-
-                    <materialDesign:PackIcon Grid.Column="1" Kind="BoxAdd" HorizontalAlignment="Right"
-                                         Width="34" Height="34" VerticalAlignment="Center"
-                                         Foreground="White" Margin="10,0,30,0"/>
 
 
                 </Grid>
@@ -130,21 +127,22 @@
                                          HorizontalAlignment="Right"
                                          Foreground="White" VerticalAlignment="Center"/>
 
-                    <hc:TextBox Name="txtValor" Grid.Column="1" Width="180" Height="60"
-                            hc:InfoElement.Placeholder="Valor" HorizontalAlignment="Left"
-                             Text="{Binding NovoAgendamento.Valor, StringFormat=R$ {0:N2}, UpdateSourceTrigger=PropertyChanged}"
-                            IsReadOnly="True"
-                            Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                            BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Kind="Cash100" Opacity="0.3" VerticalAlignment="Center" Grid.Column="1" Width="32" Height="32" Foreground="#FFA6FF9F" HorizontalAlignment="Right"/>
+                    <!-- VALOR (somente leitura) -->
 
-                    <hc:TextBox  Name="txtvalorpago" Text="{Binding NovoPagamento.Valor, UpdateSourceTrigger=PropertyChanged }"
-                            Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
-                            hc:InfoElement.Placeholder="Pago"
-                              Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
-                              BorderBrush="Transparent" SelectionTextBrush="Black"/>
-                    <materialDesign:PackIcon Kind="CashCycle" Opacity="0.3" VerticalAlignment="Center" Grid.Column="2" HorizontalAlignment="Right" Width="32" Height="32" Foreground="#FFA6FF9F"/>
+                    <hc:TextBox 
+                        Grid.Column="1" Width="180" Height="60"
+                        hc:InfoElement.Placeholder="Valor"
+                        Text="{Binding NovoAgendamento.Valor, StringFormat=R$ {0:N2}, Mode=OneWay}"
+                        IsReadOnly="True"
+                        Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
+                        FontSize="24" FontWeight="Bold" BorderBrush="Transparent"/>
 
+                    <!-- PAGO (entrada do usuário) -->
+                    <hc:TextBox Grid.Column="2" Width="150" Height="60" HorizontalAlignment="Right"
+            hc:InfoElement.Placeholder="Pago"
+            Text="{Binding NovoPagamento.Valor, UpdateSourceTrigger=PropertyChanged}"
+            Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica"
+            FontSize="24" FontWeight="Bold" BorderBrush="Transparent"/>
 
                 </Grid>
 
@@ -228,7 +226,44 @@
                           hc:InfoElement.Placeholder="Observacao" Margin="0,0,60,10" VerticalAlignment="Top" BorderBrush="Transparent"
                               Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                             />
-               
+                <hc:ComboBox Grid.Column="0" Grid.Row="5" Height="60"
+                 Width="140"
+                 ItemsSource="{Binding TiposEntrega}"
+                 SelectedItem="{Binding TipoSelecionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Background="#88D1D3D8" Foreground="Black" HorizontalAlignment="Right"
+                 FontFamily="#heveltica" FontSize="18" FontWeight="Bold" VerticalAlignment="Top"
+                 BorderBrush="Transparent" />
+                <Button Grid.Row="0" Grid.Column="0" VerticalAlignment="Top"
+                        Content="Adicionar produto" 
+                        Width="180" Height="45" Background="LightGray"
+                        HorizontalAlignment="Right" Margin="10,0,0,0"
+                        Command="{Binding AbrirAdicionarProdutoCommand}"
+                        IsEnabled="{Binding PodeAdicionarProduto}"
+                        />
+                <StackPanel   Visibility="{Binding TemProdutosPendentes, Converter={StaticResource BoolToVisibilityConverter}}"
+                              Grid.Row="5" Grid.Column="0" Margin="2,70,0,0" Width="220" HorizontalAlignment="Left"
+                              Background="#88D1D3D8">
+                    <TextBlock Text="Produtos deste agendamento" Foreground="White" Margin="0,0,0,10" FontWeight="Bold" />
+                    <ItemsControl ItemsSource="{Binding ProdutosPendentes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <TextBlock Text="{Binding Nome}" Width="80" Margin="0,0,10,0" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Quantidade}" Width="20" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Total, StringFormat=R$ {0:N2}}" Width="70" FontWeight="SemiBold"/>
+                                    <Button Content="X" DockPanel.Dock="Right" Height="24" FontSize="11" Background="Red" HorizontalAlignment="Right"
+                            Command="{Binding DataContext.RemoverProdutoPendCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="{Binding TotalProdutos, StringFormat=Total produtos: R$ {0:N2}}" 
+                    FontWeight="Bold" Margin="0,6,0,0"/>
+                </StackPanel>
+
+
 
 
 
@@ -249,9 +284,9 @@
                           Width="170" Height="40" VerticalAlignment="Top" HorizontalAlignment="Center"
                           Margin="0,0,0,60" Background="#FF00FFE2"
                           Grid.Row="5"/>
-                <hc:SearchBar hc:InfoElement.Placeholder="Buscar por Nome ou Telefone" Height="32" Width="250" Background="White"
+                <hc:SearchBar hc:InfoElement.Placeholder="Buscar por Nome ou Telefone" Height="32" Width="230" Background="White"
                             Text="{Binding TextoPesquisa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Grid.Row="5" Margin="0,0,0,5"
+                            Grid.Row="5" Margin="10,0,0,5"
                             VerticalAlignment="Bottom" HorizontalAlignment="Right"
                             BorderBrush="Black"
                             />
@@ -345,6 +380,9 @@
 
                     </StackPanel>
                 </StackPanel>
+
+
+
 
             </Grid>
         </ScrollViewer>

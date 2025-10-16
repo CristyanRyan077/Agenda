@@ -17,6 +17,7 @@ namespace AgendaNovo.Views
         private Calendario? _calendario;
         private Agendar? _agendar;
         private Financeiro? _finWin;
+        private ProcessoFotos _fotos;
         private IServiceScope _finScope;
         private readonly IServiceProvider _sp;
 
@@ -26,15 +27,12 @@ namespace AgendaNovo.Views
         }
         public async Task AbrirFinanceiroNaMainAsync()
         {
-            var owner = GetMainWindow();
-
             if (_finWin == null || !_finWin.IsLoaded)
             {
                 System.Diagnostics.Debug.WriteLine("[WM] AbrirFinanceiroNaMainAsync START");
                 _finScope = _sp.CreateScope();
                 // cria janela, exibe rápido
                 _finWin = _sp.GetRequiredService<Financeiro>();
-                _finWin.Owner = owner;
                 _finWin.Closed += (_, __) => _finWin = null;
 
                 var vm = _sp.GetRequiredService<FinanceiroViewModel>();
@@ -118,6 +116,26 @@ namespace AgendaNovo.Views
                 _agendar.Activate();
             }
             return _agendar;
+        }
+        public async Task<ProcessoFotos> GetFotos()
+        {
+            if (_fotos == null || !_fotos.IsLoaded)
+            {
+                _fotos = _sp.GetRequiredService<ProcessoFotos>();
+                var vm = _sp.GetRequiredService<FotosViewModel>();
+                _fotos.DataContext = vm;
+                _fotos.Closed += (s, e) => _fotos = null;
+                _fotos.Show();
+                await vm.CarregarAsync();
+              
+            }
+            else
+            {
+                if (_fotos.WindowState == WindowState.Minimized)
+                    _fotos.WindowState = WindowState.Normal;
+                _fotos.Activate();
+            }
+            return _fotos;
         }
 
 

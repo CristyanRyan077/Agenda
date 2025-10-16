@@ -168,19 +168,33 @@ namespace AgendaNovo.Views
             _mouseDown = false;
         }
 
-        private void Dia_PreviewDrop(object sender, DragEventArgs e)
+        private async void Dia_PreviewDrop(object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(typeof(Agendamento))) return;
+            try
+            {
+                if (!e.Data.GetDataPresent(typeof(Agendamento))) return;
 
-            var ag = (Agendamento)e.Data.GetData(typeof(Agendamento));
-            var cellVm = (DiaCalendario)((FrameworkElement)sender).DataContext;
-            var novaData = cellVm.Data;
+                var ag = (Agendamento)e.Data.GetData(typeof(Agendamento));
+                var cellVm = (DiaCalendario)((FrameworkElement)sender).DataContext;
+                var novaData = cellVm.Data;
 
-            var vm = (CalendarioViewModel)DataContext;
-            vm.MoverAgendamentoCommand.Execute((ag, novaData));
+                var vm = (CalendarioViewModel)DataContext;
 
-            ((Border)sender).ClearValue(Border.BackgroundProperty);
-            e.Handled = true;
+                // se quiser, guarde a data antiga pra rollback caso falhe
+                var oldDate = ag.Data;
+
+                await vm.MoverAgendamentoAsyncCommand.ExecuteAsync((ag, novaData));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Erro no Drop de reagendamento: " + ex);
+                // TODO: opcional -> toast/MessageBox amigável
+            }
+            finally
+            {
+                ((Border)sender).ClearValue(Border.BackgroundProperty);
+                e.Handled = true;
+            }
         }
 
         private void Dia_PreviewDragLeave(object sender, DragEventArgs e)

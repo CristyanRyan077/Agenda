@@ -4,7 +4,7 @@
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:conv="clr-namespace:AgendaNovo.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:local="clr-namespace:AgendaNovo" xmlns:views="clr-namespace:AgendaNovo.Views" xmlns:vm="clr-namespace:AgendaNovo.ViewModels">
+             xmlns:local="clr-namespace:AgendaNovo" xmlns:views="clr-namespace:AgendaNovo.Views" xmlns:vm="clr-namespace:AgendaNovo.ViewModels" xmlns:models="clr-namespace:AgendaNovo.Models">
 
 
     <Application.Resources>
@@ -22,7 +22,10 @@
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <local:StringEqualsConverter x:Key="StringEqualsConverter"/>
             <conv:StageParamConverter x:Key="StageParamConverter"/>
+            <conv:EtapaLookupConverter x:Key="EtapaLookupConverter"/>
             <conv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <conv:TruncateConverter x:Key="TruncateConverter" Max="60"/>
+            <conv:NotificacaoGrupoConverter x:Key="NotificacaoGrupoConverter"/>
             <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <conv:MesAnoPtBrConverter x:Key="MesAnoPtBrConverter"/>
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
@@ -38,6 +41,8 @@
             <conv:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
             <conv:PercentToBrushConverter x:Key="PercentToBrushConverter"/>
             <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <conv:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <conv:StatusIsPendingConverter x:Key="StatusIsPendingConverter"/>
             <conv:DecimalSafeConverter x:Key="DecimalSafeConverter"/>
             <conv:BoolToTextConverter x:Key="BoolToTextConverter" 
                                TrueText="Salvar"
@@ -46,6 +51,90 @@
             <DataTemplate DataType="{x:Type vm:FinanceiroViewModel}">
                 <views:Financeiro/>
             </DataTemplate>
+            
+            <Style x:Key="BtnConfirmarStyle" TargetType="Button">
+                <Setter Property="Width" Value="38"/>
+                <Setter Property="Height" Value="25"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Focusable" Value="False"/>
+
+                <Setter Property="Command"
+            Value="{Binding DataContext.ConfirmarCommand,
+                            RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Setter Property="CommandParameter" Value="{Binding}"/>
+                <Setter Property="Content" Value="✔"/>
+                <Setter Property="IsEnabled" Value="True"/>
+                <Setter Property="IsHitTestVisible" Value="True"/>
+                <Setter Property="Background"
+            Value="{Binding Status, Converter={StaticResource StatusToColorConverter}, ConverterParameter=Confirmado}"/>
+
+                <Style.Triggers>
+                    <!-- deixa clicável só quando Pendente -->
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Pendente}">
+                        <Setter Property="IsHitTestVisible" Value="True"/>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Confirmado}">
+                        <Setter Property="IsHitTestVisible" Value="True"/>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Concluido}">
+                        <Setter Property="Content" Value="✔✔"/>
+                        <Setter Property="Background" Value="Green"/>
+                        <Setter Property="IsHitTestVisible" Value="False"/>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Cancelado}">
+                        <Setter Property="IsHitTestVisible" Value="True"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="BtnCancelarStyle" TargetType="Button">
+                <Setter Property="Width" Value="38"/>
+                <Setter Property="Height" Value="25"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Content" Value="✖"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Margin" Value="5,0,0,0"/>
+
+                <!-- Comando padrão -->
+                <Setter Property="Command"
+                    Value="{Binding DataContext.CancelarCommand,
+                                    RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Setter Property="CommandParameter" Value="{Binding}"/>
+
+                <!-- Sempre habilitado visualmente -->
+                <Setter Property="IsEnabled" Value="True"/>
+                <Setter Property="IsHitTestVisible" Value="True"/>
+                <Setter Property="Background"
+                    Value="{Binding Status,
+                                    Converter={StaticResource StatusToColorConverter},
+                                    ConverterParameter=Cancelado}"/>
+
+                <Style.Triggers>
+                    <!-- Só deixa clicar quando está pendente -->
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Pendente}">
+                        <Setter Property="IsHitTestVisible" Value="True"/>
+                    </DataTrigger>
+
+                    <!-- Quando confirmado, bloqueia clique -->
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Confirmado}">
+                        <Setter Property="IsHitTestVisible" Value="False"/>
+                    </DataTrigger>
+
+                    <!-- Quando cancelado, bloqueia clique -->
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Cancelado}">
+                        <Setter Property="IsHitTestVisible" Value="False"/>
+                    </DataTrigger>
+
+                    <!-- Quando concluído, ESCONDE o botão -->
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static models:StatusAgendamento.Concluido}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

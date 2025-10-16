@@ -16,7 +16,6 @@
                  hc:InfoElement.Placeholder="Cliente"
                  MinWidth="200"
                  TextSearch.TextPath="Nome"
-                 ToolTip="Obs: Nessa janela, cliente não pode ser editado nem criado um novo"
                  Background="#88D1D3D8" Foreground="Black" FontFamily="#heveltica" FontSize="24" FontWeight="Bold"
                  BorderBrush="Black" SelectionTextBrush="Black"/>
 
@@ -32,7 +31,9 @@
     <ListBox.ItemTemplate>
         <DataTemplate>
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="{Binding Nome}" FontWeight="Bold" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding NomeComId}" Margin="0,0,10,0" FontWeight="Bold" />
+                </StackPanel>
                 <TextBlock Text="{Binding Telefone}" FontSize="12" Foreground="Gray" />
             </StackPanel>
         </DataTemplate>

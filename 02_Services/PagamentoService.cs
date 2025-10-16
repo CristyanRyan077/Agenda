@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Dtos;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.ViewModels;
 using Microsoft.EntityFrameworkCore;

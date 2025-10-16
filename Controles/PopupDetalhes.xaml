@@ -1,24 +1,184 @@
-﻿<Window x:Class="AgendaNovo.Controles.PopupDetalhes"
+﻿
+    <Window x:Class="AgendaNovo.Controles.PopupDetalhes"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AgendaNovo.Controles"
-        mc:Ignorable="d"
-        Title="PopupDetalhes" Height="450" Width="800">
-    <Grid>
-        <ListBox ItemsSource="{Binding Notificacoes}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <TextBlock Text="{Binding NomeCliente}" Width="200"/>
-                        <Button Content="Enviar" 
-                                Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </Grid>
+        xmlns:conv="clr-namespace:AgendaNovo.Converters"
+        xmlns:models="clr-namespace:AgendaNovo.Models" xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase" xmlns:local="clr-namespace:AgendaNovo.Controles"
+        mc:Ignorable="d" Background="DimGray"
+        Title="PopupDetalhes" Height="550" Width="900">
 
+        <Window.Resources>
+            <!-- Converters -->
+            <conv:NotificacaoGrupoConverter x:Key="NotificacaoGrupoConverter"/>
+            <conv:NotificacaoSubGrupoConverter x:Key="NotificacaoSubGrupoConverter"/>
+        <conv:GroupNameDisplayConverter x:Key="GroupNameDisplayConverter"/>
+
+    </Window.Resources>
+    <Grid Background="DimGray" Margin="0">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <!-- header Agendamentos Hoje -->
+        <RowDefinition Height="Auto"/>
+        <!-- lista Hoje -->
+        <RowDefinition Height="Auto"/>
+        <!-- header Amanhã -->
+        <RowDefinition Height="*"/>
+        <!-- lista Amanhã -->
+        <RowDefinition Height="Auto"/>
+        <!-- header Fotos atrasadas -->
+        <RowDefinition Height="10*"/>
+        <!-- 3 listas em colunas -->
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <!-- (1) Hoje -->
+    <Border Grid.Row="0" Grid.ColumnSpan="1" Background="#333" Padding="6" CornerRadius="4" Margin="0,10,8,6">
+        <TextBlock Text="Agendamentos — Hoje" Foreground="White" FontWeight="SemiBold"/>
+    </Border>
+
+    <ListBox Grid.Row="1" Grid.Column="0"
+           ItemsSource="{Binding HojeView}"
+           ScrollViewer.VerticalScrollBarVisibility="Auto"
+           VirtualizingPanel.IsVirtualizing="True"
+           VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="0,4">
+                    <Button Content="Enviar"
+                  DockPanel.Dock="Right"
+                  Padding="10,4" Background="LightGray"
+                  Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                  CommandParameter="{Binding}"/>
+                    <StackPanel Margin="0,0,10,2">
+                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Mensagem}" Foreground="#666"/>
+                    </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- (2) Amanhã (usa 2 colunas para ficar largo como sua imagem) -->
+    <Border Grid.Row="0" Grid.Column="1"  Background="#333" Padding="6" CornerRadius="4" Margin="8,10,0,6">
+        <TextBlock Text="Agendamentos — Amanhã" Foreground="White" FontWeight="SemiBold"/>
+    </Border>
+
+    <ListBox Grid.Row="1" Grid.Column="1"
+           ItemsSource="{Binding AmanhaView}"
+           Margin="8,0,0,0"
+           ScrollViewer.VerticalScrollBarVisibility="Auto"
+           VirtualizingPanel.IsVirtualizing="True"
+           VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="0,4">
+                    <Button Content="Enviar"
+                  DockPanel.Dock="Right"
+                  Padding="10,4" Background="LightGray"
+                  Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                  CommandParameter="{Binding}"/>
+                    <StackPanel Margin="0,0,10,2">
+                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Mensagem}" Foreground="#666"/>
+                    </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- Header para as 3 de fotos -->
+    <Border Grid.Row="3" Width="470" Height="30" HorizontalAlignment="Left" Background="#333" Padding="6" CornerRadius="4" Margin="0,12,0,6">
+        <TextBlock Text="Tratamento - Atrasados" Foreground="White" FontWeight="SemiBold"/>
+    </Border>
+        <Border Grid.Row="3" Grid.Column="1" Width="470" Height="30" HorizontalAlignment="Center" Background="#333" Padding="6" CornerRadius="4" Margin="0,12,0,6">
+            <TextBlock Text="Revelar - Atrasados" Foreground="White" FontWeight="SemiBold"/>
+        </Border>
+        <Border Grid.Row="3" Grid.Column="2" Width="470" Height="30" HorizontalAlignment="Center" Background="#333" Padding="6" CornerRadius="4" Margin="0,12,0,6">
+            <TextBlock Text="Enviar - Atrasados" Foreground="White" FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- (3) Tratamento -->
+    <ListBox Grid.Row="5" Grid.Column="0"
+           ItemsSource="{Binding TratamentoView}"
+           Margin="0,0,8,0"
+           ScrollViewer.VerticalScrollBarVisibility="Auto"
+           VirtualizingPanel.IsVirtualizing="True"
+           VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="0,4">
+                    <Button Content="Enviar"
+                  DockPanel.Dock="Right"
+                  Padding="10,4" Background="LightGray"
+                  Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                  CommandParameter="{Binding}"/>
+                    <StackPanel Margin="0,0,10,2">
+                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Mensagem}" Foreground="#666"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Data do Agendamento: "/>
+                                <TextBlock Text="{Binding DataAgendamento,StringFormat=dd/MM/yyyy}" />
+                            </StackPanel>
+
+                        </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- (4) Revelar -->
+    <ListBox Grid.Row="5" Grid.Column="1"
+           ItemsSource="{Binding RevelarView}"
+           Margin="4,0,4,0"
+           ScrollViewer.VerticalScrollBarVisibility="Auto"
+           VirtualizingPanel.IsVirtualizing="True"
+           VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="0,4">
+                    <Button Content="Enviar"
+                  DockPanel.Dock="Right"
+                  Padding="10,4" Background="LightGray"
+                  Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                  CommandParameter="{Binding}"/>
+                    <StackPanel Margin="0,0,10,2">
+                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Mensagem}" Foreground="#666"/>
+                    </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- (5) Entrega -->
+    <ListBox Grid.Row="5" Grid.Column="2"
+           ItemsSource="{Binding EntregaView}"
+           Margin="8,0,0,0"
+           ScrollViewer.VerticalScrollBarVisibility="Auto"
+           VirtualizingPanel.IsVirtualizing="True"
+           VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="0,4">
+                    <Button Content="Enviar"
+                  DockPanel.Dock="Right"
+                  Padding="10,4" Background="LightGray"
+                  Command="{Binding DataContext.EnviarMensagemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                  CommandParameter="{Binding}"/>
+                    <StackPanel Margin="0,0,10,2">
+                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Mensagem}" Foreground="#666"/>
+                    </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+    </Grid>
 </Window>

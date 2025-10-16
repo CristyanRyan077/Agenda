@@ -1,6 +1,8 @@
 ﻿
 using AgendaNovo.Controles;
 using AgendaNovo.Converters;
+using AgendaNovo.Dtos;
+using AgendaNovo.Helpers;
 using AgendaNovo.Interfaces;
 using AgendaNovo.Migrations;
 using AgendaNovo.Models;
@@ -37,6 +39,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static AgendaNovo.Agendamento;
+using static AgendaNovo.ViewModels.AdicionarProdutoVM;
 
 namespace AgendaNovo
 {
@@ -58,22 +61,27 @@ namespace AgendaNovo
         private bool _viewInicializada;
         private bool _atualizandoLista;
 
-
         [ObservableProperty] private decimal valorPacote;
         [ObservableProperty] private Agendamento? itemSelecionado;
         [ObservableProperty] private Pacote? pacoteselecionado;
         [ObservableProperty] private Pagamento novoPagamento = new Pagamento();
+        [ObservableProperty] private AgendamentoEtapa etapa = new AgendamentoEtapa();
         [ObservableProperty] private string idBusca;
-
+        [ObservableProperty] private Produto? produtoSelecionado;
+        [ObservableProperty] private int quantidadeProduto = 1;
+        [ObservableProperty] private ObservableCollection<Produto> listaProdutos = new();
         //Cliente
         [ObservableProperty] private Cliente? clienteSelecionado;
         [ObservableProperty] private Cliente novoCliente = new();
         [ObservableProperty] private ObservableCollection<Cliente> listaClientes = new();
         [ObservableProperty]
         private bool usuarioDigitouNome;
+        [ObservableProperty]
+        private ObservableCollection<HistoricoFinanceiroDto> historico = new();
         public ObservableCollection<Cliente> ClientesFiltrados { get; set; } = new();
         public ObservableCollection<Servico> ServicosFiltrados { get; set; } = new();
-
+        [ObservableProperty] private ObservableCollection<ProdutoLinhaVM> produtosPendentes = new();
+        public decimal TotalProdutos => ProdutosPendentes.Sum(p => p.Total);
         //Crianca
         [ObservableProperty] private ObservableCollection<Crianca> listaCriancas = new();
         [ObservableProperty] private Crianca? criancaSelecionada = new();
@@ -86,43 +94,67 @@ namespace AgendaNovo
         [ObservableProperty] private DateTime dataSelecionada;
         [ObservableProperty] private ObservableCollection<string> horariosDisponiveis = new();
 
+        // === FIND (Ctrl+F) ===
+        [ObservableProperty] private bool findBarVisivel;
+        [ObservableProperty] private string? findTermo;
+        [ObservableProperty] private int findIndice;                   // 0-based
+        [ObservableProperty] private int findTotal;                    // total hits
+        [ObservableProperty] private int? findAgendamentoIdAtual;      // para destacar o item atual
+        private List<Agendamento> _findHits = new();
+        [ObservableProperty] private DateTime? dataFiltroSelecionada;
+
+
         //Outros
+        [ObservableProperty] private bool modoFotos;
         [ObservableProperty] FotosReveladas fotosreveladas;
         [ObservableProperty] private ObservableCollection<Servico> listaServicos = new();
         [ObservableProperty] private Servico? servicoSelecionado;
         [ObservableProperty] private string textoPesquisa = string.Empty;
         [ObservableProperty] private ObservableCollection<Pacote> listaPacotes = new();
         [ObservableProperty] private ObservableCollection<Pacote> listaPacotesFiltrada = new();
-        [ObservableProperty]
-        private string nomeDigitado = string.Empty;
-        [ObservableProperty]
-        private string servicoDigitado = string.Empty;
-        [ObservableProperty]
-        private bool ignorarProximoTextChanged;
+        [ObservableProperty] private string nomeDigitado = string.Empty;
+        [ObservableProperty] private string servicoDigitado = string.Empty;
+        [ObservableProperty] private bool ignorarProximoTextChanged;
         [ObservableProperty] private bool mostrarCheck;
+        [ObservableProperty] private Agendamento? selectedAgendamento;
+        [ObservableProperty] private bool isDetalhesOpen;
 
         [ObservableProperty]
         private bool mostrarSugestoes = false;
-
         [ObservableProperty]
         private bool mostrarSugestoesServico = false;
         public bool MostrarCrianca => ServicoSelecionado == null || ServicoSelecionado.PossuiCrianca;
 
+        public static readonly TimeSpan HORARIO_PRODUTO = new TimeSpan(23, 59, 0);
+        public const string HORARIO_PRODUTO_LABEL = "Produto (sem horário)";
+
         public IEnumerable<IdadeUnidade> IdadesUnidadeDisponiveis => Enum.GetValues(typeof(IdadeUnidade)).Cast<IdadeUnidade>();
         public IEnumerable<Genero> GenerosLista => Enum.GetValues(typeof(Genero)).Cast<Genero>();
+        public IEnumerable<TipoEntrega> TiposEntrega => Enum.GetValues(typeof(TipoEntrega)).Cast<TipoEntrega>();
+        [ObservableProperty] private TipoEntrega tipoSelecionado = TipoEntrega.Foto;
         public string NomeClienteSelecionado => ClienteSelecionado?.Nome ?? string.Empty;
+
         public bool _populandoCampos;
+        [ObservableProperty] private bool podeAdicionarProduto = false;
+        public bool TemProdutosPendentes => ProdutosPendentes.Any();
         public IRelayCommand AbrirAdicionarServicoCommand { get; }
         public IRelayCommand FecharModalCommand { get; }
-        public IRelayCommand<SetEtapaParam> SetEtapaCommand { get; }
+        public IRelayCommand<SetEtapaParam> AbrirEtapaDialogCommand { get; }
+        public IRelayCommand<Agendamento> ConfirmarCommand { get; }
+        public IRelayCommand<Agendamento> CancelarCommand { get; }
+        public AgendamentoActions Actions { get; }
+
 
         private readonly IAgendamentoService _agendamentoService;
         private readonly IClienteService _clienteService;
         private readonly ICriancaService _criancaService;
         private readonly IPacoteService _pacoteService;
         private readonly IServicoService _servicoService;
+        private readonly IProdutoService _produtoService;
+        private readonly IPagamentoService _pagamentoService;
 
         public NotificacaoViewModel NotificacaoVM { get; }
+
 
         private readonly NotificacaoService _notificacaoService;
 
@@ -130,7 +162,9 @@ namespace AgendaNovo
         IClienteService clienteService,
         ICriancaService criancaService,
         IPacoteService pacoteService,
-        IServicoService servicoService)
+        IServicoService servicoService,
+        IProdutoService produtoService,
+        IPagamentoService pagamentoService)
         {
 
             _agendamentoService = agendamentoService;
@@ -138,16 +172,20 @@ namespace AgendaNovo
             _criancaService = criancaService;
             _pacoteService = pacoteService;
             _servicoService = servicoService;
+            _produtoService = produtoService;
+            _pagamentoService = pagamentoService;
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
             NovoAgendamento = new Agendamento();
-            SetEtapaCommand = new RelayCommand<SetEtapaParam>(SetEtapa);
+            AbrirEtapaDialogCommand = new RelayCommand<SetEtapaParam>(AbrirEtapaDialog);
             MostrarAdicionarServicoPacote = false;
             mostrarCheck = true;
             NotificacaoVM = new NotificacaoViewModel( servicoService , agendamentoService );
             _notificacaoService = new NotificacaoService(NotificacaoVM, agendamentoService);
             Debug.WriteLine($"AgendaViewModel criado Hash: {this.GetHashCode()}");
+            ConfirmarCommand = new RelayCommand<Agendamento>(Confirmar);
+            CancelarCommand = new RelayCommand<Agendamento>(Cancelar);
             AbrirAdicionarServicoCommand = new RelayCommand(() =>
             {
                 TelaModalConteudo = new AddServico()
@@ -175,6 +213,33 @@ namespace AgendaNovo
                 OnDadosAtualizados(m);
                 
             });
+           
+
+        }
+        // Recalcula a lista de matches (clientes contendo o termo, ignorando maiúsculas/minúsculas)
+        partial void OnFindTermoChanged(string? value)
+        {
+            RebuildFindHits();
+        }
+        partial void OnDataFiltroSelecionadaChanged(DateTime? value)
+        {
+            if (value is null) return;
+            IrParaSemana(value.Value);
+        }
+        public void IrParaSemana(DateTime data)
+        {
+            var inicio = InicioDaSemanaPicker(data); // dom ou seg, conforme sua regra
+            if (inicio.Date == DataReferencia.Date) return;
+
+            DataReferencia = inicio;
+        }
+
+        private static DateTime InicioDaSemanaPicker(DateTime d)
+        {
+            // Semana começando no DOMINGO:
+            int delta = ((int)d.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            if (delta < 0) delta += 7;
+            return d.Date.AddDays(-delta);
 
         }
         public void FiltrarServicos(string termo)
@@ -193,57 +258,53 @@ namespace AgendaNovo
 
             System.Diagnostics.Debug.WriteLine($"FiltrarServicos('{termo}') -> {ServicosFiltrados.Count} itens");
         }
-        private void SetEtapa(SetEtapaParam p)
+        public void AbrirEtapaDialog(SetEtapaParam p)
         {
             if (p?.Agendamento is null) return;
-            var ag = p.Agendamento;
-            var agora = DateTime.Now;
 
-            // SHIFT = limpar etapa
-            bool limpar = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-
-            switch (p.Etapa)
+            var vm = new EtapaDialogViewModel
             {
-                case EtapaFotos.Escolha:
-                    ag.EscolhaFeitaEm = limpar ? (DateTime?)null : (ag.EscolhaFeitaEm ?? agora);
-                    break;
+                AgendamentoId = p.Agendamento.Id,
+                Etapa = p.Etapa,
+                DataConclusao = DateTime.Today,
+                Observacao = null
+            };
 
-                case EtapaFotos.Tratamento:
-                    ag.TratadasEm = limpar ? (DateTime?)null : (ag.TratadasEm ?? agora);
-                    break;
+            var dialog = new EtapaDialogView { DataContext = vm }; // mini window/usercontrol
+            var ok = dialog.ShowDialog() == true;
+            if (!ok) return;
 
-
-                case EtapaFotos.ProducaoConcluida:
-                    ag.ProducaoConcluidaEm = limpar ? null : ag.ProducaoConcluidaEm ?? agora;
-                    break;
-
-                case EtapaFotos.Entrega:
-                    ag.EntregueEm = limpar ? (DateTime?)null : (ag.EntregueEm ?? agora);
-                    break;
-            }
-
-            // persistir (use seus services)
-            try
+            // Persistir
+                var saved = _agendamentoService.AddOrUpdateEtapa(
+                    vm.AgendamentoId, vm.Etapa, vm.DataConclusao, vm.Observacao);
+            var local = p.Agendamento.Etapas.FirstOrDefault(x => x.Etapa == saved.Etapa);
+            if (local == null)
+                p.Agendamento.Etapas.Add(new AgendaNovo.Models.AgendamentoEtapa
+                {
+                    Id = saved.Id,
+                    AgendamentoId = saved.AgendamentoId,
+                    Etapa = saved.Etapa,
+                    DataConclusao = saved.DataConclusao,
+                    Observacao = saved.Observacao,
+                    CreatedAt = saved.CreatedAt,
+                    UpdatedAt = saved.UpdatedAt
+                });
+            else
             {
-                _agendamentoService.UpdateEtapas(ag); // implemente salvando escalares + itens (attach/modified)
+                local.DataConclusao = saved.DataConclusao;
+                local.Observacao = saved.Observacao;
+                local.UpdatedAt = saved.UpdatedAt;
+                var idx = p.Agendamento.Etapas.IndexOf(local);
+                p.Agendamento.Etapas[idx] = local;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("[Etapas] Erro ao salvar: " + ex);
-            }
+                p.Agendamento.NotifyEtapasChanged();
 
-            // ajuste UI/coleções se necessário
-            OnPropertyChanged(nameof(AgendamentosSegunda)); // etc, se usar coleções por dia
-            OnPropertyChanged(nameof(AgendamentosDomingo));
-            OnPropertyChanged(nameof(AgendamentosSegunda));
-            OnPropertyChanged(nameof(AgendamentosTerca));
-            OnPropertyChanged(nameof(AgendamentosQuarta));
-            OnPropertyChanged(nameof(AgendamentosQuinta));
-            OnPropertyChanged(nameof(AgendamentosSexta));
-            OnPropertyChanged(nameof(AgendamentosSabado));
         }
 
-
+        partial void OnProdutosPendentesChanged(ObservableCollection<ProdutoLinhaVM> value)
+        {
+            OnPropertyChanged(nameof(TotalProdutos));
+        }
         partial void OnServicoSelecionadoChanged(Servico? value)
         {
             if (_populandoCampos) return;
@@ -253,9 +314,9 @@ namespace AgendaNovo
                 NovoAgendamento.ServicoId = null;
                 ListaPacotesFiltrada.Clear();
                 OnPropertyChanged(nameof(MostrarCrianca));
+                AtualizarHorariosDisponiveis();
                 return;
             }
-
 
             // Atualiza o Id do serviço
             NovoAgendamento.ServicoId = value.Id;
@@ -273,8 +334,40 @@ namespace AgendaNovo
 
             OnPropertyChanged(nameof(MostrarCrianca));
             Debug.WriteLine($"ServicoSelecionado mudou para: {(value == null ? "null" : value.Id.ToString())}");
+          
+            AtualizarHorariosDisponiveis();
         }
+        [RelayCommand]
+        private void AbrirAdicionarProduto()
+        {
+            if (PodeAdicionarProduto)
+            {
+                // VM do modal
+                TelaModalConteudo = new AdicionarProdutoView
+                {
+                    DataContext = new AdicionarProdutoVM(
+                    produtoService: _produtoService,
+                    onAddToCart: async (linha) =>
+                    {
+                        ProdutosPendentes.Add(linha);
+                        OnPropertyChanged(nameof(TotalProdutos));
+                        OnPropertyChanged(nameof(TemProdutosPendentes));
+                        MostrarAdicionarServicoPacote = false;
+                        TelaModalConteudo = null;
+                    })
+                };
 
+                MostrarAdicionarServicoPacote = true;
+            }
+        }
+        [RelayCommand]
+        private void RemoverProdutoPend(ProdutoLinhaVM linha)
+        {
+            if (linha == null) return;
+            ProdutosPendentes.Remove(linha);
+            OnPropertyChanged(nameof(TotalProdutos));
+            OnPropertyChanged(nameof(TemProdutosPendentes));
+        }
 
         partial void OnNomeDigitadoChanged(string value)
         {
@@ -320,6 +413,7 @@ namespace AgendaNovo
             NovoAgendamento.PacoteId = value.Id;
             NovoAgendamento.Valor = value.Valor;
             Debug.WriteLine($"PacoteSelecionado mudou para: {(value == null ? "null" : value.Id.ToString())}");
+            PodeAdicionarProduto = true;
         }
 
         public void Inicializar()
@@ -366,7 +460,7 @@ namespace AgendaNovo
                     // se já existia, apenas atualiza a view depois de popular
                     ListaAgendamentosView?.Refresh();
                 }
-
+                CarregarProdutos();
                 _atualizandoLista = false;
 
             });
@@ -505,7 +599,7 @@ namespace AgendaNovo
             var ocupados = ListaAgendamentos
                 .Where(a => a.Data.Date == DataSelecionada.Date)
                 .Select(a => a.Horario?.ToString(@"hh\:mm"))
-                .Where(h => !string.IsNullOrEmpty(h)) // remove nulos
+                .Where(h => !string.IsNullOrEmpty(h))
                 .ToList();
 
             var livres = _horariosFixos
@@ -579,17 +673,18 @@ namespace AgendaNovo
             NovoAgendamento.ServicoId = 0;
             NovoAgendamento.PacoteId = 0;
             NovoAgendamento.Valor = 0;
-            novoPagamento.Valor = 0;
+            NovoPagamento.Valor = 0;
             IdBusca = string.Empty;
             ClienteSelecionado = null;
             ServicoSelecionado = null;
             Pacoteselecionado = null;
             NomeDigitado = string.Empty;
-            servicoDigitado = string.Empty;
+            ServicoDigitado = string.Empty;
             NovoCliente = new Cliente();
             NovoAgendamento.CriancaId = null;
             HorarioTexto = string.Empty;
-
+            TipoSelecionado = TipoEntrega.Foto;
+            NovoAgendamento.TipoEntrega = TipoEntrega.Foto;
             CriancaSelecionada = new Crianca();
             
             ListaCriancas.Clear();
@@ -611,6 +706,7 @@ namespace AgendaNovo
             MostrarSugestoes = false;
             ServicoDigitado = string.Empty;
             NomeDigitado = string.Empty;
+            PodeAdicionarProduto = false;
             OnPropertyChanged(nameof(ServicoDigitado));
             OnPropertyChanged(nameof(NomeDigitado));
 
@@ -680,7 +776,8 @@ namespace AgendaNovo
                 NovoAgendamento.Crianca = null;
                 NovoAgendamento.Mesversario = null;
             }
-  
+            var idade = (criancaParaAgendar ?? CriancaSelecionada)?.Idade;
+            var unidade = (criancaParaAgendar ?? CriancaSelecionada)?.IdadeUnidade ?? IdadeUnidade.Meses;
             Debug.WriteLine($"🔍 ServicoSelecionado: {(ServicoSelecionado != null ? ServicoSelecionado.Nome + " (ID: " + ServicoSelecionado.Id + ")" : "null")}");
             agendamento.ClienteId = cliente.Id;
             agendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
@@ -690,7 +787,10 @@ namespace AgendaNovo
             agendamento.Fotos = Fotosreveladas;
             agendamento.Tema = NovoAgendamento.Tema;
             agendamento.Horario = NovoAgendamento.Horario;
-            agendamento.Mesversario = criancaParaAgendar?.Idade ?? CriancaSelecionada?.Idade;
+            agendamento.Mesversario = unidade is IdadeUnidade.Ano or IdadeUnidade.Anos
+                    ? (idade ?? 0) * 12
+                    : idade;
+            agendamento.TipoEntrega = TipoSelecionado;
             AdicionarPagamento();
 
 
@@ -733,10 +833,11 @@ namespace AgendaNovo
             var horarioStr = NovoAgendamento?.Horario?.ToString(@"hh\:mm");
 
             var ocupados = ListaAgendamentos
-                .Where(a => a.Data.Date == DataSelecionada.Date && (NovoAgendamento.Id == 0 || a.Id != NovoAgendamento.Id))
+                .Where(a => a.Data.Date == DataSelecionada.Date && a.Horario != HORARIO_PRODUTO && (NovoAgendamento.Id == 0 || a.Id != NovoAgendamento.Id))
                 .Select(a => a.Horario?.ToString(@"hh\:mm"))
                 .Where(h => !string.IsNullOrEmpty(h))
                 .ToList();
+
 
             if (NovoAgendamento.Horario.HasValue)
             {
@@ -863,16 +964,32 @@ namespace AgendaNovo
         }
         public void AdicionarPagamento()
         {
-            if (NovoPagamento.Valor > 0)
+            if (NovoPagamento.Valor <= 0) return;
+
+            NovoAgendamento.pagamentos.Add(new Pagamento
             {
-                NovoAgendamento.Pagamentos.Add(new Pagamento
-                {
-                    Valor = NovoPagamento.Valor,
-                    DataPagamento = NovoPagamento.DataPagamento != default ? NovoPagamento.DataPagamento : DateTime.Today,
-                    Metodo = NovoPagamento.Metodo,
-                    Observacao = NovoPagamento.Observacao
-                });
-            }
+                AgendamentoId = NovoAgendamento.Id,
+                AgendamentoProdutoId = null, // <-- pagamento do serviço
+                Valor = NovoPagamento.Valor,
+                DataPagamento = DateTime.Today,
+                Metodo = NovoPagamento.Metodo,
+                Observacao = NovoPagamento.Observacao
+            });
+            
+        }
+        public void FotoEscolhida()
+        {
+            NovoAgendamento.Etapas.Add(new AgendamentoEtapa
+            {
+                Etapa = EtapaFotos.Escolha,
+                DataConclusao = NovoAgendamento.Data
+            });
+            
+        }
+        public void CarregarProdutos()
+        {
+            var lista = _produtoService.GetAll(); // crie a interface/serviço
+            ListaProdutos = new ObservableCollection<Produto>(lista);
         }
         public void ForcarAtualizacaoCampos()
         {
@@ -882,7 +999,7 @@ namespace AgendaNovo
         }
         private Guid agendamentoIdAtual;
         [RelayCommand]
-        private void CriarAgendamento()
+        private async void CriarAgendamento()
         {
             agendamentoIdAtual = Guid.NewGuid();
             Debug.WriteLine($"Agendamento iniciado - ID: {agendamentoIdAtual}");
@@ -932,13 +1049,57 @@ namespace AgendaNovo
             }
             // 4) Prepara o objeto a salvar
             int? agendamentoidnotificacao = NovoAgendamento.Id;
+            var valorServicoOuPacote = NovoAgendamento.Valor;
+            var valorProdutos = ProdutosPendentes.Sum(p => p.Total);
+
+
+
             NovoAgendamento.ClienteId = clienteExistente.Id;
             NovoAgendamento.CriancaId = criancaParaAgendar?.Id ?? CriancaSelecionada?.Id;
             NovoAgendamento.ServicoId = ServicoSelecionado?.Id;
             NovoAgendamento.PacoteId = Pacoteselecionado?.Id;
             NovoAgendamento.Data = DataSelecionada;
             NovoAgendamento.Fotos = Fotosreveladas;
+            NovoAgendamento.Valor = valorServicoOuPacote + valorProdutos;
+            NovoAgendamento.TipoEntrega = TipoSelecionado;
+            bool sucesso = false;
+
+
             AdicionarPagamento();
+            try
+            {
+                _agendamentoService.Add(NovoAgendamento);
+
+                foreach (var p in ProdutosPendentes)
+                {
+                    var dto = new CriarProdutoAgendamentoDto
+                    {
+                        ProdutoId = p.ProdutoId,
+                        Quantidade = p.Quantidade,
+                        ValorUnitario = 0m
+                    };
+
+                    await _pagamentoService.AdicionarProdutoAoAgendamentoAsync(
+                        NovoAgendamento.Id,
+                        dto,
+                        metodo: NovoPagamento?.Metodo,                     // opcional
+                        observacao: $"Produto: {p.Nome}",                  // opcional
+                        dataPagamento: DateTime.Today                      // opcional
+                    );
+                }
+                sucesso = true;
+            }
+            finally
+            {
+                if (sucesso)
+                {
+                    ProdutosPendentes.Clear();
+                    OnPropertyChanged(nameof(TotalProdutos));
+                    OnPropertyChanged(nameof(TemProdutosPendentes));
+                }
+            }
+
+
             if (criancaParaAgendar != null || CriancaSelecionada != null)
             {
                 var idade = (criancaParaAgendar ?? CriancaSelecionada)?.Idade;
@@ -957,7 +1118,7 @@ namespace AgendaNovo
             if (agendamentoidnotificacao.HasValue)
                 WeakReferenceMessenger.Default.Send(new DadosAtualizadosMessage(agendamentoidnotificacao));
             Debug.WriteLine($"Adicionar agendamento: ServicoId={novoAgendamento.ServicoId}, Servico={novoAgendamento.Servico?.Id}");
-            _agendamentoService.Add(NovoAgendamento);
+
 
             FinalizarAgendamento(clienteExistente);
 
@@ -1107,7 +1268,8 @@ namespace AgendaNovo
                     : null;
                 CriancaSelecionada = cri;
                 OnPropertyChanged(nameof(CriancaSelecionada));
-
+                var idade = (CriancaSelecionada)?.Idade;
+                var unidade = (CriancaSelecionada)?.IdadeUnidade ?? IdadeUnidade.Meses;
                 NovoAgendamento = new Agendamento
                 {
                     Id = ag.Id,
@@ -1122,7 +1284,9 @@ namespace AgendaNovo
                     ServicoId = ag.ServicoId,
                     PacoteId = ag.PacoteId,
                     Fotos = ag.Fotos,
-                    Mesversario = cri.Idade
+                    Mesversario = unidade is IdadeUnidade.Ano or IdadeUnidade.Anos
+                    ? (idade ?? 0) * 12
+                    : idade
 
                 };
                 ServicoSelecionado = ListaServicos.FirstOrDefault(s => s.Id == ag.ServicoId);
@@ -1305,17 +1469,167 @@ namespace AgendaNovo
         private void ProximaSemana() => DataReferencia = DataReferencia.AddDays(7);
         public string HorarioTexto
         {
-            get => NovoAgendamento?.Horario?.ToString(@"hh\:mm") ?? "";
+            get => NovoAgendamento?.Horario == HORARIO_PRODUTO
+                    ? HORARIO_PRODUTO_LABEL
+                    : (NovoAgendamento?.Horario?.ToString(@"hh\:mm") ?? "");
             set
             {
-                if (TimeSpan.TryParse(value, out var parsed) && NovoAgendamento != null)
+                if (value == HORARIO_PRODUTO_LABEL)
+                {
+                    NovoAgendamento.Horario = HORARIO_PRODUTO;
+                }
+                else if (TimeSpan.TryParse(value, out var parsed) && NovoAgendamento != null)
                 {
                     NovoAgendamento.Horario = parsed;
-                    OnPropertyChanged(nameof(HorarioTexto));
                 }
+                OnPropertyChanged(nameof(HorarioTexto));
             }
         }
-     
+        private void RebuildFindHits()
+        {
+            var termo = FindTermo?.Trim();
+            _findHits.Clear();
+            FindTotal = 0;
+            FindIndice = 0;
+            FindAgendamentoIdAtual = null;
+
+            if (string.IsNullOrWhiteSpace(termo))
+            {
+                NotificarFindMudou();
+                return;
+            }
+
+            // Onde buscar? Nos itens visíveis da semana exibida.
+            IEnumerable<Agendamento> visiveis =
+                AgendamentosDomingo.Concat(AgendamentosSegunda)
+                .Concat(AgendamentosTerca).Concat(AgendamentosQuarta)
+                .Concat(AgendamentosQuinta).Concat(AgendamentosSexta)
+                .Concat(AgendamentosSabado);
+
+            _findHits = ListaAgendamentos
+            .Where(a =>
+                a?.Cliente != null &&
+                (
+                    // Nome contém o termo (case-insensitive)
+                    (!string.IsNullOrEmpty(a.Cliente.Nome) &&
+                     a.Cliente.Nome.IndexOf(termo, StringComparison.OrdinalIgnoreCase) >= 0)
+
+                    // Telefone termina com o termo
+                    || (!string.IsNullOrEmpty(a.Cliente.Telefone) &&
+                        a.Cliente.Telefone.EndsWith(termo, StringComparison.OrdinalIgnoreCase))
+                )
+            )
+             .OrderBy(a => a.Data).ThenBy(a => a.Horario)
+             .ToList();
+
+            FindTotal = _findHits.Count;
+            if (FindTotal > 0)
+            {
+                FindIndice = 0;
+                var primeiro = _findHits[0];
+                FindAgendamentoIdAtual = primeiro.Id;
+                // foca o primeiro
+                WeakReferenceMessenger.Default.Send(new FocusAgendamentoMessage(primeiro.Id, primeiro.Data));
+            }
+            NotificarFindMudou();
+        }
+
+        private void NotificarFindMudou()
+        {
+            OnPropertyChanged(nameof(FindIndiceLabel));
+            OnPropertyChanged(nameof(FindTemResultados));
+            FindProximoCommand.NotifyCanExecuteChanged();
+            FindAnteriorCommand.NotifyCanExecuteChanged();
+        }
+
+        public string FindIndiceLabel => FindTotal == 0 ? "0/0" : $"{FindIndice + 1}/{FindTotal}";
+        public bool FindTemResultados => FindTotal > 0;
+
+        // Próximo / Anterior
+        [RelayCommand(CanExecute = nameof(FindTemResultados))]
+        private void FindProximo()
+        {
+            if (FindTotal == 0) return;
+            FindIndice = (FindIndice + 1) % FindTotal;
+            var alvo = _findHits[FindIndice];
+            FindAgendamentoIdAtual = alvo.Id;
+            OnPropertyChanged(nameof(FindIndiceLabel));
+            WeakReferenceMessenger.Default.Send(new FocusAgendamentoMessage(alvo.Id, alvo.Data));
+            FindProximoCommand.NotifyCanExecuteChanged();
+            FindAnteriorCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand(CanExecute = nameof(FindTemResultados))]
+        private void FindAnterior()
+        {
+            if (FindTotal == 0) return;
+            FindIndice = (FindIndice - 1 + FindTotal) % FindTotal;
+            var alvo = _findHits[FindIndice];
+            FindAgendamentoIdAtual = alvo.Id;
+            OnPropertyChanged(nameof(FindIndiceLabel));
+            WeakReferenceMessenger.Default.Send(new FocusAgendamentoMessage(alvo.Id, alvo.Data));
+            FindProximoCommand.NotifyCanExecuteChanged();
+            FindAnteriorCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand]
+        private void FindLimpar()
+        {
+            FindTermo = null;
+            _findHits.Clear();
+            FindTotal = 0;
+            FindIndice = 0;
+            FindAgendamentoIdAtual = null;
+            NotificarFindMudou();
+        }
+
+        [RelayCommand]
+        private void FindToggle() => FindBarVisivel = !FindBarVisivel;
+
+        private void Confirmar(Agendamento agendamento)
+        {
+            if (agendamento is null) return; 
+
+            _agendamentoService.UpdateStatus(agendamento.Id, StatusAgendamento.Confirmado);
+
+  
+            agendamento.Status = StatusAgendamento.Confirmado;
+        }
+
+        private void Cancelar(Agendamento agendamento)
+        {
+            if (agendamento is null) return;
+            
+            _agendamentoService.UpdateStatus(agendamento.Id, StatusAgendamento.Cancelado);
+
+            
+            agendamento.Status = StatusAgendamento.Cancelado;
+        }
+
+        // Rebuild hits quando a semana muda (ou dados recarregam)
+        public record FocusAgendamentoMessage(int AgendamentoId, DateTime Data);
+
+        [RelayCommand]
+        private async Task AbrirDetalhesAgendamento(Agendamento? ag)
+        {
+            if (ag is null) return;
+
+            DiaAtual = ag.Data.DayOfWeek;
+            SelectedAgendamento = ag;
+            IsDetalhesOpen = true;
+            await CarregarPagamentosAsync(ag);
+        }
+        [RelayCommand]
+        private void FecharDetalhes() => IsDetalhesOpen = false;
+        public async Task CarregarPagamentosAsync(Agendamento? ag)
+        {
+            Debug.WriteLine($"carregando pagamentos {ag.Id}");
+            var lista = await _pagamentoService.ListarHistoricoAsync(ag.Id);
+            Debug.WriteLine($"Pagamentos carregados do serviço: {lista?.Count ?? -1}");
+            Historico = new ObservableCollection<HistoricoFinanceiroDto>(lista);
+
+            Debug.WriteLine($"Historico agora tem: {Historico.Count}");
+        }
 
     }
 

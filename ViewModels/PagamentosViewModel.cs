@@ -1,4 +1,5 @@
-﻿using AgendaNovo.Interfaces;
+﻿using AgendaNovo.Dtos;
+using AgendaNovo.Interfaces;
 using AgendaNovo.Models;
 using AgendaNovo.Services;
 using AgendaNovo.Views;
@@ -73,8 +74,8 @@ namespace AgendaNovo.ViewModels
         // Novo pagamento (inputs)
         public ObservableCollection<MetodoPagamento> Metodo { get; } =
         new ObservableCollection<MetodoPagamento>((MetodoPagamento[])Enum.GetValues(typeof(MetodoPagamento)));
-        [ObservableProperty]
-        private ObservableCollection<HistoricoFinanceiroDto> historico = new();
+
+        [ObservableProperty] private ObservableCollection<HistoricoFinanceiroDto> historico = new();
         [ObservableProperty] private CriarPagamentoDto novoPagamento = new();
         [ObservableProperty] private CriarProdutoAgendamentoDto novoProduto = new();
         [ObservableProperty] private bool modoProduto;
@@ -125,14 +126,6 @@ namespace AgendaNovo.ViewModels
         partial void OnFotosChanged(FotosReveladas value)
         {
             MostrarBotaoSalvarFotos = true;
-        }
-        [RelayCommand]
-        public async Task SalvarStatusFotosAsync()
-        {
-            // Atualiza apenas o campo Fotos do agendamento
-            await _agendaservice.AtualizarFotosAsync(AgendamentoId, Fotos);
-
-            MostrarBotaoSalvarFotos = false; // botão some após salvar
         }
         [RelayCommand]
         public void SelecionarHistoricoParaEdicao(HistoricoFinanceiroDto? item)
@@ -241,19 +234,7 @@ namespace AgendaNovo.ViewModels
                     };
 
                     await _service.AdicionarPagamentoAsync(AgendamentoId, dto);
-                   /* var transacaodto = new TransacaoDto
-                    {
-                        Data = NovoPagamento.DataPagamento,
-                        Tipo = 'R', // Receita
-                        Valor = NovoPagamento.Valor.ToString("N2", new CultureInfo("pt-BR")),
-                        ContaId = 1, // Exemplo (poderia ser definido pelo usuário)
-                        PlanoContasId = 2 // Exemplo
-                    };
-                    var sucesso = await _service.CriarTransacaoAsync(transacaodto);
-                    if (!sucesso)
-                    {
-                        Debug.WriteLine($"Transação Falhou");
-                    } */
+                   
 
                 }
             }
@@ -343,14 +324,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private decimal valorUnitario;
     }
     public class AtualizarPagamentoDto : NovoPagamentoDto { public int Id { get; set; } }
-    public record HistoricoFinanceiroDto(
-    int Id,
-    DateTime Data,
-    string Tipo,          // "Pagamento", "Produto"
-    string Descricao,     // "Entrada", "Foto extra", "Álbum impresso"
-    decimal Valor,
-    MetodoPagamento? Metodo
-);
+   
 
     public record ResumoAgendamentoDto(int ClienteId, string ClienteNome, FotosReveladas Fotos, string ServicoNome, DateTime Data, decimal Valor);
 }

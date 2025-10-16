@@ -39,12 +39,6 @@ namespace AgendaNovo.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EntregueEm")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EscolhaFeitaEm")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("Fotos")
                         .HasColumnType("int");
 
@@ -60,12 +54,6 @@ namespace AgendaNovo.Migrations
                     b.Property<bool>("Pago")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PrazoTratarDias")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ProducaoConcluidaEm")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("ServicoId")
                         .HasColumnType("int");
 
@@ -75,8 +63,8 @@ namespace AgendaNovo.Migrations
                     b.Property<string>("Tema")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("TratadasEm")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("TipoEntrega")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
@@ -111,7 +99,7 @@ namespace AgendaNovo.Migrations
                     b.Property<DateTime?>("EnviadoParaProducaoEm")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("PrazoProducaoDias")
+                    b.Property<int>("PrazoProducaoDias")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("ProducaoConcluidaEm")
@@ -171,6 +159,39 @@ namespace AgendaNovo.Migrations
                     b.HasIndex("DataPagamento");
 
                     b.ToTable("Pagamentos");
+                });
+
+            modelBuilder.Entity("AgendaNovo.Models.AgendamentoEtapa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgendamentoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataConclusao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Etapa")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgendamentoId");
+
+                    b.ToTable("AgendamentoEtapas");
                 });
 
             modelBuilder.Entity("AgendaNovo.Models.Cliente", b =>
@@ -383,6 +404,17 @@ namespace AgendaNovo.Migrations
                     b.Navigation("Agendamento");
                 });
 
+            modelBuilder.Entity("AgendaNovo.Models.AgendamentoEtapa", b =>
+                {
+                    b.HasOne("AgendaNovo.Agendamento", "Agendamento")
+                        .WithMany("Etapas")
+                        .HasForeignKey("AgendamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agendamento");
+                });
+
             modelBuilder.Entity("AgendaNovo.Models.Crianca", b =>
                 {
                     b.HasOne("AgendaNovo.Models.Cliente", "Cliente")
@@ -406,6 +438,8 @@ namespace AgendaNovo.Migrations
             modelBuilder.Entity("AgendaNovo.Agendamento", b =>
                 {
                     b.Navigation("AgendamentoProdutos");
+
+                    b.Navigation("Etapas");
 
                     b.Navigation("Pagamentos");
                 });
