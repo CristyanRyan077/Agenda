@@ -36,20 +36,18 @@ namespace AgendaNovo.ViewModels
         private readonly IPagamentoService _pagamentoService;
         private readonly IProdutoService _produtoService;
         private readonly IAcoesService _acoes;
-        public IAsyncRelayCommand<Agendamento> EditarAgendamentoCommand { get; }
-        public IAsyncRelayCommand<Agendamento> PagamentosAgendamentoCommand { get; }
+        public IRelayCommand<Agendamento> EditarAgendamentoCommand { get; }
+        public IRelayCommand<Agendamento> PagamentosAgendamentoCommand { get; }
 
 
-        public CalendarioViewModel(
-        AgendaViewModel agendaViewModel,
+        public CalendarioViewModel(AgendaViewModel agendaViewModel,
         IAgendamentoService agendamentoService,
         IClienteService clienteService,
         ICriancaService criancaService,
         IPacoteService pacoteService,
         IServicoService servicoService,
         IPagamentoService pagamentoService,
-        IProdutoService produtoService,
-        IAcoesService acoesService)
+        IProdutoService produtoService)
         {
             IsActive = true;
             AgendaViewModel = agendaViewModel;
@@ -60,7 +58,6 @@ namespace AgendaNovo.ViewModels
             _servicoService = servicoService;
             _pagamentoService = pagamentoService;
             _produtoService = produtoService;
-            _acoes = acoesService;
             _clienteService.ClienteInativo();
             
             MesAtual = DateTime.Today;
@@ -69,12 +66,24 @@ namespace AgendaNovo.ViewModels
             MoverAgendamentoAsyncCommand =
             new AsyncRelayCommand<(Agendamento ag, DateTime novaData)>(ReagendarAsync);
             RefreshCalendar();
+            EditarAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
+            {
+                if (ag is null) return;
+                SelecionarAgendamento(ag);
+                EditarAgendamentoPorId(ag.Id);   
+                HistoricoCliente(ag.ClienteId);               
+                AplicarDestaqueNoHistorico();
+            });
 
-            EditarAgendamentoCommand =
-                new AsyncRelayCommand<Agendamento>(EditarAgendamentoAsync);
+            PagamentosAgendamentoCommand = new RelayCommand<Agendamento>(ag =>
+            {
+                if (ag is null) return;
+                SelecionarAgendamento(ag);
+                _ = AbrirPagamentosAsync(ag.Id); 
+                HistoricoCliente(ag.ClienteId);               
+                AplicarDestaqueNoHistorico();
 
-            PagamentosAgendamentoCommand =
-                new AsyncRelayCommand<Agendamento>(AbrirPagamentosAsync);
+            });
 
 
         }
@@ -346,81 +355,6 @@ namespace AgendaNovo.ViewModels
                 h.EstaSendoEditado = (AgendamentoEditandoId.HasValue &&
                                       h.Agendamento?.Id == AgendamentoEditandoId.Value);
         }
-        private async Task EditarAgendamentoAsync(Agendamento ag)
-        {
-            if (ag is null) return;
-
-            // 1) Seleção/estado de UI 
-            SelecionarAgendamento(ag);
-
-            // 2) Pede dados ao serviço (sem tocar em UI dentro do serviço)
-            var dto = await _acoes.PrepararEdicaoAsync(ag.Id);
-            if (dto is null) return;
-
-            // 3) Preenche sua AgendaViewModel com os dados retornados
-            var agendaVM = AgendaViewModel;
-            agendaVM._populandoCampos = true;
-
-            // monta objetos “editáveis” sem navegação, como você já fazia:
-            agendaVM.NovoAgendamento = new Agendamento
-            {
-                Id = dto.Agendamento.Id,
-                Data = dto.Agendamento.Data,
-                Horario = dto.Agendamento.Horario,
-                Tema = dto.Agendamento.Tema,
-                Valor = dto.Agendamento.Valor,
-                ServicoId = dto.Agendamento.ServicoId,
-                PacoteId = dto.Agendamento.PacoteId,
-                CriancaId = dto.Agendamento.CriancaId,
-                Fotos = dto.Agendamento.Fotos,
-                Mesversario = dto.Agendamento.Mesversario
-            };
-
-            agendaVM.NovoCliente = new Cliente
-            {
-                Id = dto.Cliente?.Id ?? 0,
-                Nome = dto.Cliente?.Nome,
-                Telefone = dto.Cliente?.Telefone,
-                Observacao = dto.Cliente?.Observacao
-            };
-
-            // listas pré-carregadas
-            agendaVM.ListaServicos = new ObservableCollection<Servico>(dto.Servicos);
-            agendaVM.ListaPacotes = new ObservableCollection<Pacote>(dto.Pacotes);
-            agendaVM.ListaPacotesFiltrada = new ObservableCollection<Pacote>(dto.PacotesFiltrados);
-
-            // seleções auxiliares
-            if (dto.Agendamento.ServicoId.HasValue)
-                agendaVM.ServicoSelecionado = agendaVM.ListaServicos
-                    .FirstOrDefault(s => s.Id == dto.Agendamento.ServicoId.Value);
-
-            agendaVM.Pacoteselecionado = agendaVM.ListaPacotesFiltrada
-                .FirstOrDefault(p => p.Id == dto.Agendamento.PacoteId);
-
-            agendaVM._populandoCampos = false;
-            agendaVM.ForcarAtualizacaoCampos();
-
-            // 4) UI: abrir modal, destacar histórico etc.
-            HistoricoAgendamentos = new ObservableCollection<AgendamentoHistoricoVM>(
-                await _acoes.ObterHistoricoClienteAsync(ag.ClienteId));
-            OnPropertyChanged(nameof(TemHistorico));
-            AplicarDestaqueNoHistorico();
-
-            if (!MostrarEditarAgendamento || TelaEditarAgendamento is null)
-            {
-                var view = new EditarAgendamentoView { DataContext = agendaVM };
-                view.FecharSolicitado += (s, e) =>
-                {
-                    MostrarEditarAgendamento = false;
-                    TelaEditarAgendamento = null;
-                    AgendamentoEditandoId = null;
-                    AplicarDestaqueNoHistorico();
-                };
-                TelaEditarAgendamento = view;
-                MostrarEditarAgendamento = true;
-            }
-        }
-
         public void EditarAgendamentoPorId(int id)
         {
             var a = _agendamentoService.GetByIdAsNoTracking(id);
