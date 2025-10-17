@@ -259,39 +259,23 @@
             </Grid>
         </Border>
 
-        <!-- STATUS FOTOS -->
-        <Border Grid.Row="4" Background="#3A3A3A" CornerRadius="12" Margin="0,0,0,6" Padding="12">
-            <Grid>
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="Status das fotos:" Foreground="White" FontSize="14" Margin="0,0,18,0"/>
-                    <RadioButton Foreground="White" Content="Revelado" 
-                                 IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Revelado}" />
-                    <RadioButton Foreground="Green" Content="Entregue" Margin="8,0,0,0"
-                                 IsChecked="{Binding Path=Fotos, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Entregue}" />
-                </StackPanel>
-                <Button Content="Salvar status das fotos"
-                        Command="{Binding SalvarStatusFotosCommand}"
-                        Visibility="{Binding MostrarBotaoSalvarFotos, Converter={StaticResource BoolToVisibilityConverter}}"
-                        Background="#4CAF50" Foreground="White" FontWeight="Bold"
-                        Padding="10,6" Margin="0,2,60,0" />
-            </Grid>
-        </Border>
+       
 
         <!-- HISTÓRICO -->
-        <Border Grid.Row="5" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">
+        <Border Grid.Row="5" Width="800" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">
             <DockPanel>
                 <TextBlock Text="Histórico de Pagamentos" Foreground="White" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top"/>
                 <DataGrid ItemsSource="{Binding Historico}"
                           AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                           EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                          Width="900" HorizontalAlignment="Left"
+                          Width="800" HorizontalAlignment="Left"
                           Margin="0,8,0,0" RowHeaderWidth="0"
                           SelectedItem="{Binding ItemSelecionado}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="*" />
-                        <DataGridTextColumn Header="Método" Binding="{Binding Metodo, TargetNullValue=—}" Width="*" />
-                        <DataGridTextColumn Header="Observ." Binding="{Binding Descricao}" Width="2*" />
-                        <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="*" />
+                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="auto" />
+                        <DataGridTextColumn Header="Método" Binding="{Binding Metodo, TargetNullValue=—}" Width="auto" />
+                        <DataGridTextColumn Header="Observ." Binding="{Binding Descricao}" Width="auto" />
+                        <DataGridTextColumn Header="Valor" Binding="{Binding Valor, StringFormat=R$ {0:N2}}" Width="auto" />
                         <DataGridTemplateColumn Header="" Width="140">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

@@ -1,4 +1,5 @@
 ﻿
+using AgendaNovo._01_Interfaces;
 using AgendaNovo.Controles;
 using AgendaNovo.Converters;
 using AgendaNovo.Dtos;
@@ -46,8 +47,6 @@ namespace AgendaNovo
     public partial class AgendaViewModel : ObservableObject
     {
         //Agendamento
-        [ObservableProperty]
-        private bool mostrarEditarAgendamento;
         private bool _suspendendoDataChanged = false;
         private bool _selecionandoDaGrid = false;
         [ObservableProperty]
@@ -60,6 +59,16 @@ namespace AgendaNovo
         public ICollectionView ListaAgendamentosView { get; private set; }
         private bool _viewInicializada;
         private bool _atualizandoLista;
+
+        // Acões
+        [ObservableProperty] private object telaEditarAgendamento;
+        [ObservableProperty] private bool mostrarEditarAgendamento;
+        [ObservableProperty] private object telaHistoricoCliente;
+        [ObservableProperty] private object? pagamentosView;
+        [ObservableProperty] private bool mostrarHistoricoCliente;
+        [ObservableProperty] private bool mostrarPagamentos;
+        [ObservableProperty] private PagamentosViewModel? pagamentosVM;
+        [ObservableProperty] private ObservableCollection<AgendamentoHistoricoVM> historicoAgendamentos = new();
 
         [ObservableProperty] private decimal valorPacote;
         [ObservableProperty] private Agendamento? itemSelecionado;
@@ -152,6 +161,7 @@ namespace AgendaNovo
         private readonly IServicoService _servicoService;
         private readonly IProdutoService _produtoService;
         private readonly IPagamentoService _pagamentoService;
+        private readonly IAcoesService _acoes;
 
         public NotificacaoViewModel NotificacaoVM { get; }
 
@@ -164,7 +174,8 @@ namespace AgendaNovo
         IPacoteService pacoteService,
         IServicoService servicoService,
         IProdutoService produtoService,
-        IPagamentoService pagamentoService)
+        IPagamentoService pagamentoService,
+        IAcoesService acoesService)
         {
 
             _agendamentoService = agendamentoService;
@@ -174,6 +185,7 @@ namespace AgendaNovo
             _servicoService = servicoService;
             _produtoService = produtoService;
             _pagamentoService = pagamentoService;
+            _acoes = acoesService;
             AtualizarHorariosDisponiveis();
             DiaAtual = DateTime.Today.DayOfWeek;
             NovoCliente = new Cliente();
@@ -216,7 +228,32 @@ namespace AgendaNovo
            
 
         }
-        // Recalcula a lista de matches (clientes contendo o termo, ignorando maiúsculas/minúsculas)
+        [RelayCommand]
+        public async Task AbrirPagamentosAsync(Agendamento ag)
+        {
+            Debug.WriteLine("Abrir pagamentos chamado");
+            if (ag is null) return;
+
+            
+
+            PagamentosVM = await _acoes.CriarPagamentosViewModelAsync(ag.Id);
+            MostrarPagamentos = true;
+
+            HistoricoAgendamentos = new ObservableCollection<AgendamentoHistoricoVM>(
+                await _acoes.ObterHistoricoClienteAsync(ag.ClienteId));
+            OnPropertyChanged(nameof(TemHistorico));
+            //AplicarDestaqueNoHistorico();
+            var view = new HistoricoUsuario { DataContext = this };
+            TelaHistoricoCliente = view;
+            MostrarHistoricoCliente = true;
+        }
+        public bool TemHistorico => HistoricoAgendamentos?.Any() == true;
+        [RelayCommand]
+        public void FecharPagamentos()
+        {
+            MostrarPagamentos = false;
+            PagamentosView = null;
+        }
         partial void OnFindTermoChanged(string? value)
         {
             RebuildFindHits();
@@ -371,12 +408,15 @@ namespace AgendaNovo
 
         partial void OnNomeDigitadoChanged(string value)
         {
+
             var termo = value?.ToLower() ?? "";
+            int idProcurado;
+            bool buscaPorId = int.TryParse(termo, out idProcurado);
             var filtrados = ListaClientes
-                .Where(c =>
-            (!string.IsNullOrEmpty(c.Nome) && c.Nome.ToLower().Contains(termo)) ||
-            (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.EndsWith(termo)))
-                .ToList();
+             .Where(c =>
+             (!string.IsNullOrEmpty(c.Nome) && c.Nome.ToLower().Contains(termo)) ||
+             (buscaPorId && c.Id == idProcurado))
+             .ToList();
 
             ClientesFiltrados.Clear();
             foreach (var cliente in filtrados)
@@ -519,9 +559,12 @@ namespace AgendaNovo
             if (string.IsNullOrWhiteSpace(q))
                 return true;
 
-            return
-                (a.Cliente?.Nome?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false)
-             || (a.Cliente?.Telefone?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (int.TryParse(q, out var idProcurado))
+            {
+                return a.Cliente?.Id == idProcurado;
+            }
+
+            return a.Cliente?.Nome?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false;
         }
         public void CarregarServicos()
         {
@@ -1137,7 +1180,7 @@ namespace AgendaNovo
             var servicoNome = _servicoService.GetById(NovoAgendamento.ServicoId ?? 0)?.Nome ?? "Não informado";
             var cultura = new CultureInfo("pt-BR");
             var diaSemana = cultura.TextInfo.ToTitleCase(NovoAgendamento.Data.ToString("dddd", cultura));
-            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario:hh\\:mm} ({diaSemana}) \n\n" +
+            var texto = Uri.EscapeDataString($"✅ Agendado: {NovoAgendamento.Data:dd/MM/yyyy} às {NovoAgendamento.Horario:hh\\:mm} ({diaSemana}) (Id: {cliente.Id}) \n\n" +
                             $"Cliente: {cliente.Nome} - {textoCrianca}" +
                             $"Telefone: {cliente.Telefone}\n" +
                             $"Tema: {NovoAgendamento.Tema}\n" +
@@ -1505,6 +1548,8 @@ namespace AgendaNovo
                 .Concat(AgendamentosTerca).Concat(AgendamentosQuarta)
                 .Concat(AgendamentosQuinta).Concat(AgendamentosSexta)
                 .Concat(AgendamentosSabado);
+            int idProcurado;
+            bool buscaPorId = int.TryParse(termo, out idProcurado);
 
             _findHits = ListaAgendamentos
             .Where(a =>
@@ -1513,10 +1558,7 @@ namespace AgendaNovo
                     // Nome contém o termo (case-insensitive)
                     (!string.IsNullOrEmpty(a.Cliente.Nome) &&
                      a.Cliente.Nome.IndexOf(termo, StringComparison.OrdinalIgnoreCase) >= 0)
-
-                    // Telefone termina com o termo
-                    || (!string.IsNullOrEmpty(a.Cliente.Telefone) &&
-                        a.Cliente.Telefone.EndsWith(termo, StringComparison.OrdinalIgnoreCase))
+                    ||  (buscaPorId && a.ClienteId == idProcurado)
                 )
             )
              .OrderBy(a => a.Data).ThenBy(a => a.Horario)

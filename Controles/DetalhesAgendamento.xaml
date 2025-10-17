@@ -68,8 +68,8 @@
                            FontSize="16" FontWeight="Bold"
                            Foreground="White"/>
                         <Button Content="Adicionar" Grid.Column="3" DockPanel.Dock="Right"
-                        Command="{Binding DataContext.AdicionarPagamentoCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                        CommandParameter="{Binding}"
+                        Command="{Binding AbrirPagamentosCommand}"
+                        CommandParameter="{Binding SelectedAgendamento}"
                         Background="#2D89EF"
                         Foreground="White"
                         Padding="6,3"

@@ -104,7 +104,7 @@
                         <TextBlock Foreground="#555">
                             <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource EtapaLookupConverter}"
-                                          ConverterParameter="full;t:60"
+                                          ConverterParameter="full;t:35"
                                           Mode="OneWay">
                                 <Binding Path="Etapas" Mode="OneWay"/>
                                 <Binding Source="{x:Static conv:EtapaFotos.Escolha}" Mode="OneWay"/>
