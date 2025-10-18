@@ -91,9 +91,13 @@
                     <TextBlock Text="Novo Lançamento" Foreground="White" FontSize="16" FontWeight="Bold" />
                     <StackPanel Orientation="Horizontal" Margin="16,0,0,0">
                         <RadioButton x:Name="rbPagamento" Content="Pagamento" Margin="0,0,8,0" Foreground="White"
-                     IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Pagamento}"/>
+                        IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Pagamento}"/>
+
                         <RadioButton x:Name="rbProduto" Content="Produto" Foreground="White"
-                     IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Produto}"/>
+                        IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Produto}"/>
+
+                        <RadioButton x:Name="rbReserva" Content="Reserva" Foreground="White"
+                        IsChecked="{Binding TipoLancamento, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Reserva}"/>
                     </StackPanel>
                 </DockPanel>
 
@@ -173,7 +177,7 @@
                         </Button>
                     </WrapPanel>
                 </StackPanel>
-                
+
                 <StackPanel Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,5,0"
             Visibility="{Binding ElementName=rbProduto, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
                     <TextBlock Text="Atalhos:" Foreground="#BBB" Margin="0,5,12,0"/>
@@ -218,7 +222,7 @@
                         </Button.Style>
                     </Button>
                 </StackPanel>
-                
+
 
                 <!-- ====== PRODUTO (mantém seu layout, mas em 2 colunas) ====== -->
                 <Grid Grid.Row="1" Grid.ColumnSpan="2"
@@ -256,10 +260,59 @@
                  Text="{Binding NovoProduto.ValorUnitario, Mode=TwoWay, StringFormat=R$ {0:N2}}"/>
                     </StackPanel>
                 </Grid>
+
+
+                <!-- ====== Reserva  ====== -->
+                <Grid Grid.Row="1" Grid.ColumnSpan="2"
+            Visibility="{Binding ElementName=rbReserva, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="col"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Data -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
+                        <TextBlock Text="Data" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <hc:DatePicker SelectedDate="{Binding NovoPagamento.DataPagamento, Mode=TwoWay, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"/>
+                    </StackPanel>
+
+                    <!-- Método -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
+                        <TextBlock Text="Método" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Metodo}" 
+                     SelectedItem="{Binding NovoPagamento.Metodo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                     hc:InfoElement.Placeholder="PIX, Crédito..." />
+                    </StackPanel>
+
+                    <!-- Valor -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+                        <TextBlock Text="Valor" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <hc:TextBox Width="180">
+                            <hc:TextBox.Text>
+                                <Binding Path="NovoPagamento.Valor" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"
+                            ConverterCulture="pt-BR" ValidatesOnExceptions="True" NotifyOnValidationError="True"/>
+                            </hc:TextBox.Text>
+                        </hc:TextBox>
+                    </StackPanel>
+
+                    <!-- Mês -->
+                    <StackPanel Grid.Row="1" Grid.Column="1">
+                        <TextBlock Text="Mês" Foreground="#BBB" Margin="0,0,0,4"/>
+                        <hc:ComboBox hc:InfoElement.Placeholder="Selecione o Mês"
+                        ItemsSource="{Binding Meses}"
+                        SelectedItem="{Binding NovoPagamento.Observacao, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        MinHeight="32"/>
+                    </StackPanel>
+
+                </Grid>
             </Grid>
         </Border>
+        
 
-       
+
 
         <!-- HISTÓRICO -->
         <Border Grid.Row="5" Width="800" Height="300" Background="#3A3A3A" CornerRadius="12" Padding="10">

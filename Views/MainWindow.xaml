@@ -373,6 +373,14 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
 
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->
@@ -541,9 +549,18 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            <Border HorizontalAlignment="Left"
+                                                                    Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
 
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->
+                                                        
                                                         <StackPanel Visibility="{Binding DataContext.ModoFotos,
                                                             RelativeSource={RelativeSource AncestorType=Window},
                                                             Converter={StaticResource BoolToVisibilityConverter}}">
@@ -695,6 +712,14 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->
                                                         <StackPanel Visibility="{Binding DataContext.ModoFotos,
@@ -845,6 +870,15 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
 
 
                                                         </StackPanel>
@@ -994,6 +1028,15 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->
                                                         <StackPanel Visibility="{Binding DataContext.ModoFotos,
@@ -1158,6 +1201,14 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->
                                                         <StackPanel Visibility="{Binding DataContext.ModoFotos,
@@ -1328,6 +1379,14 @@
                                                                 <TextBlock Text=" | " Foreground="Gray" Margin="0,-2,0,0" FontSize="16"/>
                                                                 <TextBlock Text="{Binding TipoEntrega}" Margin="2,-2,0,0" FontSize="16"/>
                                                             </StackPanel>
+                                                            <Border HorizontalAlignment="Left"
+                                                          Visibility="{Binding TemReserva, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <StackPanel Background="LightGray" Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="Reserva: "/>
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding MesReserva}" Margin="0,0,5,0"/>
+                                                                    <TextBlock Foreground="Green" FontWeight="Bold" Text="{Binding ValorReserva, StringFormat=R$ {0:N2}}"/>
+                                                                </StackPanel>
+                                                            </Border>
 
                                                         </StackPanel>
                                                         <!-- MODO FOTOS -->

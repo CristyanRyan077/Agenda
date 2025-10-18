@@ -79,6 +79,7 @@ namespace AgendaNovo.Models
     public enum TipoLancamento 
     { 
         Pagamento = 0,
-        Produto = 1
+        Produto = 1,
+        Reserva = 2
     }
 }

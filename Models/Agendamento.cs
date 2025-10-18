@@ -49,6 +49,7 @@ namespace AgendaNovo
 
         [NotMapped] public decimal ValorPago => Pagamentos?.Sum(p => p.Valor) ?? 0m;
         [NotMapped] public int? NumeroMes { get; set; }
+        
 
         public int? Mesversario { get; set; }
 
@@ -58,6 +59,11 @@ namespace AgendaNovo
         public ICollection<AgendamentoProduto> AgendamentoProdutos { get; set; } = new List<AgendamentoProduto>();
         public ObservableCollection<AgendamentoEtapa> Etapas { get; } = new ();
 
+        // Reserva (Taxa inicial)
+        [NotMapped] public bool TemReserva => Pagamentos?.Any(p => p.Tipo == TipoLancamento.Reserva) == true;
+        [NotMapped] public string? MesReserva => Pagamentos ?.FirstOrDefault(p => p.Tipo == TipoLancamento.Reserva)?.Observacao;
+        [NotMapped] public decimal? ValorReserva => Pagamentos.FirstOrDefault(p => p.Tipo == TipoLancamento.Reserva)?.Valor;
+         
         public string? MesversarioFormatado
         {
             get
@@ -84,6 +90,7 @@ namespace AgendaNovo
             public Agendamento Agendamento { get; set; } = null!;
 
             public int? AgendamentoProdutoId { get; set; }
+            public TipoLancamento Tipo { get; set; } = TipoLancamento.Pagamento;
 
             [ObservableProperty] private decimal valor;            // valor da parcela
             [ObservableProperty] private DateTime dataPagamento;   // quando pagou

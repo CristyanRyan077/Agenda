@@ -62,7 +62,9 @@ namespace AgendaNovo.Services
                 Valor = dto.Valor,
                 DataPagamento = dto.DataPagamento == default ? DateTime.Now : dto.DataPagamento,
                 Metodo = dto.Metodo,
-                Observacao = dto.Observacao
+                Observacao = dto.Observacao,
+                Tipo = dto.Tipo
+                
             });
             await db.SaveChangesAsync();
         }

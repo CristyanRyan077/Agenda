@@ -63,7 +63,7 @@ namespace AgendaNovo.ViewModels
 
 
         [ObservableProperty] private string? observacao;
-        public decimal ValorPago => Historico?.Where(h => h.Tipo == "Pagamento").Sum(h => h.Valor) ?? 0m;
+        public decimal ValorPago => Historico?.Sum(h => h.Valor) ?? 0m;
         public decimal Falta => Math.Max(0, Valor - ValorPago);
         public int PercentualPago => Valor <= 0 ? 0 : (int)Math.Round(Math.Min(ValorPago, Valor) / Valor * 100m);
 
@@ -104,17 +104,19 @@ namespace AgendaNovo.ViewModels
 
         public async Task AtualizarStatusAsync()
         {
-            if (ValorPago >= Valor)
+            var valorPagoAtual = Historico?.Sum(h => h.Valor) ?? 0m;
+
+            if (valorPagoAtual >= Valor)
             {
                 // Total pago, marcar como concluído
                 _clienteservice.AtivarSePendente(clienteId);
-                _agendaservice.AtivarSePendente(AgendamentoId);
+                _agendaservice.UpdateStatus(AgendamentoId, StatusAgendamento.Concluido);
             }
             else
             {
                 // Ainda falta valor, deixar como pendente
                 _clienteservice.ValorIncompleto(clienteId);
-                _agendaservice.ValorIncompleto(AgendamentoId);
+                _agendaservice.UpdateStatus(AgendamentoId, StatusAgendamento.Pendente);
             }
         }
         public void CarregarProdutos()
@@ -155,8 +157,19 @@ namespace AgendaNovo.ViewModels
                 };
                 ModoProduto = true;
             }
+            else
+            {
+                NovoPagamento = new CriarPagamentoDto
+                {
+                    Valor = item.Valor,
+                    DataPagamento = item.Data,
+                    Metodo = item.Metodo ?? MetodoPagamento.Pix, // valor default se null
+                    Observacao = item.Descricao
+                };
+                ModoProduto = false;
+            }
 
-            EstaEditando = true;
+                EstaEditando = true;
         }
         private void LimparFormulario()
         {
@@ -225,21 +238,24 @@ namespace AgendaNovo.ViewModels
                 }
                 else
                 {
+                    // Decide o tipo com base no radio selecionado (propriedade TipoLancamento)
+                    var tipo = this.TipoLancamento;
+
                     var dto = new CriarPagamentoDto
                     {
                         Valor = NovoPagamento.Valor,
                         DataPagamento = NovoPagamento.DataPagamento,
                         Metodo = NovoPagamento.Metodo,
-                        Observacao = NovoPagamento.Observacao
+                        Observacao = NovoPagamento.Observacao,
+                        Tipo = tipo
                     };
 
                     await _service.AdicionarPagamentoAsync(AgendamentoId, dto);
-                   
-
                 }
             }
 
             await CarregarAsync();
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] ValorPago={ValorPago} Valor={Valor} Historico.Count={Historico.Count}");
             await AtualizarStatusAsync();
             LimparFormulario();
             NotificarFinanceiro();
@@ -282,9 +298,9 @@ namespace AgendaNovo.ViewModels
         {
             if (h is null) return;
 
-            if (h.Tipo == "Pagamento")
+            if (h.Tipo != "Produto")
                 await _service.RemoverPagamentoAsync(h.Id);
-            else if (h.Tipo == "Produto")
+            else
                 await _service.RemoverProdutoDoAgendamentoAsync(h.Id);
 
             await CarregarAsync();
@@ -308,6 +324,11 @@ namespace AgendaNovo.ViewModels
 
         [RelayCommand] public void ExportarRecibos() { /* opcional */ }
         [RelayCommand] public void Fechar() { /* Window.Close via evento/serviço UI */ }
+        public ObservableCollection<string> Meses { get; } = new ObservableCollection<string>
+        {
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        };
     }
     public partial class NovoPagamentoDto : ObservableObject
     {
@@ -315,6 +336,7 @@ namespace AgendaNovo.ViewModels
         [ObservableProperty] private decimal valor;
         [ObservableProperty] private MetodoPagamento metodo;
         [ObservableProperty] private string? observacao;
+        [ObservableProperty] private TipoLancamento tipo;
     }
     public class CriarPagamentoDto : NovoPagamentoDto { }
     public partial class CriarProdutoAgendamentoDto : ObservableObject
