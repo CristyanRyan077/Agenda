@@ -297,15 +297,15 @@
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding TipoEntrega}" Value="Album">
                                                                     <!-- Azul claro suave -->
-                                                                    <Setter Property="Background" Value="#DDE8F7"/>
+                                                                    <Setter Property="Background" Value="Blue"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding TipoEntrega}" Value="Painel">
                                                                     <!-- Lilás discreto -->
-                                                                    <Setter Property="Background" Value="#EAE4F9"/>
+                                                                    <Setter Property="Background" Value="Blue"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding TipoEntrega}" Value="Banner">
                                                                     <!-- Amarelo pastel -->
-                                                                    <Setter Property="Background" Value="#FFF6D1"/>
+                                                                    <Setter Property="Background" Value="Blue"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
